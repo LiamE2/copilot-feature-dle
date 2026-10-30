@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<title>Feature-dle e2e</title>
+<style>body{font:13px/1.4 Consolas,monospace;padding:12px} .pass{color:#0a7a4d} .fail{color:#b00020;font-weight:bold} iframe{width:1280px;height:900px;border:1px solid #ccc}</style>
+</head>
+<body>
+<pre id="out"></pre>
+<iframe id="app" title="app"></iframe>
+<script>
+(async () => {
+  const out = document.getElementById('out');
+  const log = (s, cls) => { const d = document.createElement('div'); d.className = cls || ''; d.textContent = s; out.appendChild(d); };
+  let pass = 0, fail = 0;
+  const ok = (cond, name, extra) => { if (cond) { pass++; log('PASS ' + name, 'pass'); } else { fail++; log('FAIL ' + name + (extra ? ' :: ' + extra : ''), 'fail'); } };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const params = new URLSearchParams(location.search);
+  const wantAxe = params.get('axe') === '1';
+
+  const frame = document.getElementById('app');
+  const load = (hash) => new Promise((res) => { frame.onload = () => res(); frame.src = '../index.html?nowelcome&ns=test' + (hash || '#/'); });
+  await load('#/');
+  const W = () => frame.contentWindow, D = () => frame.contentDocument;
+  const q = (s) => D().querySelector(s), qa = (s) => Array.from(D().querySelectorAll(s));
+  const waitFor = async (fn, ms = 4000) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); } return false; };
+  const go = async (hash) => { W().location.hash = hash; await sleep(250); };
+  const typeInto = (v) => { const i = q('#guess-input'); i.focus(); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+  const submit = () => { q('#guess-form').requestSubmit(); };
+  const errors = [];
+  W().addEventListener('error', (e) => errors.push(e.message));
+  W().addEventListener('unhandledrejection', (e) => errors.push('promise: ' + (e.reason && e.reason.message)));
+
+  await waitFor(() => W().FD && W().FD.lib && W().FD.lib.ready);
+  const FD = W().FD;
+  ok(FD.lib.features.length > 0, 'library loaded', String(FD.lib.features.length));
+  log('   library: ' + FD.lib.features.length + ' features');
+  ok(/\.test$/.test(FD.store.key) && FD.store.key !== 'copilot-feature-dle.v1', 'safety: tests run in their own save slot, never a real player\u2019s', FD.store.key);
+
+  /* ---------------- unit: matching ---------------- */
+  const target = FD.lib.features.find((f) => f.id === 'copilot-pages') || FD.lib.features[0];
+  const m = (txt) => { const r = FD.match.resolve(txt, FD.lib.features, target.id); return r ? r.feature.id : null; };
+  const pagesId = target.id;
+  [['Copilot Pages', pagesId], ['copilot pages', pagesId], ['Pages', pagesId], ['Copilot Page', pagesId], ['copilot pagse', pagesId], ['Coilot Pages', pagesId], ['copilotpages', pagesId], ['Microsoft 365 Copilot Pages', pagesId], ['pages copilot', pagesId]]
+    .forEach(([t, id]) => ok(m(t) === id, 'match: "' + t + '" -> pages', String(m(t))));
+  ok(m('zzzzzz') === null, 'match: nonsense is unknown');
+  ok(m('copilot') === null, 'match: bare "copilot" is not a feature');
+  const wordF = FD.lib.features.find((f) => /word/i.test(f.name));
+  if (wordF) ok(FD.match.resolve('Word', FD.lib.features, 'x').feature.id === wordF.id, 'match: "Word" -> ' + wordF.name);
+  const sug = FD.match.suggest('cop', FD.lib.features, 6, []);
+  ok(sug.length > 0, 'suggest: "cop" returns suggestions');
+  const waves = FD.lib.features.filter((f) => /\bwave\b/i.test(f.name));
+  if (waves.length > 1) {
+    const wr = FD.match.resolve('Wave', FD.lib.features, waves[0].id);
+    ok(wr && wr.ambiguous && wr.options.length >= 2, 'match: "Wave" is ambiguous between wave packs');
+    ok(FD.match.resolve(waves[0].name, FD.lib.features, waves[1].id).feature.id === waves[0].id, 'match: an exact name is never ambiguous');
+  }
+  /* every feature's own name and aliases must resolve to it, and never to a different answer */
+  const selfFail = FD.lib.features.filter((f) => [f.name, ...f.aliases].some((t) => { const r = FD.match.resolve(t, FD.lib.features, f.id); return !r || r.feature.id !== f.id || r.ambiguous; }));
+  ok(selfFail.length === 0, 'match: every name and alias resolves to its own feature', selfFail.map((f) => f.name).join(', '));
+  const wrongAccept = [];
+  FD.lib.features.forEach((a) => FD.lib.features.forEach((b) => { if (a.id !== b.id) { const r = FD.match.resolve(a.name, FD.lib.features, b.id); if (r && r.feature.id === b.id) wrongAccept.push(a.name + ' -> ' + b.name); } }));
+  ok(wrongAccept.length === 0, 'match: no feature name is accepted for a different answer', wrongAccept.slice(0, 3).join('; '));
+
+  /* ---------------- unit: scoring ---------------- */
+  const S = FD.scoring;
+  ok(S.base(1) === 100 && S.base(5) === 20, 'scoring: base 100..20');
+  ok(S.speed(10000, false) === 20 && S.speed(50000, false) === 10 && S.speed(300000, false) === 0 && S.speed(1000, true) === 0, 'scoring: speed bonus tiers + relaxed');
+  ok(S.multiplier(0) === 1 && S.multiplier(3) === 1.3 && S.multiplier(50) === 2, 'scoring: streak multiplier capped x2');
+  ok(S.compute({ hints: 2, ms: 30000, streakBefore: 2, relaxed: false }).total === Math.round((80 + 15) * 1.2), 'scoring: total');
+  ok(S.rank(0).rank.id === 'newcomer' && S.rank(2200).rank.id === 'champion', 'ranks: newcomer / champion');
+
+  /* ---------------- unit: daily ---------------- */
+  const d1 = FD.daily.pick('2026-10-26'), d2 = FD.daily.pick('2026-10-26');
+  ok(d1 && d1.id === d2.id, 'daily: deterministic');
+  ok(FD.daily.pick('2026-10-23').id === (FD.lib.schedule['2026-10-23'] || FD.daily.pick('2026-10-23').id), 'daily: schedule pin respected');
+  const seen = new Set(); let repeats = 0;
+  for (let i = 0; i < 28; i++) { const k = FD.u.addDays('2026-10-26', i); const f = FD.daily.pick(k); if (!f) continue; if (seen.has(f.id)) repeats++; seen.add(f.id); }
+  ok(repeats <= Math.max(2, FD.lib.features.length < 40 ? 28 : 3), 'daily: few repeats across 4 weeks', String(repeats));
+  ok(FD.daily.pick('2026-10-26').difficulty === 'Easy', 'daily: Monday is Easy', FD.daily.pick('2026-10-26').difficulty);
+  ok(FD.daily.number('2026-10-23') === 1, 'daily: epoch is #1');
+
+  /* ---------------- integration: home ---------------- */
+  FD.store.resetAll();
+  await go('#/'); await sleep(300);
+  ok(!!q('.hero'), 'home: hero renders');
+  ok(!!q('.daily-card'), 'home: daily card renders');
+  ok(qa('.mode-card').length >= 8, 'home: mode cards', String(qa('.mode-card').length));
+  ok(!!q('.es-logo'), 'home: Engage Squared logo present');
+
+  /* ---------------- integration: daily game ---------------- */
+  const today = FD.u.dateKey();
+  const dailyF = FD.daily.pick(today);
+  await go('#/daily'); await sleep(400);
+  ok(!!q('#hint-card .hint-text'), 'daily: hint 1 shown');
+  const hint1 = q('#hint-card .hint-text').textContent;
+  const wrong = FD.lib.features.find((f) => f.id !== dailyF.id && f.category !== dailyF.category) || FD.lib.features.find((f) => f.id !== dailyF.id);
+  typeInto(wrong.name.slice(0, 5)); await sleep(100);
+  ok(q('#suggest') && !q('#suggest').hidden, 'daily: suggestions open while typing');
+  ok(q('#guess-input').getAttribute('aria-expanded') === 'true', 'daily: combobox aria-expanded');
+  typeInto(wrong.name); submit(); await sleep(300);
+  ok(qa('.guess-list .guess').length === 1, 'daily: wrong guess recorded');
+  ok(q('#hint-card .hint-n').textContent.includes('Hint 2'), 'daily: hint 2 unlocked');
+  ok(q('#hint-card .hint-text').textContent !== hint1, 'daily: hint text changed');
+  typeInto('qwertyuiop'); submit(); await sleep(150);
+  ok(qa('.guess-list .guess').length === 1, 'daily: unknown text costs no attempt');
+  typeInto(wrong.name); submit(); await sleep(150);
+  ok(qa('.guess-list .guess').length === 1, 'daily: duplicate guess costs no attempt');
+  // nudge
+  q('[data-act="nudge"]').click(); await sleep(200);
+  ok(qa('.guess-list .guess').length === 2 && q('#hint-card .hint-n').textContent.includes('Hint 3'), 'daily: nudge reveals hint 3');
+  ok(!q('.chip-locked') || !/Category at hint 3/.test(q('#play-chips').textContent), 'daily: category unlocked at hint 3');
+  ok(!!q('.name-tiles'), 'daily: name shape revealed at hint 3');
+  // solve with a typo
+  const typo = dailyF.name.length > 6 ? dailyF.name.slice(0, 3) + dailyF.name.slice(4) : dailyF.name;
+  typeInto(typo); submit(); await sleep(900);
+  ok(!!q('.result.is-win'), 'daily: typo still wins', typo);
+  ok(!!q('.learn-grid') && qa('.learn-card').length >= 2, 'daily: learning cards shown');
+  ok(!!q('.emoji-grid'), 'daily: share grid shown');
+  const prof = FD.store.profile();
+  ok(prof.stats.won === 1 && prof.stats.played === 1, 'store: stats updated');
+  ok(FD.store.dailyStreak() === 1, 'store: daily streak = 1');
+  ok(!!prof.collection[dailyF.id] && prof.collection[dailyF.id].solved === 1, 'store: collection updated');
+  ok(prof.xp > 0, 'store: XP awarded', String(prof.xp));
+  ok(!!prof.badges['first-spark'] && !!prof.badges['typo-ninja'], 'badges: first-spark + typo-ninja');
+  ok(FD.share.text(q('#result-host') ? FD.result.current : {}).includes('Copilot Feature-dle #' + FD.daily.number(FD.u.dateKey())), 'share: text includes daily number');
+  ok(!FD.share.text(FD.result.current).includes(dailyF.name), 'share: spoiler-free');
+  const blob = await FD.share.card(FD.result.current);
+  ok(blob && blob.size > 5000, 'share: PNG card renders', blob ? String(blob.size) : 'null');
+  // reload daily -> finished state
+  await go('#/'); await sleep(200); await go('#/daily'); await sleep(400);
+  ok(!!q('.result.is-win') && !q('#guess-form') || q('#guess-form').hidden, 'daily: revisit shows finished result');
+
+  /* ---------------- integration: free play ---------------- */
+  await go('#/free'); await sleep(300);
+  ok(!!q('#free-form'), 'free: setup renders');
+  q('#free-form').requestSubmit(); await sleep(500);
+  ok(!!q('#guess-input'), 'free: game starts');
+  const fg = W().document.querySelector('#hint-card .hint-text').textContent;
+  ok(fg.length > 5, 'free: hint present');
+  q('[data-act="giveup"]').click(); await sleep(300);
+  const dlg = D().querySelector('dialog[open]');
+  ok(!!dlg, 'free: give-up confirmation dialog opens');
+  if (dlg) { dlg.querySelector('[data-dlg="yes"]').click(); await waitFor(() => !!q('.result.is-loss'), 8000); }
+  ok(!!q('.result.is-loss'), 'free: give up shows answer + learning');
+  ok(FD.store.profile().stats.lost === 1, 'store: loss recorded');
+
+  /* ---------------- integration: other pages ---------------- */
+  const pages = [['#/book', 'h1', 'Feature Book'], ['#/stats', 'h1', 'Player'], ['#/leaderboard', 'h1', 'Leaderboard'], ['#/about', 'h1', 'About Copilot Feature-dle'], ['#/settings', 'h1', 'Settings'], ['#/packs', 'h1', 'Packs'], ['#/speed', 'h1', 'Speed round'], ['#/team', 'h1', 'Team battle']];
+  for (const [h, sel, text] of pages) {
+    await go(h); await sleep(350);
+    const el = q(sel);
+    ok(!!el && el.textContent.includes(text), 'page ' + h + ' renders', el ? el.textContent : 'no h1');
+  }
+  // book: open detail
+  await go('#/book'); await sleep(300);
+  const card = q('.fcard.is-collected');
+  ok(!!card, 'book: collected card exists');
+  if (card) { card.click(); await sleep(300); ok(!!D().querySelector('dialog[open] .learn-grid'), 'book: detail dialog shows learning card'); const x = D().querySelector('dialog[open] [data-close]'); if (x) x.click(); await sleep(200); }
+  // speed round
+  await go('#/speed'); await sleep(300);
+  q('#speed-form').requestSubmit(); await sleep(600);
+  ok(!!q('#speed-bar') && !!q('#guess-input'), 'speed: round starts');
+  // team
+  await go('#/team'); await sleep(300);
+  q('#team-form').requestSubmit(); await sleep(600);
+  ok(!!q('.team-bar') && !!q('.turn-banner'), 'team: battle starts with turn banner');
+  // packs: validate + import community pack
+  await go('#/packs'); await sleep(300);
+  const pj = q('#pack-json');
+  pj.value = JSON.stringify({ name: 'Test pack', features: [{ name: 'Zig Zag Feature', hints: ['a clue', 'another clue', 'third clue'], difficulty: 'Easy' }] });
+  q('[data-action="pack-check"]').click(); await sleep(200);
+  ok(!!q('[data-action="pack-add"]'), 'packs: valid JSON can be added');
+  q('[data-action="pack-add"]').click(); await sleep(300);
+  ok(FD.lib.features.some((f) => f.name === 'Zig Zag Feature'), 'packs: community feature merged into library');
+  q('#pack-json').value = '{"nope":1}'; q('[data-action="pack-check"]').click(); await sleep(150);
+  ok(/features/.test(q('#pack-report').textContent), 'packs: invalid pack reports a friendly error');
+  // hardening: imported content can never smuggle in script links, odd event codes or poisoned backups
+  q('#pack-json').value = JSON.stringify({ name: 'Sneaky pack', features: [{ name: 'Evil Link', hints: ['one clue', 'two clues', 'three clues'], learnMore: 'javascript:alert(1)' }, { name: 'Fine Link', hints: ['one clue', 'two clues', 'three clues'], learnMore: 'https://learn.microsoft.com/' }] });
+  q('[data-action="pack-check"]').click(); await sleep(150); q('[data-action="pack-add"]').click(); await sleep(250);
+  ok((FD.lib.features.find((f) => f.name === 'Evil Link') || { learnMore: 'x' }).learnMore === '', 'security: javascript: learnMore link is dropped');
+  ok((FD.lib.features.find((f) => f.name === 'Fine Link') || {}).learnMore === 'https://learn.microsoft.com/', 'security: https learnMore link is kept');
+  const poisoned = FD.store.importJSON('{"app":"copilot-feature-dle","data":{"profiles":{"__proto__":{"name":"x"},"p_ok":{"name":"<img src=x onerror=alert(1)>","color":"url(x)","xp":"lots"},"p_null":null},"community":[{"id":"bad","features":"nope"},{"id":"worse"}]}}');
+  ok(poisoned.ok && ({}).name === undefined && FD.store.state.profiles.p_ok && FD.store.state.profiles.p_ok.color === 'blue' && FD.store.state.profiles.p_ok.xp === 0, 'security: poisoned backup is cleaned, prototype untouched');
+  let rebuilt = true; try { FD.data.build(FD.rawLib, FD.store.community()); } catch (e) { rebuilt = false; }
+  ok(rebuilt && FD.lib.features.length > 90, 'security: library still builds after a poisoned backup');
+  FD.store.removeProfile('p_ok'); FD.store.removeCommunityPack('bad'); FD.store.removeCommunityPack('worse');
+  ok(FD.joinEvent('my evil/event?x=1<b>') === 'myevileventx1b' && FD.config.leaderboard.endpoint === 'api/leaderboard', 'security: event codes are cleaned and stay on this site');
+  FD.joinEvent('');
+  // challenge link
+  const link = FD.share.challengeUrl(target.id).split('#')[1];
+  await go('#' + link); await sleep(400);
+  ok(!!q('#guess-input'), 'challenge link opens a game');
+  // settings change
+  FD.store.setSetting('relaxed', true); await go('#/free'); await sleep(200);
+  ok(FD.store.settings().relaxed === true, 'settings: relaxed stored');
+  FD.store.setSetting('relaxed', false);
+
+  ok(errors.length === 0, 'no uncaught JS errors', errors.join(' | '));
+
+  /* ---------------- accessibility (axe) ----------------
+     Needs a real browser tab (not the headless runner): open  tests/e2e.html?axe=1  while tools\serve.ps1 is running.
+     axe is loaded inside the app's own frame, because axe.run refuses elements that belong to another window. */
+  if (wantAxe) {
+    FD.store.resetAll(); FD.store.setOnboarded();
+    await new Promise((res, rej) => { const s = D().createElement('script'); s.src = 'tests/vendor/axe.min.js'; s.onload = res; s.onerror = () => rej(new Error('axe failed to load')); D().head.appendChild(s); });
+    const axeOpts = { runOnly: { type: 'tag', values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'] }, resultTypes: ['violations'] };
+    const check = async (label) => {
+      const axeRes = await W().axe.run(D().documentElement, axeOpts);
+      ok(axeRes.violations.length === 0, 'axe ' + label + ' (' + axeRes.violations.length + ' violations)', axeRes.violations.map((v) => v.id + ' x' + v.nodes.length + ' [' + v.nodes.slice(0, 2).map((n) => n.target.join(' ')).join('; ') + ']').join(' | '));
+      axeRes.violations.forEach((v) => log('   ' + v.id + ': ' + v.help + ' -> ' + v.nodes.slice(0, 3).map((n) => n.target.join(' ') + ' {' + (n.any[0] && n.any[0].message || n.failureSummary || '').slice(0, 140) + '}').join(' ; ')));
+    };
+    const routes = ['#/', '#/daily', '#/free', '#/speed', '#/team', '#/book', '#/stats', '#/leaderboard', '#/about', '#/settings', '#/packs'];
+    for (const r of routes) { await go(r); await sleep(500); await check(r); }
+    // game states: a fresh hint card, autocomplete open, a wrong guess, then a finished game with Learning Mode
+    await go('#/play/' + target.id); await sleep(500); await check('play: fresh hint card');
+    typeInto('cop'); await sleep(300); await check('play: suggestions open');
+    const miss = FD.lib.features.find((f) => f.id !== target.id && f.category !== target.category);
+    typeInto(miss.name); submit(); await sleep(400); await check('play: after a wrong guess');
+    typeInto(target.name); submit(); await sleep(1600); await check('result + Learning Mode');
+    await go('#/book'); await sleep(400); q('.fcard.is-collected').click(); await sleep(400); await check('Feature Book detail dialog');
+    D().querySelector('dialog [data-dlg]') && D().querySelector('dialog [data-dlg]').click(); await sleep(300);
+    await go('#/'); await sleep(300); q('[data-action="profile"]').click(); await sleep(400); await check('player dialog');
+  }
+
+  log('SUMMARY pass=' + pass + ' fail=' + fail, fail ? 'fail' : 'pass');
+  document.title = 'DONE ' + (fail ? 'FAIL' : 'OK');
+})();
+</script>
+</body>
+</html>

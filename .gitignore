@@ -1,0 +1,8 @@
+# live-event leaderboard data holds player names: never commit it
+tools/leaderboard-data.json
+
+# editor / OS / temp noise
+*.log
+*.tmp
+Thumbs.db
+.DS_Store

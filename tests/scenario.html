@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<title>Feature-dle scenario</title>
+<style>html,body{margin:0;background:#cfd3e6}iframe{border:0;display:block;background:#fff}</style>
+</head>
+<body>
+<iframe id="app" title="app"></iframe>
+<script>
+/* Drives the app into a known state for screenshots:  scenario.html?w=390&h=2000&do=win&hash=/daily  */
+(async () => {
+  const p = new URLSearchParams(location.search);
+  const f = document.getElementById('app');
+  f.style.width = (p.get('w') || 1280) + 'px';
+  f.style.height = (p.get('h') || 1000) + 'px';
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const what = p.get('do') || 'none';
+  await new Promise((res) => { f.onload = res; f.src = '../index.html?nowelcome&ns=test' + (p.get('hash') ? '#' + p.get('hash') : '#/'); });
+  const W = f.contentWindow, D = () => f.contentDocument, q = (s) => D().querySelector(s);
+  const waitFor = async (fn, ms = 4000) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); } return false; };
+  await waitFor(() => W.FD && W.FD.lib && W.FD.lib.ready);
+  const FD = W.FD, go = async (h) => { W.location.hash = h; await sleep(300); };
+  const typeInto = (v) => { const i = q('#guess-input'); i.focus(); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
+  const submit = () => q('#guess-form').requestSubmit();
+  const seed = (n, extra) => {
+    // fill the Feature Book with some history
+    const feats = FD.lib.features.filter((x) => !x.community);
+    feats.slice(0, n).forEach((ft, i) => FD.store.recordGame({ mode: i % 3 === 0 ? 'daily' : 'free', dateKey: FD.u.addDays(FD.u.dateKey(), -(n - i)), feature: ft, won: i % 5 !== 4, hintsUsed: 1 + (i % 4), timeMs: 15000 + i * 7000, grid: ['cold', 'warm', 'correct'], guesses: [], typo: false }));
+  };
+
+  if (what === 'welcome') { FD.store.resetAll(); W.location.reload(); }
+  if (what === 'mid' || what === 'win' || what === 'lose' || what === 'nudge') {
+    FD.store.resetAll(); FD.store.setOnboarded(); if (what === 'win') seed(6);
+    await go('#/daily'); await sleep(500);
+    const dailyF = FD.daily.pick(FD.u.dateKey());
+    const others = FD.lib.features.filter((x) => x.id !== dailyF.id);
+    const sameCat = others.find((x) => x.category === dailyF.category), diffCat = others.find((x) => x.category !== dailyF.category);
+    if (what === 'mid' || what === 'win' || what === 'lose') {
+      typeInto(diffCat.name); submit(); await sleep(250);
+      typeInto(sameCat ? sameCat.name : others[1].name); submit(); await sleep(250);
+    }
+    if (what === 'mid') { typeInto('cop'); await sleep(200); }
+    if (what === 'win') { typeInto(dailyF.name); submit(); await sleep(1500); }
+    if (what === 'lose') { q('[data-act="giveup"]').click(); await sleep(300); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(1500); }
+  }
+  if (what === 'book') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); }
+  if (what === 'bookdetail') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); q('.fcard.is-collected').click(); await sleep(400); }
+  if (what === 'stats') { FD.store.resetAll(); FD.store.setOnboarded(); seed(14); await go('#/stats'); await sleep(400); }
+  if (what === 'board') { FD.store.resetAll(); FD.store.setOnboarded(); seed(5); await go('#/leaderboard'); await sleep(400); }
+  if (what === 'speed') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/speed'); await sleep(300); q('#speed-form').requestSubmit(); await sleep(600); const g = FD.lib.features[3]; typeInto(g.name); submit(); await sleep(600); }
+  if (what === 'team') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/team'); await sleep(300); q('#team-form').requestSubmit(); await sleep(600); typeInto(FD.lib.features[2].name); submit(); await sleep(600); }
+  if (what === 'teamend') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/team'); await sleep(300); q('#team-form').requestSubmit(); await sleep(500); q('[data-act="giveup"]').click(); await sleep(200); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(600); }
+  if (what === 'more') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); q('[data-action="more"]').click(); await sleep(300); }
+  if (what === 'profile') { FD.store.resetAll(); FD.store.setOnboarded(); seed(4); await go('#/'); await sleep(300); q('[data-action="profile"]').click(); await sleep(300); }
+  document.title = 'READY ' + what;
+})();
+</script>
+</body>
+</html>

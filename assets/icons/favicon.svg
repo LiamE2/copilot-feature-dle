@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Copilot Feature-dle">
+  <rect width="128" height="128" rx="28" fill="#165AF1"/>
+  <path d="M34 108V62a30 30 0 0 1 60 0v46a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6Z" fill="#fff"/>
+  <rect x="42" y="58" width="44" height="34" rx="17" fill="#E8EEFE"/>
+  <circle cx="55" cy="73" r="4" fill="#12134B"/>
+  <circle cx="73" cy="73" r="4" fill="#12134B"/>
+  <path d="M57 82q7 8 14 0" stroke="#12134B" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M30 44 20 54l10 10M98 44l10 10-10 10" stroke="#F3B029" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M96 20l3 8 8 3-8 3-3 8-3-8-8-3 8-3Z" fill="#F3B029"/>
+</svg>

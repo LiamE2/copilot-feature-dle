@@ -1,0 +1,25 @@
+{
+  "name": "Copilot Feature-dle",
+  "short_name": "Feature-dle",
+  "description": "A friendly daily guessing game that helps you learn Microsoft Copilot features. By Engage Squared.",
+  "id": "./",
+  "start_url": "./#/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#165AF1",
+  "lang": "en-AU",
+  "dir": "ltr",
+  "categories": ["education", "games", "productivity"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "Today's challenge", "short_name": "Daily", "url": "./#/daily", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Free play", "short_name": "Free play", "url": "./#/free", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Team battle", "short_name": "Team", "url": "./#/team", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}
