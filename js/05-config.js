@@ -5,7 +5,7 @@
   const FD = (window.FD = window.FD || {});
 
   FD.config = {
-    version: '1.5.0',
+    version: '1.5.1',
     appName: 'Copilot Feature-dle',
 
     /* one guess per hint: hint 1 is free, every miss unlocks the next one */
@@ -47,8 +47,8 @@
       { id: 'champion', name: 'Copilot Champion', xp: 12000, color: 'red' }
     ],
 
-    /* every difficulty level is open from the start, in every game mode */
-    /* what each level means: the About page and the "Same level" explainer in the guess list both read from here */
+    /* every difficulty is open from the start, in every game mode */
+    /* what each difficulty means: the About page and the "Same difficulty" explainer in the guess list both read from here */
     difficulties: ['Easy', 'Medium', 'Hard', 'Expert'],
     levelInfo: {
       Easy: 'Common features most people have met',

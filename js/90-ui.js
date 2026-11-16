@@ -83,7 +83,7 @@
     return html`<span class="pie c-${M.color}${full ? ' is-full' : ''}" style="--p:${pct};--sz:${size}px" title="${M.verb}: ${total ? `${d} of ${total}` : 'nothing to play yet'}" aria-hidden="true"><span class="pie-g">${icon}</span><span class="pie-g pie-top">${icon}</span></span>`;
   };
 
-  /* The guess-feedback chips explain themselves: hover, focus or tap "Same category" or "Same level" to read what the word means.
+  /* The guess-feedback chips explain themselves: hover, focus or tap "Same category" or "Same difficulty" to read what the word means.
      The definitions describe the idea only, and read the same whatever the guess was, so they never give the answer away. */
   let infoSeq = 0;
   ui.categoryDef = () => {
@@ -92,7 +92,7 @@
   };
   ui.levelDef = () => {
     const info = FD.config.levelInfo;
-    return html`<strong>What is a level?</strong><span class="def-line">Every feature has a level for how well known it is.</span><span class="def-levels">${FD.config.difficulties.map((d) => html`<span><b>${d}</b> ${info[d]}.</span> `)}</span>`;
+    return html`<strong>What is difficulty?</strong><span class="def-line">Every feature has a difficulty for how well known it is.</span><span class="def-levels">${FD.config.difficulties.map((d) => html`<span><b>${d}</b> ${info[d]}.</span> `)}</span>`;
   };
   ui.defChip = (iconName, label, kind) => {
     const id = 'def-' + (++infoSeq);

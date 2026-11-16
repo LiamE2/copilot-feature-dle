@@ -150,7 +150,7 @@
           ? html`<li class="guess is-skip"><span class="g-n">${i + 1}</span><span class="g-name">Nudge used</span><span class="g-chips">${ui.tempChip('skip')}<span class="chip">Next hint revealed</span></span></li>`
           : html`<li class="guess is-${g.temp}"><span class="g-n">${i + 1}</span><span class="g-name">${g.name}</span><span class="g-chips">${ui.tempChip(g.temp)}
               ${g.temp === 'correct' ? '' : html`${ui.defChip(g.sameCat ? 'check' : 'x', g.sameCat ? 'Same category' : 'Different category', 'category')}
-              ${ui.defChip(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same level', 'level')}`}</span></li>`)}</ol>`
+              ${ui.defChip(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same difficulty', 'level')}`}</span></li>`)}</ol>`
           : html`<p class="muted empty">No guesses yet. Each wrong guess gets a hot or cold clue, then unlocks the next hint.</p>`}`;
     }
     function drawAll(isNew) {

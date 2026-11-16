@@ -52,7 +52,14 @@
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !/[?&]ns=/.test(location.search)) {
       navigator.serviceWorker.register('sw.js').then(() => navigator.serviceWorker.ready).then(() => { FD.pwa.controlled = !!navigator.serviceWorker.controller; })
         .catch(() => { /* offline support is a bonus */ });
-      navigator.serviceWorker.addEventListener('controllerchange', () => { FD.pwa.controlled = true; });
+      /* a new version took over: on the home screen load it straight away, anywhere else (a game may be on screen) say it is ready */
+      const hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        FD.pwa.controlled = true;
+        if (!hadController) return;
+        if (ui.current().path === '/') location.reload();
+        else ui.toast('A new version of Feature-dle is ready. It loads next time you open the game.', { icon: 'check' });
+      });
     }
   }
 

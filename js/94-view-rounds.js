@@ -79,7 +79,7 @@
   }
   function start(mode, total, filters) {
     const f = cleanFilters(mode, filters), n = clamp(mode, total, f);
-    if (!FD.puzzles.count(withKinds(mode, f))) { ui.toast('Nothing matches those choices. Try another level, category or more game modes.', { icon: 'x' }); return false; }
+    if (!FD.puzzles.count(withKinds(mode, f))) { ui.toast('Nothing matches those choices. Try another difficulty, category or more game modes.', { icon: 'x' }); return false; }
     destroyPuzzle();
     eng.mode = mode; eng.last = { mode, total: n, filters: f };
     eng.run = { v: 1, mode, total: n, i: 0, items: [], done: false, filters: f, used: [], game: null, q: null, startedAt: Date.now(), savedAt: Date.now() };

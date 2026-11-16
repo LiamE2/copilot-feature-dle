@@ -109,7 +109,7 @@
   const focusHead = (main) => { const h = main.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } };
 
   /* ======================================================================== FEATURE HUNT
-     Five sneaky hints about one Copilot feature. Choose a level and categories (or let Pip surprise you) and how many rounds, guess, learn. */
+     Five sneaky hints about one Copilot feature. Choose a difficulty and categories (or let Pip surprise you) and how many rounds, guess, learn. */
   const hunt = { filters: null, ctl: null, main: null };
 
   function loadHuntFilters() {
@@ -244,7 +244,7 @@
     form.addEventListener('change', (e) => { if (e.target !== range) read(); });
     form.addEventListener('submit', async (e) => {
       e.preventDefault(); read();
-      if (!FD.puzzles.count(free.filters)) { ui.toast('Nothing matches those choices. Try another level, category or more game modes.', { icon: 'x' }); return; }
+      if (!FD.puzzles.count(free.filters)) { ui.toast('Nothing matches those choices. Try another difficulty, category or more game modes.', { icon: 'x' }); return; }
       if (FD.rounds.read('free') && !(await askNewGame())) return;
       FD.rounds.start('free', FD.rounds.clamp('free', want, free.filters), freeChoices(free.filters));
     });

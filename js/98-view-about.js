@@ -47,9 +47,9 @@
         </div>`, { id: 'a-score' })}
 
         ${ui.section('Difficulty & the Daily Challenge', html`<div class="about-cols">
-          <div class="card"><h3>Four levels</h3><ul class="plain">
+          <div class="card"><h3>Four difficulties</h3><ul class="plain">
             ${cfg.difficulties.map((d) => html`<li>${ui.diffChip(d)}<span>${cfg.levelInfo[d]} (${byDiff[d]}).</span></li>`)}</ul>
-            <p class="muted small">Every level is open from the start, in every game mode.</p></div>
+            <p class="muted small">Every difficulty is open from the start, in every game mode.</p></div>
           <div class="card"><h3>The Daily Challenge</h3><p>Everyone gets the same Daily Challenge every weekday. It can be a Feature Hunt, a Scenario Match or a Prompt Lab question, in a balanced mix. Each day\u2019s difficulty is random too, with a balanced mix of Easy, Medium, Hard and Expert over time.</p><ul class="plain">
             <li>${FD.icon('target', { size: 18 })}<span>In a Scenario Match or Prompt Lab Daily Challenge you get three picks, worth ${cfg.scenarioMatch.points.join(', ')} points. Miss all three and it counts as a missed day.</span></li>
             <li>${FD.icon('timer', { size: 18 })}<span>Finish fast for a Speed Bonus on top, whichever game mode the day is.</span></li>
@@ -59,7 +59,7 @@
         </div>`, { id: 'a-diff' })}
 
         ${ui.section('More ways to play', html`<div class="about-cols">
-          <div class="card"><h3>Free Play</h3><p>Unlimited puzzles from any game mode, with no pressure. Choose the game modes, level and categories, pick how many rounds (${cfg.freePlay.rounds.min} to ${cfg.freePlay.rounds.max}), then play a mix of puzzles at your own pace.</p></div>
+          <div class="card"><h3>Free Play</h3><p>Unlimited puzzles from any game mode, with no pressure. Choose the game modes, difficulty and categories, pick how many rounds (${cfg.freePlay.rounds.min} to ${cfg.freePlay.rounds.max}), then play a mix of puzzles at your own pace.</p></div>
           <div class="card"><h3>Packs</h3><p>Themed sets that mix all three game modes: official packs like Copilot Essentials, and a monthly spotlight. A puzzle you have played won\u2019t come back until you finish the pack.</p></div>
           <div class="card"><h3>Needs Another Look</h3><p>Find it in <a href="#/packs">Packs</a>. It\u2019s made for you based on all the puzzles you missed.</p></div>
         </div>`, { id: 'a-more' })}
