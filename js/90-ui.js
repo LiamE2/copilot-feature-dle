@@ -28,24 +28,32 @@
     setTimeout(() => { t.classList.remove('in'); setTimeout(() => t.remove(), 350); }, o.ms || 3600);
   };
 
-  ui.dialog = ({ title, body, actions = [], cls = '', onClose }) => {
+  /* lock: a choice that has to be made. There is no close button, and Esc or a click outside does nothing, so the buttons are the only way out. */
+  ui.dialog = ({ title, body, actions = [], cls = '', onClose, lock = false }) => {
     const d = document.createElement('dialog');
     d.className = 'dlg ' + cls;
     const id = 'dlg-' + Math.random().toString(36).slice(2, 7);
     d.setAttribute('aria-labelledby', id);
     d.innerHTML = flat(html`<div class="dlg-card">
-      <header class="dlg-head"><h2 id="${id}">${title}</h2><button class="btn btn-icon btn-ghost" type="button" data-close aria-label="Close dialog">${FD.icon('x')}</button></header>
+      <header class="dlg-head"><h2 id="${id}">${title}</h2>${lock ? '' : html`<button class="btn btn-icon btn-ghost" type="button" data-close aria-label="Close dialog">${FD.icon('x')}</button>`}</header>
       <div class="dlg-body">${body}</div>
       ${actions.length ? html`<footer class="dlg-foot">${actions.map((a) => html`<button class="btn ${a.cls || 'btn-ghost'}" type="button" data-dlg="${a.id}">${a.label}</button>`)}</footer>` : ''}
     </div>`);
     document.body.appendChild(d);
     let done = false;
     const end = (v) => { if (done) return; done = true; try { d.close(); } catch (e) { /* already closed */ } d.remove(); if (onClose) onClose(v); };
-    d.addEventListener('click', (e) => { if (e.target === d) end(''); });
+    d.addEventListener('click', (e) => { if (e.target === d && !lock) end(''); });
+    if (lock) d.addEventListener('cancel', (e) => e.preventDefault());
     d.addEventListener('close', () => end(d.returnValue));
-    d.querySelector('[data-close]').addEventListener('click', () => end(''));
+    const x = d.querySelector('[data-close]');
+    if (x) x.addEventListener('click', () => end(''));
     d.querySelectorAll('[data-dlg]').forEach((b) => b.addEventListener('click', () => end(b.dataset.dlg)));
     if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
+    /* a long message with nothing to tab to still has to be scrollable from the keyboard */
+    const scroller = d.querySelector('.dlg-body');
+    if (scroller && scroller.scrollHeight > scroller.clientHeight + 1 && !scroller.querySelector('a[href], button, input, select, textarea, summary, [tabindex]')) {
+      scroller.tabIndex = 0; scroller.setAttribute('role', 'region'); scroller.setAttribute('aria-labelledby', id);
+    }
     return d;
   };
   ui.confirm = (title, message, okLabel = 'Yes', danger = false) => new Promise((res) => {
@@ -61,8 +69,162 @@
     return html`<span class="chip chip-solid c-${DIFF_COLOR[d] || 'yellow'}" title="Difficulty: ${d}"><span class="dots" aria-hidden="true">${[1, 2, 3, 4].map((i) => html`<i class="${i <= n ? 'on' : ''}"></i>`)}</span>${d}</span>`;
   };
   ui.catChip = (name) => html`<span class="chip c-${FD.data.catColor(name)}"><span class="dot" aria-hidden="true"></span>${name}</span>`;
+
+  /* How the Feature Book describes a feature: Not collected, Spotted, Collected or Mastered (see FD.scoring.bookState). One look for all four, wherever it is shown. */
+  ui.STATE_TEXT = { new: 'Not collected', spotted: 'Spotted', collected: 'Collected', mastered: 'Mastered' };
+  const STATE_ICON = { new: 'minus', spotted: 'eye', collected: 'check', mastered: 'crown' };
+  ui.stateChip = (state, color) => html`<span class="fstate is-${state}${color ? ' c-' + color : ''}">${FD.icon(STATE_ICON[state] || 'minus', { size: 14 })}${ui.STATE_TEXT[state] || ui.STATE_TEXT.new}</span>`;
+
+  /* A layer's icon that fills in like a pie chart as its puzzles are done: Know it (Feature Hunt), Use it (Scenario Match) or Prompt it (Prompt Lab).
+     One puzzle done of two is half a pie. The icon is drawn twice, once on the empty part and once (in the fill's own text colour) on the filled part. */
+  ui.pie = (kind, done, total, o = {}) => {
+    const M = FD.puzzles.META[kind], size = o.size || 28, d = Math.max(0, Math.min(done, total)), pct = total ? Math.round((d / total) * 100) : 0;
+    const full = total > 0 && d >= total, icon = FD.icon(M.icon, { size: Math.round(size * 0.58) });
+    return html`<span class="pie c-${M.color}${full ? ' is-full' : ''}" style="--p:${pct};--sz:${size}px" title="${M.verb}: ${total ? `${d} of ${total}` : 'nothing to play yet'}" aria-hidden="true"><span class="pie-g">${icon}</span><span class="pie-g pie-top">${icon}</span></span>`;
+  };
+
+  /* The guess-feedback chips explain themselves: hover, focus or tap "Same category" or "Same level" to read what the word means.
+     The definitions describe the idea only, and read the same whatever the guess was, so they never give the answer away. */
+  let infoSeq = 0;
+  ui.categoryDef = () => {
+    const names = FD.lib.categories.filter((c) => FD.lib.features.some((f) => f.category === c.name)).map((c) => c.name);
+    return html`<strong>What is a category?</strong><span class="def-line">Every feature belongs to one family, grouped by where you find it and the job it does.</span><span class="def-tags">${names.map((n) => html`<span>${n}</span> `)}</span>`;
+  };
+  ui.levelDef = () => {
+    const info = FD.config.levelInfo;
+    return html`<strong>What is a level?</strong><span class="def-line">Every feature has a level for how well known it is.</span><span class="def-levels">${FD.config.difficulties.map((d) => html`<span><b>${d}</b> ${info[d]}.</span> `)}</span>`;
+  };
+  ui.defChip = (iconName, label, kind) => {
+    const id = 'def-' + (++infoSeq);
+    return html`<span class="info-wrap def-wrap"><button class="chip chip-def" type="button" data-action="info-toggle" aria-describedby="${id}">${FD.icon(iconName, { size: 14 })}${label}</button><span class="info-pop def-pop" id="${id}" role="tooltip">${kind === 'level' ? ui.levelDef() : ui.categoryDef()}</span></span>`;
+  };
+  ui.actions['info-toggle'] = (el) => {
+    const w = el.closest('.info-wrap'), open = !w.classList.contains('is-open');
+    $$('.info-wrap.is-open').forEach((x) => x.classList.remove('is-open'));
+    w.classList.remove('is-dismissed');
+    if (open) { placeInfo(w); w.classList.add('is-open'); }
+  };
+  /* keep the bubble on screen, whatever side of the page the chip sits (clientWidth leaves out any scrollbar) */
+  const placeInfo = (w) => {
+    const b = w.querySelector('.chip-def'), p = w.querySelector('.info-pop');
+    if (!b || !p) return;
+    const cw = document.documentElement.clientWidth;
+    const r = b.getBoundingClientRect(), pw = Math.round(Math.min(320, cw * 0.86));
+    const left = Math.max(8, Math.min(r.left + r.width / 2 - pw / 2, cw - pw - 8));
+    p.style.width = pw + 'px';
+    p.style.setProperty('--pop-x', Math.round(left - r.left) + 'px');
+    p.style.setProperty('--arrow-x', Math.round(r.left + r.width / 2 - left) + 'px');
+  };
+  const infoOf = (e) => (e.target && e.target.closest ? e.target.closest('.info-wrap') : null);
+  document.addEventListener('mouseover', (e) => { const w = infoOf(e); if (w) placeInfo(w); });
+  document.addEventListener('focusin', (e) => { const w = infoOf(e); if (w) placeInfo(w); });
+  /* Esc hides the bubble without moving focus or the pointer (WCAG 1.4.13); it comes back next time you hover or focus */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    $$('.info-wrap').forEach((x) => { if (x.classList.contains('is-open') || x.matches(':hover, :focus-within')) { x.classList.remove('is-open'); x.classList.add('is-dismissed'); } });
+  });
+  const clearDismiss = (e) => { const w = infoOf(e); if (w && !w.contains(e.relatedTarget)) w.classList.remove('is-dismissed'); };
+  document.addEventListener('mouseout', clearDismiss);
+  document.addEventListener('focusout', clearDismiss);
+  document.addEventListener('click', (e) => { if (!e.target.closest('.info-wrap')) $$('.info-wrap.is-open').forEach((x) => x.classList.remove('is-open')); });
+
+  /* range sliders paint their filled part from --fill */
+  ui.rangeFill = (el) => { const min = +el.min || 0, max = +el.max || 100; el.style.setProperty('--fill', (max > min ? ((+el.value - min) / (max - min)) * 100 : 0).toFixed(1) + '%'); };
+  document.addEventListener('input', (e) => { if (e.target && e.target.matches && e.target.matches('input.range')) ui.rangeFill(e.target); });
+
+  /* ---------- multi-select dropdown: a button that opens a list of tick boxes ----------
+     For choosing several categories (or features) at once. Nothing ticked means "all" (no limit): ticking "All ..." clears the others, and ticking the last one off brings
+     "All ..." back. The button says what is chosen: the names of one or two, or a count ("3 categories"). It is made of real checkboxes, so it works with a keyboard and a
+     screen reader: Enter, Space or Down opens it, Tab and the arrow keys move through the boxes, Esc closes it (and focus goes back to the button).
+     Options are { value, label, group? }; a group name puts a heading above its options. Everything else is looked after here, so a form only has to read ui.msel.values(root)
+     when a 'change' event comes up from it. */
+  const mselRows = (options, selected, allLabel) => {
+    const sel = new Set(selected), row = (o) => html`<label class="msel-opt"><input type="checkbox" value="${o.value}"${FD.u.attrs({ checked: sel.has(o.value) })}><span>${o.label}</span></label>`;
+    const groups = [];
+    options.forEach((o) => { const name = o.group || '', last = groups[groups.length - 1]; if (last && last.name === name) last.items.push(o); else groups.push({ name, items: [o] }); });
+    return html`<label class="msel-opt msel-all"><input type="checkbox" data-all${FD.u.attrs({ checked: !selected.length })}><span>${allLabel}</span></label>${groups.map((g) => (g.name ? html`<fieldset class="msel-set"><legend>${g.name}</legend>${g.items.map(row)}</fieldset>` : html`${g.items.map(row)}`))}`;
+  };
+  const mselBoxes = (root) => Array.from(root.querySelectorAll('.msel-panel input[type="checkbox"]'));
+  const mselNames = (root) => mselBoxes(root).filter((b) => !b.hasAttribute('data-all') && b.checked).map((b) => b.nextElementSibling.textContent);
+  function mselRefresh(root) {
+    const names = mselNames(root), btn = root.querySelector('.msel-btn');
+    root.querySelector('.msel-text').textContent = !names.length ? root.dataset.all : names.length <= 2 ? names.join(', ') : `${names.length} ${root.dataset.noun}`;
+    btn.title = names.length > 1 ? names.join(', ') : '';
+    root.dataset.count = String(names.length);
+  }
+  const mselClose = (root, back) => {
+    if (!root.classList.contains('is-open')) return;
+    root.classList.remove('is-open');
+    root.querySelector('.msel-panel').hidden = true;
+    const btn = root.querySelector('.msel-btn'); btn.setAttribute('aria-expanded', 'false');
+    if (back) btn.focus();
+  };
+  const mselOpen = (root, focus) => {
+    if (root.classList.contains('is-disabled')) return;
+    $$('.msel.is-open').forEach((r) => { if (r !== root) mselClose(r); });
+    root.classList.add('is-open');
+    const panel = root.querySelector('.msel-panel'); panel.hidden = false;
+    root.querySelector('.msel-btn').setAttribute('aria-expanded', 'true');
+    if (focus) { const first = mselBoxes(root).find((b) => b.checked) || mselBoxes(root)[0]; if (first) first.focus({ preventScroll: true }); }
+    panel.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+  };
+  ui.msel = {
+    /* spec: { id, label, options, selected, allLabel ("All categories"), noun ("categories"), hint (shown beside the label while it is switched off), disabled } */
+    html(o) {
+      const have = o.options.map((x) => x.value), selected = FD.u.selList(o.selected).filter((v) => have.includes(v));
+      const names = o.options.filter((x) => selected.includes(x.value)).map((x) => x.label);
+      const text = !names.length ? o.allLabel : names.length <= 2 ? names.join(', ') : `${names.length} ${o.noun}`;
+      return html`<div class="field msel${o.disabled ? ' is-disabled' : ''}" id="${o.id}" data-msel data-all="${o.allLabel}" data-noun="${o.noun}" data-count="${names.length}">
+        <label id="${o.id}-l" for="${o.id}-b">${o.label}${o.hint ? html` <span class="label-hint" id="${o.id}-hint"${FD.u.attrs({ hidden: !o.disabled })}>${o.hint}</span>` : ''}</label>
+        <button class="select msel-btn" type="button" id="${o.id}-b" aria-haspopup="true" aria-expanded="false" aria-controls="${o.id}-p"${FD.u.attrs({ disabled: !!o.disabled })}><span class="msel-text">${text}</span></button>
+        <div class="msel-panel" id="${o.id}-p" role="group" aria-labelledby="${o.id}-l" tabindex="-1" hidden>${mselRows(o.options, selected, o.allLabel)}</div>
+      </div>`;
+    },
+    /* the values ticked ([] means all) */
+    values(root) { return mselBoxes(root).filter((b) => !b.hasAttribute('data-all') && b.checked).map((b) => b.value); },
+    /* new options (a feature list that follows the categories chosen), keeping whichever of the old choices are still on offer */
+    setOptions(root, options, selected) {
+      const have = options.map((x) => x.value), keep = FD.u.selList(selected == null ? ui.msel.values(root) : selected).filter((v) => have.includes(v));
+      root.querySelector('.msel-panel').innerHTML = flat(mselRows(options, keep, root.dataset.all));
+      mselRefresh(root);
+    },
+    /* switched off (and, while it is, the little hint beside its label says why) or back on */
+    setDisabled(root, off) {
+      root.classList.toggle('is-disabled', !!off);
+      root.querySelector('.msel-btn').disabled = !!off;
+      const hint = root.querySelector('.label-hint'); if (hint) hint.hidden = !off;
+      if (off) mselClose(root);
+    },
+    refresh: mselRefresh
+  };
+  /* the "All" box and the others stay in step. This listens before any form does (the capture phase), so a form always reads the settled choice. */
+  document.addEventListener('change', (e) => {
+    const box = e.target, root = box && box.closest ? box.closest('.msel') : null;
+    if (!root || box.type !== 'checkbox') return;
+    const all = root.querySelector('input[data-all]'), others = mselBoxes(root).filter((b) => b !== all);
+    if (box === all) { if (all.checked) others.forEach((b) => { b.checked = false; }); else if (!others.some((b) => b.checked)) all.checked = true; }
+    else all.checked = !others.some((b) => b.checked);
+    mselRefresh(root);
+  }, true);
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest && e.target.closest('.msel-btn');
+    if (btn) { const root = btn.closest('.msel'); if (root.classList.contains('is-open')) mselClose(root); else mselOpen(root, e.detail === 0); return; } /* a keyboard press (detail 0) moves into the list, a mouse click leaves focus on the button */
+    $$('.msel.is-open').forEach((r) => { if (!r.contains(e.target)) mselClose(r); });
+  });
+  document.addEventListener('focusout', (e) => { const r = e.target.closest && e.target.closest('.msel.is-open'); if (r && !r.contains(e.relatedTarget)) mselClose(r); });
+  document.addEventListener('keydown', (e) => {
+    const root = e.target.closest && e.target.closest('.msel'); if (!root) return;
+    const open = root.classList.contains('is-open');
+    if (e.key === 'Escape' && open) { e.preventDefault(); e.stopPropagation(); mselClose(root, true); return; }
+    if (e.target.classList.contains('msel-btn')) { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); mselOpen(root, true); } return; }
+    if (!open || e.target.type !== 'checkbox') return;
+    const boxes = mselBoxes(root), i = boxes.indexOf(e.target);
+    const to = e.key === 'ArrowDown' ? (i + 1) % boxes.length : e.key === 'ArrowUp' ? (i - 1 + boxes.length) % boxes.length : e.key === 'Home' ? 0 : e.key === 'End' ? boxes.length - 1 : -1;
+    if (to >= 0) { e.preventDefault(); boxes[to].focus(); }
+  });
+
   ui.tempChip = (t) => {
-    const m = { hot: ['flame', 'Hot', 'orange'], warm: ['sun', 'Warm', 'yellow'], cold: ['snow', 'Cold', 'blue-50'], correct: ['check', 'Correct', 'green'], skip: ['bulb', 'Nudge', 'grey-10'] }[t] || ['snow', 'Cold', 'blue-50'];
+    const m = { hot: ['flame', 'Hot', 'orange'], warm: ['sun', 'Warm', 'yellow'], cold: ['snow', 'Cold', 'blue-50'], correct: ['check', 'Correct', 'green'], skip: ['bulb', 'Nudge', 'grey-10'], time: ['timer', 'Time\u2019s up', 'grey-10'] }[t] || ['snow', 'Cold', 'blue-50'];
     return html`<span class="chip chip-solid temp temp-${t}">${FD.icon(m[0], { size: 16 })}${m[1]}</span>`;
   };
 
@@ -74,16 +236,24 @@
       <span class="ring-label"><strong>${label}</strong>${sub ? html`<small>${sub}</small>` : ''}</span></div>`;
   };
   ui.bar = (pct, color = 'blue', label = '') => html`<div class="bar c-${color}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" ${FD.u.attrs({ 'aria-label': label })}><span style="width:${Math.max(0, Math.min(100, pct))}%"></span></div>`;
+  /* A bar with two fills, for features. The grey track is every feature, the striped fill the ones collected (at least one puzzle done) and the solid fill the ones mastered (every
+     puzzle done). Mastered is part of collected, so the solid fill sits over the start of the striped one and is never added to it. The bar is only a picture: the numbers beside it
+     say the same in words, so it is hidden from screen readers. */
+  ui.nbar = (have, mastered, total, color = 'blue') => {
+    const pct = (n) => (total > 0 ? Math.round(Math.max(0, Math.min(100, (n / total) * 100)) * 10) / 10 : 0);
+    return html`<span class="nbar c-${color}" aria-hidden="true"><span class="nbar-have" style="width:${pct(have)}%"></span><span class="nbar-done" style="width:${pct(Math.min(mastered, have))}%"></span></span>`;
+  };
 
-  /* answer / name-shape tiles. lvl = FD.hints.level(n); reveal = show the whole answer (flip) */
+  /* answer / name-shape tiles. lvl = FD.hints.level(n); reveal = show the whole answer (flip).
+     --ml is the longest word's tile count, so a narrow card (Pip's extras) can shrink its tiles to fit instead of growing wider than its column. */
   ui.nameTiles = (name, lvl, reveal) => {
     const words = FD.hints.shape(name);
     let idx = 0, label;
     if (reveal) label = name;
     else if (lvl.first) label = 'Starts with ' + words.map((w) => w[0].c.toUpperCase()).join(' and ');
-    else if (lvl.lengths) label = 'Word lengths: ' + words.map((w) => w.filter((c) => c.alnum).length).join(', ');
-    else label = `${words.length} word${words.length === 1 ? '' : 's'}`;
-    return html`<div class="name-tiles" role="img" aria-label="${label}">${words.map((w) => html`<span class="name-word">${w.map((ch, i) => {
+    else label = 'Word lengths: ' + words.map((w) => w.filter((c) => c.alnum).length).join(', ');
+    const longest = Math.max(1, ...words.map((w) => w.length));
+    return html`<div class="name-tiles" role="img" aria-label="${label}" style="--ml:${longest}">${words.map((w) => html`<span class="name-word">${w.map((ch, i) => {
       if (!ch.alnum) return html`<span class="tile tile-punct" aria-hidden="true">${ch.c}</span>`;
       const show = reveal || (lvl.first && i === 0);
       return html`<span class="tile ${show ? 'is-on' : ''} ${reveal ? 'is-flip' : ''}" style="--i:${idx++}" aria-hidden="true">${show ? ch.c.toUpperCase() : ''}</span>`;
@@ -93,13 +263,9 @@
   /* badge medallion */
   ui.badge = (b, earned, big) => html`<span class="medal ${earned ? 'is-earned' : 'is-locked'} c-${b.color} ${big ? 'medal-lg' : ''}" aria-hidden="true">${FD.icon(earned ? b.icon : 'lock', { size: big ? 34 : 26 })}</span>`;
 
-  ui.stars = (n, max = 3) => html`<span class="stars" role="img" aria-label="${n} of ${max} stars">${Array.from({ length: max }, (_, i) => html`<span class="star ${i < n ? 'on' : ''}">${FD.icon('star', { size: 16 })}</span>`)}</span>`;
-  /* mastery: 3 stars = solved with the 1st hint, 2 = by hint 2, 1 = solved */
-  ui.mastery = (entry) => (!entry || !entry.solved ? 0 : entry.bestHints <= 1 ? 3 : entry.bestHints <= 2 ? 2 : 1);
-
   ui.section = (title, body, o = {}) => html`<section class="section ${o.cls || ''}" ${FD.u.attrs({ 'aria-labelledby': o.id })}><div class="section-head"><h2${FD.u.attrs({ id: o.id })}>${title}</h2>${o.aside || ''}</div>${body}</section>`;
 
-  /* ---------- router (hash based: #/daily, #/book/copilot-pages, #/free?tag=security) ---------- */
+  /* ---------- router (hash based: #/daily, #/book/copilot-pages, #/pack/wave-2) ---------- */
   const routes = [];
   ui.route = (pattern, view, nav) => {
     const keys = [];
@@ -125,6 +291,8 @@
       if (m) { route = r; r.keys.forEach((k, i) => { params[k] = m[i + 1] ? decodeURIComponent(m[i + 1]) : undefined; }); break; }
     }
     if (!route) { route = routes[0]; params = {}; }
+    /* when this copy of the game asks everyone to sign in, nobody sees a screen until they have */
+    if (FD.auth && FD.auth.gated() && FD.views.gate) { route = { view: FD.views.gate, keys: [] }; params = {}; }
     if (cleanup) { try { cleanup(); } catch (e) { console.error(e); } cleanup = null; }
     const main = $('#main');
     main.className = 'main';
@@ -149,16 +317,20 @@
   const NAV = [
     { href: '#/', label: 'Home', icon: 'home', re: /^\/$/ },
     { href: '#/daily', label: 'Daily', icon: 'calendar', re: /^\/daily/ },
-    { href: '#/free', label: 'Free play', icon: 'shuffle', re: /^\/(free|speed|team|play|c)(\/|$)/ },
-    { href: '#/book', label: 'Feature Book', short: 'Book', icon: 'book', re: /^\/book/ },
+    { href: '#/free', label: 'Play', icon: 'shuffle', re: /^\/(hunt|match|prompts|free|speed|packs|pack|team|play|c)(\/|$)/ },
+    { href: '#/book', label: 'Feature Book', short: 'Book', icon: 'book', re: /^\/(book|ask)(\/|$)/ },
     { href: '#/stats', label: 'Stats', icon: 'chart', re: /^\/stats/ },
     { href: '#/leaderboard', label: 'Leaderboard', icon: 'trophy', re: /^\/leaderboard/ },
     { href: '#/about', label: 'About', icon: 'info', re: /^\/about/ }
   ];
+  /* the phone's "More" sheet: the bottom bar has Home, Daily, Play (Free Play) and Feature Book, so the other game modes and the rest are here */
   const MORE = [
+    { href: '#/hunt', label: 'Feature Hunt', icon: 'search' },
+    { href: '#/match', label: 'Scenario Match', icon: 'puzzle' },
+    { href: '#/prompts', label: 'Prompt Lab', icon: 'flask' },
+    { href: '#/packs', label: 'Packs', icon: 'package' },
     { href: '#/stats', label: 'Stats & badges', icon: 'chart' },
     { href: '#/leaderboard', label: 'Leaderboard', icon: 'trophy' },
-    { href: '#/packs', label: 'Packs & themes', icon: 'package' },
     { href: '#/settings', label: 'Settings', icon: 'sliders' },
     { href: '#/about', label: 'About & how to play', icon: 'info' }
   ];
@@ -170,15 +342,19 @@
     });
   };
 
+  /* the top bar is just the sound switch and your profile: the Daily streak lives on the home tile and the stats page.
+     A guest who could sign in sees a Microsoft sign-in button where the profile would be. */
   function toolsHtml() {
     const p = FD.store.profile(), st = FD.store.settings();
-    const streak = FD.store.dailyStreak(), rk = FD.scoring.rank(p.xp);
-    return html`
-      <a class="tool tool-streak ${streak ? 'is-on' : ''}" href="#/stats" aria-label="Daily streak: ${FD.u.plural(streak, 'day')}. Open stats">${FD.icon('flame', { size: 20 })}<strong>${streak}</strong></a>
-      <button class="tool tool-sound" type="button" data-action="sound" aria-pressed="${String(!!st.sound)}" aria-label="Sound effects" title="Sound effects">${FD.icon(st.sound ? 'volume' : 'mute', { size: 20 })}</button>
-      <button class="tool tool-player" type="button" data-action="profile" aria-label="Player: ${p.name}, ${rk.rank.name}. Switch player">
-        ${FD.avatar(p.name, p.color, 34)}<span class="tool-player-text"><strong>${p.name}</strong><small>${rk.rank.name}</small></span>
-      </button>`;
+    const rk = FD.scoring.rank(p.xp);
+    const sound = html`<button class="tool tool-sound" type="button" data-action="sound" aria-pressed="${String(!!st.sound)}" aria-label="Sound effects" title="Sound effects">${FD.icon(st.sound ? 'volume' : 'mute', { size: 20 })}</button>`;
+    if (!p.account && FD.auth && FD.auth.available()) {
+      return html`${sound}<button class="tool tool-player tool-signin" type="button" data-action="sign-in" aria-label="Sign in with Microsoft. You are playing as a guest." title="Sign in with Microsoft">${FD.msLogo(24)}<span class="tool-player-text"><strong>Sign in</strong><small>Playing as a guest</small></span></button>`;
+    }
+    return html`${sound}
+      <a class="tool tool-player" href="#/stats" aria-label="Your profile: ${p.name}, ${rk.rank.name}. Open your stats">
+        ${FD.avatar(p.name, p.color, 28, rk.rank.id)}<span class="tool-player-text"><strong>${p.name}</strong><small>${rk.rank.name}</small></span>
+      </a>`;
   }
 
   ui.renderTools = () => { const t = $('#header-tools'); if (t) mount(t, toolsHtml()); };
@@ -198,7 +374,7 @@
     mount($('#site-footer'), html`<div class="container footer-inner">
       <div class="footer-brand">${FD.logo({ width: 170 })}<p>${FD.tagline()}</p></div>
       <p class="footer-note"><strong>Copilot Feature-dle</strong> is an independent, community-style learning game from Engage Squared. It isn't affiliated with or endorsed by Microsoft. Microsoft, Microsoft 365, Copilot, Teams, Word, Excel, PowerPoint, Outlook, OneNote, SharePoint and other product names are trademarks of the Microsoft group of companies. Your progress lives only on this device.</p>
-      <nav class="footer-links" aria-label="Footer"><a href="#/about">About</a><a href="#/packs">Packs</a><a href="#/settings">Settings</a><a href="#/leaderboard">Leaderboard</a></nav>
+      <nav class="footer-links" aria-label="Footer"><a href="#/about">About</a><button class="link-btn" type="button" data-action="changelog">What\u2019s new</button><a href="#/settings">Settings</a></nav>
     </div>`);
     ui.renderTools();
     FD.store.on(ui.renderTools);
@@ -213,67 +389,130 @@
     ui.toast(ok ? 'Copied to your clipboard' : 'Could not copy. Select the text and copy it manually.', { icon: ok ? 'check' : 'x' });
   };
   ui.actions.more = () => {
+    const guest = !FD.store.account() && FD.auth && FD.auth.available();
     const d = ui.dialog({
       title: 'More from Feature-dle', cls: 'dlg-sheet',
-      body: html`<ul class="more-list">${MORE.map((m) => html`<li><a class="more-link" href="${m.href}" data-close-dlg>${FD.icon(m.icon)}<span>${m.label}</span>${FD.icon('right', { size: 18 })}</a></li>`)}</ul>`
+      body: html`${guest ? html`<div class="more-signin"><p class="muted small">Playing as a guest. Sign in to put your name on the leaderboard.</p>${FD.account.button({ cls: 'btn-ms-block' })}</div>` : ''}<ul class="more-list">${MORE.map((m) => html`<li><a class="more-link" href="${m.href}" data-close-dlg>${FD.icon(m.icon)}<span>${m.label}</span>${FD.icon('right', { size: 18 })}</a></li>`)}</ul>`
     });
-    d.addEventListener('click', (e) => { if (e.target.closest('[data-close-dlg]')) d.close(); });
+    d.addEventListener('click', (e) => { if (e.target.closest('[data-close-dlg]') || e.target.closest('[data-action="sign-in"]')) d.close(); });
   };
-  ui.actions.profile = () => ui.profileDialog();
 
-  /* ---------- player dialog (also handy for shared laptops at events) ---------- */
-  ui.profileDialog = () => {
-    const draw = () => {
-      const me = FD.store.profile();
-      return html`
-        <p class="muted">Sharing this device? Everyone gets their own stats, streaks and Feature Book.</p>
-        <ul class="player-list">${FD.store.profiles().map((p) => {
-          const rk = FD.scoring.rank(p.xp);
-          return html`<li><button type="button" class="player-row ${p.id === me.id ? 'is-me' : ''}" data-switch="${p.id}" aria-pressed="${String(p.id === me.id)}">${FD.avatar(p.name, p.color, 40)}<span class="pr-text"><strong>${p.name}</strong><small>${rk.rank.name} \u00B7 ${p.xp} XP</small></span>${p.id === me.id ? html`<span class="chip chip-solid c-green">Playing</span>` : ''}</button></li>`;
-        })}</ul>
-        <form class="inline-form" data-newplayer><label class="sr-only" for="np-name">New player name</label><input id="np-name" class="input" maxlength="24" placeholder="Add a player (name)" autocomplete="off"><button class="btn btn-primary" type="submit">${FD.icon('plus', { size: 18 })}Add</button></form>
-        <form class="inline-form" data-rename><label class="sr-only" for="rn-name">Rename current player</label><input id="rn-name" class="input" maxlength="24" value="${me.name}" autocomplete="off"><button class="btn btn-ghost" type="submit">Rename</button></form>`;
-    };
-    const d = ui.dialog({ title: 'Who\u2019s playing?', body: draw(), actions: [{ id: 'stats', label: 'Open my stats', cls: 'btn-ghost' }, { id: 'ok', label: 'Done', cls: 'btn-primary' }], onClose: (v) => { if (v === 'stats') ui.go('/stats'); } });
-    const body = d.querySelector('.dlg-body');
-    const redraw = () => { mount(body, draw()); };
-    body.addEventListener('click', (e) => { const b = e.target.closest('[data-switch]'); if (b) { FD.store.switchProfile(b.dataset.switch); redraw(); ui.render(); } });
-    body.addEventListener('submit', (e) => {
-      e.preventDefault();
-      if (e.target.matches('[data-newplayer]')) { const v = $('#np-name', body).value.trim(); if (!v) return; FD.store.createProfile(v); redraw(); ui.render(); ui.toast(`Welcome, ${v}!`, { icon: 'sparkle' }); }
-      if (e.target.matches('[data-rename]')) { FD.store.renameProfile(FD.store.profile().id, $('#rn-name', body).value); redraw(); ui.toast('Name updated', { icon: 'check' }); }
+  /* ---------- player profile (opened from the leaderboard) ---------- */
+  ui.profileDialog = (pl) => {
+    const rk = FD.scoring.rank(pl.xp || 0), has = (v) => v != null && v !== undefined;
+    const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
+    const stat = (label, value, sub) => html`<div class="pf-stat"><strong>${value}</strong><span>${label}</span>${sub ? html`<small>${sub}</small>` : ''}</div>`;
+    return ui.dialog({
+      title: pl.name, cls: 'dlg-profile',
+      body: html`<div class="pf-head">${FD.avatar(pl.name, pl.color, 84, rk.rank.id)}
+          <div class="pf-who"><p class="pf-rank">${FD.icon('crown', { size: 18 })}<strong>${rk.rank.name}</strong></p>
+            <p class="muted">${pl.xp || 0} XP${rk.next ? html` \u00B7 <strong>${rk.toNext} XP</strong> to ${rk.next.name}` : ' \u00B7 the top rank!'}</p>
+            ${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}
+            ${pl.you ? html`<span class="chip chip-solid c-blue">That\u2019s you</span>` : ''}${pl.sample ? html`<span class="chip">Sample player</span>` : ''}</div></div>
+        <div class="pf-grid">
+          ${stat('Puzzles played', pl.played)}${has(pl.mastered) ? stat('Features mastered', pl.mastered) : ''}
+          ${stat('Longest Daily streak', html`${pl.maxStreak}<small> ${pl.maxStreak === 1 ? 'day' : 'days'}</small>`)}
+        </div>
+        <div class="pf-coll"><div class="pf-coll-top"><strong>Collection progress</strong><span>${has(pl.collected) ? `${pl.collected} of ${pl.collectedTotal} features` : 'Not shared'}</span></div>
+          ${has(pl.collected) ? ui.bar(pct(pl.collected, pl.collectedTotal), 'green', 'Collection progress') : ''}</div>
+        ${pl.sample ? html`<p class="muted small">Sample players have made-up numbers so the board never looks empty. You can switch them off in Settings.</p>` : ''}`
     });
   };
 
-  /* ---------- first run ---------- */
-  ui.firstRun = () => {
-    let input = null;
-    const d = ui.dialog({
-      title: 'Hi, I\u2019m Pip!', cls: 'dlg-welcome',
+  /* ---------- welcome: the first time someone opens the game (no name to type: the player is "Player" until sign-in arrives) ---------- */
+  const WELCOME_ITEMS = [
+    ['calendar', 'Daily Challenge', 'A new puzzle every weekday, the same for everyone. Keep your streak glowing.', 'yellow'],
+    ['shuffle', 'Free Play', 'Unlimited puzzles from any game mode. Choose how many rounds and play at your own pace.', 'orange'],
+    ['search', 'Feature Hunt', 'Know it: five sneaky hints, one Copilot feature.', 'blue'],
+    ['puzzle', 'Scenario Match', 'Use it: match a work scenario to the feature that fits.', 'purple'],
+    ['flask', 'Prompt Lab', 'Prompt it: pick the prompt that gets the best result.', 'blue-50'],
+    ['package', 'Packs', 'Themed sets that mix all three game modes, plus monthly spotlights.', 'red'],
+    ['book', 'Feature Book', 'Everything about each feature in one place: Know it, Use it and Prompt it.', 'green']
+  ];
+  ui.welcome = (o = {}) => {
+    /* only a brand-new player has nothing to catch up on in What's new: someone who clicks Pip to hear it again still gets their update popup */
+    const first = !FD.store.onboarded();
+    return ui.dialog({
+      title: 'Hi, I\u2019m Pip!', cls: 'dlg-wide dlg-welcome',
       body: html`<div class="welcome">
-        <div class="welcome-art">${FD.pip('hello', { size: 132 })}</div>
-        <div>
-          <p>I\u2019ll give you <strong>five sneaky hints</strong> about a Microsoft Copilot feature. Guess it early for more points, and learn something new every time.</p>
-          <ul class="ticks"><li>${FD.icon('check', { size: 18 })}Every miss unlocks an easier hint</li><li>${FD.icon('check', { size: 18 })}Typos are fine \u2013 I\u2019m friendly like that</li><li>${FD.icon('check', { size: 18 })}Collect features, earn badges, climb the ranks</li></ul>
-          <form data-welcome><label for="wel-name" class="label">What should we call you? <span class="muted">(optional)</span></label><input id="wel-name" class="input" maxlength="24" placeholder="Your first name" autocomplete="given-name"></form>
-        </div></div>`,
+        <div class="welcome-art">${FD.pip('hello', { size: 120 })}</div>
+        <div class="welcome-intro">
+          <p class="welcome-lede">I\u2019ll help you get to know Microsoft Copilot three ways: <strong>Know it</strong>, <strong>Use it</strong> and <strong>Prompt it</strong>. Answer early for more points, and learn something new every time.</p>
+        </div>
+      </div>
+      <h3 class="welcome-h">Here\u2019s what you can do</h3>
+      <ul class="welcome-grid">${WELCOME_ITEMS.map(([icon, name, text, color]) => html`<li class="welcome-item c-${color}"><span class="welcome-ic" aria-hidden="true">${FD.icon(icon, { size: 22 })}</span><div><strong>${name}</strong><span>${text}</span></div></li>`)}</ul>
+      <p class="welcome-foot">${FD.icon('crown', { size: 18 })}<span>Earn XP and badges as you go, and climb from ${FD.config.ranks[0].name} to ${FD.config.ranks[FD.config.ranks.length - 1].name}.</span></p>
+      ${FD.auth && FD.auth.available() && !FD.store.account() ? html`<div class="welcome-signin"><div><strong>Want your name on the leaderboard?</strong><span>Sign in with your Microsoft account. It only takes a few seconds, and you can always play as a guest instead.</span></div>${FD.account.button()}</div>` : ''}`,
       actions: [{ id: 'go', label: 'Let\u2019s play', cls: 'btn-primary btn-lg' }],
       onClose: () => {
-        const v = input ? input.value.trim() : '';
-        if (v) FD.store.renameProfile(FD.store.profile().id, v);
         FD.store.setOnboarded();
-        ui.render();
+        const t = FD.changelog && FD.changelog.token();
+        if (first && t) FD.store.setChangelogSeen(t);
+        if (o.afterClose) o.afterClose();
       }
     });
-    input = d.querySelector('#wel-name');
-    d.querySelector('form[data-welcome]').addEventListener('submit', (e) => { e.preventDefault(); d.querySelector('[data-dlg="go"]').click(); });
+  };
+  /* Pip on the home screen: click (or press Enter) to hear the welcome again */
+  ui.actions.welcome = () => {
+    if (document.querySelector('dialog.dlg-welcome[open]')) return;
+    /* saying hello to Pip again earns a badge (announced once the popup is closed, so the toast isn't hidden behind it) */
+    ui.welcome({ afterClose: () => ui.celebrate({ newBadges: FD.store.bump('pipHellos') }) });
   };
 
-  /* announce earned badges / rank-ups with toasts (used after every game) */
+  /* ---------- What's new: data/changelog.json is the one place to edit (see the README) ---------- */
+  const fmtLongDate = (s) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || '')); return m ? FD.u.fmtDateLong(`${m[1]}-${m[2]}-${m[3]}`).replace(/^\w+ /, '') + ' ' + m[1] : String(s || ''); };
+  const fmtMonth = (s) => { const m = /^(\d{4})-(\d{2})/.exec(String(s || '')); return m ? new Date(Date.UTC(+m[1], +m[2] - 1, 1)).toLocaleDateString('en-AU', { month: 'long', year: 'numeric', timeZone: 'UTC' }) : ''; };
+  ui.changelog = () => {
+    const c = FD.changelog && FD.changelog.data;
+    if (!c) { ui.toast('What\u2019s new isn\u2019t available right now.', { icon: 'x' }); return null; }
+    const list = (items) => html`<ul class="cl-list">${items.map((it) => html`<li><strong>${it.title}</strong>${it.text ? html`<span>${it.text}</span>` : ''}</li>`)}</ul>`;
+    const ms = (c.microsoft || []).map((it) => html`<li><div class="cl-ms-top"><strong>${it.title}</strong>${it.date ? html`<span class="chip">${fmtMonth(it.date)}</span>` : ''}</div>${it.text ? html`<span>${it.text}</span>` : ''}${it.link && /^https:\/\//i.test(it.link) ? html`<a href="${it.link}" target="_blank" rel="noopener noreferrer">${it.linkLabel || 'Read more'}<span class="sr-only"> (opens in a new tab)</span></a>` : ''}</li>`);
+    const history = (c.history || []);
+    const msHead = html`<h3 id="cl-ms">${FD.icon('agent', { size: 20 })}Microsoft updates</h3>`;
+    return ui.dialog({
+      title: 'What\u2019s new', cls: 'dlg-wide dlg-changelog',
+      body: html`<div class="cl">
+        <p class="cl-ver"><span class="chip chip-solid c-blue">Version ${c.version}</span><span class="muted">${fmtLongDate(c.date)}</span></p>
+        ${c.intro ? html`<p class="lede cl-intro">${c.intro}</p>` : ''}
+        <section aria-labelledby="cl-game"><h3 id="cl-game">${FD.icon('sparkle', { size: 20 })}Game updates</h3>${list(c.game || [])}</section>
+        ${ms.length ? html`<section aria-labelledby="cl-ms">${msHead}<ul class="cl-list cl-ms">${ms}</ul></section>` : c.microsoftEmpty ? html`<section aria-labelledby="cl-ms">${msHead}<p class="cl-empty">${c.microsoftEmpty}</p></section>` : ''}
+        ${history.length ? html`<details class="cl-history"><summary>Earlier versions</summary>${history.map((h) => html`<div class="cl-old"><h4>Version ${h.version} <small>${fmtLongDate(h.date)}</small></h4><ul>${(h.notes || []).map((n) => html`<li>${n}</li>`)}</ul></div>`)}</details>` : ''}
+      </div>`,
+      actions: [{ id: 'ok', label: 'Got it', cls: 'btn-primary' }],
+      onClose: () => FD.store.setChangelogSeen(FD.changelog.token())
+    });
+  };
+  ui.actions.changelog = () => ui.changelog();
+
+  /* ---------- rank-up celebration (held back during a game of rounds so it doesn't interrupt the game) ---------- */
+  let pendingRank = null, holdRank = false;
+  /* a game that has several rounds (Free Play, Feature Hunt, Scenario Match, Prompt Lab) holds a rank-up until it is over or you leave it; letting go shows it a moment later, once the next screen is up */
+  ui.holdRankUp = (on) => { holdRank = !!on; if (!on && pendingRank) setTimeout(ui.flushRankUp, 450); };
+  ui.queueRankUp = (rank) => { if (!pendingRank || rank.xp > pendingRank.xp) pendingRank = rank; if (!holdRank) setTimeout(ui.flushRankUp, 650); };
+  ui.flushRankUp = () => {
+    if (!pendingRank || holdRank) return;
+    const rank = pendingRank; pendingRank = null;
+    const p = FD.store.profile(), rk = FD.scoring.rank(p.xp);
+    FD.fx.confetti({ count: 260 }); FD.fx.play('badge'); FD.fx.haptic([30, 40, 60]);
+    announce(`Rank up! You are now ${rank.name}.`);
+    ui.dialog({
+      title: 'Rank up!', cls: 'dlg-rankup',
+      body: html`<div class="rankup">
+        <div class="rankup-art">${FD.pip('cheer', { size: 128 })}<span class="rankup-avatar">${FD.avatar(p.name, p.color, 88, rank.id)}</span></div>
+        <p class="rankup-lead">You\u2019ve reached</p>
+        <h3 class="rankup-name">${rank.name}</h3>
+        <p class="muted">${rk.next ? html`${rk.toNext} XP to <strong>${rk.next.name}</strong>. Keep going!` : 'You\u2019re at the very top. Brilliant!'}</p>
+      </div>`,
+      actions: [{ id: 'ok', label: 'Keep going', cls: 'btn-primary btn-lg' }]
+    });
+  };
+
+  /* announce earned badges / rank-ups after every game */
   ui.celebrate = (out) => {
     if (!out) return;
     let delay = 0;
-    if (out.levelUp) { setTimeout(() => { ui.toast(`New rank: ${out.levelUp.name}!`, { icon: 'crown', kind: 'good', ms: 5000 }); FD.fx.play('badge'); }, delay); delay += 900; }
+    if (out.levelUp) ui.queueRankUp(out.levelUp);
     (out.newBadges || []).forEach((b) => { setTimeout(() => { ui.toast(`Badge unlocked: ${b.name}`, { icon: b.icon, kind: 'good', ms: 5000 }); FD.fx.play('badge'); }, delay); delay += 900; });
   };
 })();

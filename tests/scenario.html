@@ -8,28 +8,30 @@
 <body>
 <iframe id="app" title="app"></iframe>
 <script>
-/* Drives the app into a known state for screenshots:  scenario.html?w=390&h=2000&do=win&hash=/daily  */
+/* Drives the app into a known state for screenshots:  scenario.html?w=390&h=2000&do=win&hash=/daily  (add &today=2026-11-14 to pretend it is another day; the default is a Tuesday) */
 (async () => {
+ try {
   const p = new URLSearchParams(location.search);
   const f = document.getElementById('app');
   f.style.width = (p.get('w') || 1280) + 'px';
   f.style.height = (p.get('h') || 1000) + 'px';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const what = p.get('do') || 'none';
-  await new Promise((res) => { f.onload = res; f.src = '../index.html?nowelcome&ns=test' + (p.get('hash') ? '#' + p.get('hash') : '#/'); });
+  await new Promise((res) => { f.onload = res; f.src = '../index.html?nowelcome&ns=test&today=' + (p.get('today') || '2026-11-17') + (p.get('hash') ? '#' + p.get('hash') : '#/'); });
   const W = f.contentWindow, D = () => f.contentDocument, q = (s) => D().querySelector(s);
-  const waitFor = async (fn, ms = 4000) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); } return false; };
-  await waitFor(() => W.FD && W.FD.lib && W.FD.lib.ready);
+  const waitFor = async (fn, ms = 20000) => { const t = Date.now(); while (Date.now() - t < ms) { try { if (fn()) return true; } catch (e) {} await sleep(50); } return false; };
+  const appReady = (w) => w.FD && w.FD.lib && w.FD.lib.ready && w.FD.scenarios && w.FD.scenarios.ready && w.FD.prompts && w.FD.prompts.ready; /* the library and both question banks have loaded */
+  await waitFor(() => appReady(W));
   const FD = W.FD, go = async (h) => { W.location.hash = h; await sleep(300); };
   const typeInto = (v) => { const i = q('#guess-input'); i.focus(); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); };
   const submit = () => q('#guess-form').requestSubmit();
   const seed = (n, extra) => {
     // fill the Feature Book with some history
-    const feats = FD.lib.features.filter((x) => !x.community);
+    const feats = FD.lib.features;
     feats.slice(0, n).forEach((ft, i) => FD.store.recordGame({ mode: i % 3 === 0 ? 'daily' : 'free', dateKey: FD.u.addDays(FD.u.dateKey(), -(n - i)), feature: ft, won: i % 5 !== 4, hintsUsed: 1 + (i % 4), timeMs: 15000 + i * 7000, grid: ['cold', 'warm', 'correct'], guesses: [], typo: false }));
   };
 
-  if (what === 'welcome') { FD.store.resetAll(); W.location.reload(); }
+  if (what === 'welcome') { FD.store.resetAll(); FD.ui.welcome(); await sleep(400); }
   if (what === 'mid' || what === 'win' || what === 'lose' || what === 'nudge') {
     FD.store.resetAll(); FD.store.setOnboarded(); if (what === 'win') seed(6);
     await go('#/daily'); await sleep(500);
@@ -40,20 +42,116 @@
       typeInto(diffCat.name); submit(); await sleep(250);
       typeInto(sameCat ? sameCat.name : others[1].name); submit(); await sleep(250);
     }
-    if (what === 'mid') { typeInto('cop'); await sleep(200); }
+    if (what === 'mid') { typeInto(p.get('type') || 'cop'); await sleep(200); }
     if (what === 'win') { typeInto(dailyF.name); submit(); await sleep(1500); }
     if (what === 'lose') { q('[data-act="giveup"]').click(); await sleep(300); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(1500); }
   }
   if (what === 'book') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); }
   if (what === 'bookdetail') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); q('.fcard.is-collected').click(); await sleep(400); }
+  /* the Feature Tracker with its first category open */
+  if (what === 'tracker') { FD.store.resetAll(); FD.store.setOnboarded(); seed(14); await go('#/book'); await sleep(400); q('.mtile').click(); await sleep(400); }
   if (what === 'stats') { FD.store.resetAll(); FD.store.setOnboarded(); seed(14); await go('#/stats'); await sleep(400); }
   if (what === 'board') { FD.store.resetAll(); FD.store.setOnboarded(); seed(5); await go('#/leaderboard'); await sleep(400); }
-  if (what === 'speed') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/speed'); await sleep(300); q('#speed-form').requestSubmit(); await sleep(600); const g = FD.lib.features[3]; typeInto(g.name); submit(); await sleep(600); }
-  if (what === 'team') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/team'); await sleep(300); q('#team-form').requestSubmit(); await sleep(600); typeInto(FD.lib.features[2].name); submit(); await sleep(600); }
-  if (what === 'teamend') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/team'); await sleep(300); q('#team-form').requestSubmit(); await sleep(500); q('[data-act="giveup"]').click(); await sleep(200); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(600); }
+  /* a game of rounds in Free Play (or Feature Hunt with &mode=hunt): &n=3 sets the rounds. It stops on the first round, or with &play=1 answers everything (every question right, every hunt given up) and waits on the results page */
+  if (what === 'rounds') {
+    FD.store.resetAll(); FD.store.setOnboarded();
+    const hunt = p.get('mode') === 'hunt', pre = hunt ? 'h' : 'f';
+    await go(hunt ? '#/hunt' : '#/free'); await sleep(500);
+    const r = q('#' + pre + '-rounds'); r.value = p.get('n') || '3'; r.dispatchEvent(new W.Event('input', { bubbles: true })); await sleep(150);
+    q(hunt ? '#hunt-form' : '#free-form').requestSubmit(); await sleep(900);
+    for (let i = 0; p.get('play') && i < 60 && !q('#ss-h'); i++) {
+      await sleep(350);
+      const yes = D().querySelector('dialog[open] [data-dlg="yes"]'), next = q('[data-action="rounds-next"]'), act = FD.quizUI.active;
+      if (yes) { yes.click(); await sleep(900); }
+      else if (next) { next.click(); await sleep(600); }
+      else if (q('#guess-form') && !q('#guess-form').hidden) { q('[data-act="giveup"]').click(); await sleep(400); }
+      else if (act && act.scn && !act.state.done) { const b = q('.pl-opt[data-oi="' + act.scn.bestIndex + '"]'); if (b) { b.click(); await sleep(500); } }
+    }
+  }
+  /* a finished Prompt Lab game (&n=3 sets the rounds): every question answered with its best prompt, then it waits on the results page */
+  if (what === 'prompts') {
+    FD.store.resetAll(); FD.store.setOnboarded();
+    await go('#/prompts'); await sleep(500);
+    const r = q('#pl-rounds'); r.value = p.get('n') || '3'; r.dispatchEvent(new W.Event('input', { bubbles: true })); await sleep(150);
+    q('#pl-form').requestSubmit(); await sleep(900);
+    for (let i = 0; i < 40 && !q('#pl-done'); i++) {
+      const next = q('[data-action="pl-next"]'), act = FD.quizUI.active;
+      if (next) { next.click(); await sleep(700); }
+      else if (act && act.scn && !act.state.done) { const b = q('.pl-opt[data-oi="' + act.scn.bestIndex + '"]'); if (b) { b.click(); await sleep(600); } else await sleep(300); }
+      else await sleep(300);
+    }
+  }
   if (what === 'more') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); q('[data-action="more"]').click(); await sleep(300); }
-  if (what === 'profile') { FD.store.resetAll(); FD.store.setOnboarded(); seed(4); await go('#/'); await sleep(300); q('[data-action="profile"]').click(); await sleep(300); }
+  if (what === 'profile') { FD.store.resetAll(); FD.store.setOnboarded(); seed(4); await go('#/leaderboard'); await sleep(400); q('.lb-row').click(); await sleep(400); }
+  if (what === 'packs') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/pack/wave-3'); await sleep(400); q('[data-act="giveup"]').click(); await sleep(250); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(700); await go('#/packs'); await sleep(400); }
+  if (what === 'rankup') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); FD.ui.queueRankUp(FD.config.ranks[7]); await sleep(1200); }
+  if (what === 'changelog') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); FD.ui.changelog(); await sleep(400); }
+  /* the "Sam" profile behind the README screenshots: scenario.html?w=1280&h=1100&do=sam&hash=/free  (&meta={"free":{"rounds":3}} presets a screen's remembered choices) */
+  if (what === 'sam') {
+    const pr = FD.store.profile(), lib = FD.lib, now = Date.now(), byName = (n) => lib.features.find((x) => x.name === n);
+    pr.name = 'Sam'; pr.color = 'blue'; pr.xp = 3250;
+    const hunt = (x, hints = 2) => { pr.collection[x.id] = { solved: 1, seen: 0, bestHints: hints, first: now, last: { won: true, hints, t: now } }; };
+    const scen = (x, n) => FD.scenarios.scenarios.filter((s) => s.feature === x.id).slice(0, n).forEach((s) => { pr.match.seen[s.id] = { n: 1, firstTry: 1, last: now - 3600000, won: 1 }; });
+    const prom = (x, n) => FD.prompts.scenarios.filter((s) => s.feature === x.id).slice(0, n).forEach((s) => { pr.prompts.seen[s.id] = { n: 1, firstTry: 1, last: now - 3600000, won: 1 }; });
+    ['Copilot Pages', 'Copilot Create', 'Prompt Gallery', 'Copilot Memory', 'Agent Builder'].forEach((n) => { const x = byName(n); hunt(x); scen(x, 99); prom(x, 99); });
+    [['Copilot Notebooks', 5, 4], ['Copilot Chat', 3, 1], ['Copilot in Word', 4, 1], ['Copilot in Excel', 0, 0], ['Researcher', 2, 0], ['Copilot in Outlook', 2, 1], ['Copilot in Teams', 5, 0], ['Think Deeper', 0, 1]].forEach(([n, s, k]) => { const x = byName(n); hunt(x, n === 'Copilot Notebooks' ? 1 : 2); scen(x, n === 'Copilot Notebooks' ? 1 : s); prom(x, k); });
+    ['Copilot in PowerPoint', 'Copilot Actions', 'Copilot Search', 'Copilot Vision', 'Analyst', 'Facilitator', 'Intelligent Recap', 'Copilot in OneNote', 'Copilot in Loop', 'Copilot Studio', 'Agent Store', 'Interpreter', 'Copilot Mobile', 'Copilot Wave 2'].forEach((n) => { const x = byName(n); if (x && !pr.collection[x.id]) hunt(x, 3); });
+    ['Declarative Agents', 'Copilot Dashboard'].forEach((n) => { const x = byName(n); pr.collection[x.id] = { solved: 0, seen: 1, bestHints: null, first: null, last: { won: false, hints: 5, t: now - 7200000 } }; });
+    const miss = FD.scenarios.scenarios.find((s) => s.feature === byName('Copilot in SharePoint').id); pr.match.seen[miss.id] = { n: 1, firstTry: 0, last: now - 5400000, won: 0, miss: 1 };
+    pr.stats.played = 38; pr.stats.won = 31; pr.stats.lost = 7; pr.stats.totalScore = 2410; pr.stats.bestScore = 130; pr.stats.hist = [9, 8, 7, 5, 2];
+    pr.match.questions = 64; pr.match.correct = 58; pr.match.firstTry = 41; pr.match.runs = 9; pr.match.points = 2310; pr.match.bestRun = 230;
+    pr.prompts.questions = 21; pr.prompts.correct = 20; pr.prompts.firstTry = 14; pr.prompts.runs = 4; pr.prompts.points = 800; pr.prompts.bestRun = 200;
+    const day = (k, won, hints, kind) => { pr.daily.results[k] = { id: lib.features[0].id, won, hints, score: won ? 120 - hints * 10 : 0, timeMs: 40000, grid: [], expired: false, kind: kind || 'hunt' }; };
+    [['2026-11-02', 1, 2], ['2026-11-03', 1, 1], ['2026-11-04', 0, 5], ['2026-11-05', 1, 3], ['2026-11-06', 1, 2], ['2026-11-09', 1, 2, 'match'], ['2026-11-10', 1, 1], ['2026-11-11', 0, 5], ['2026-11-12', 1, 2, 'prompt'], ['2026-11-13', 1, 1], ['2026-11-16', 1, 2]].forEach(([k, w, h, kind]) => day(k, !!w, h, kind));
+    pr.daily.streak = 3; pr.daily.max = 4; pr.daily.last = '2026-11-16';
+    pr.counters.played_daily = 11; pr.counters.played_free = 14; pr.counters.promptCopies = 3; pr.counters.docOpens = 2; pr.counters.matchFirstTry = 41; pr.counters.promptFirstTry = 14;
+    FD.badges.evaluate(pr, {}, lib);
+    Object.keys(pr.badges).forEach((k) => { pr.badges[k] = now - 86400000 * 3; });
+    pr.history = [];
+    if (p.get('meta')) Object.assign(FD.store.state.meta, JSON.parse(p.get('meta')));
+    if (p.get('text')) FD.store.state.settings.textScale = Number(p.get('text')); /* the Text size choice: 1, 1.125, 1.25 ... */
+    FD.store.saveNow();
+    // a fresh load shows the seeded profile everywhere, the header included
+    await new Promise((res) => { f.onload = res; W.location.reload(); });
+    await waitFor(() => appReady(f.contentWindow));
+    await sleep(1800);
+    /* &click=.mtile|.trk-feat  clicks each selector in turn (to open a panel before the shot) */
+    for (const sel of (p.get('click') || '').split('|').filter(Boolean)) { const el = q(sel); if (el) { el.click(); await sleep(600); } }
+    /* &guess=Copilot Pages  types a guess into the hunt on screen and submits it (with &hash=/play/copilot-pages it solves the puzzle, for Copilot Learning Mode) */
+    if (p.get('guess') && q('#guess-input')) { typeInto(p.get('guess')); submit(); await sleep(1800); const c = q('#confetti'); if (c) c.style.display = 'none'; }
+  }
+  /* the 1200x630 social card: the home hero centred on a white card (use w=1280&h=900, then shot.ps1 -Width 1200 -Height 630) */
+  if (what === 'social') {
+    FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(700);
+    D().getElementById('site-header').style.display = 'none';
+    D().getElementById('site-footer').style.display = 'none';
+    for (let n = q('.hero').nextElementSibling; n; n = n.nextElementSibling) n.style.display = 'none';
+    await sleep(100);
+    const hr = q('.hero').getBoundingClientRect(), s = 0.94;
+    document.documentElement.style.overflow = document.body.style.overflow = 'hidden';
+    document.documentElement.style.background = document.body.style.background = '#fff';
+    f.style.position = 'absolute'; f.style.transformOrigin = '0 0'; f.style.transform = 'scale(' + s + ')';
+    f.style.left = Math.round((1200 - hr.width * s) / 2 - hr.left * s) + 'px';
+    f.style.top = Math.round((630 - hr.height * s) / 2 - hr.top * s) + 'px';
+  }
+  /* &text=1.25 picks the Text size (1, 1.125, 1.25 ...); the seeded "Sam" scenario applies it before its fresh load */
+  if (what !== 'sam' && p.get('text')) { FD.store.setSetting('textScale', Number(p.get('text'))); await sleep(400); }
   document.title = 'READY ' + what;
+  /* &rect=selector writes that element's box (x y width height, in screenshot pixels) into the title, for cropping (read it with shot.ps1 -Dom) */
+  if (p.get('rect')) { const el = q(p.get('rect')); const b = el && el.getBoundingClientRect(); document.title = 'RECT ' + (b ? [b.left, b.top, b.width, b.height].map(Math.round).join(' ') : 'none'); }
+  /* &probe=1 writes the width of the page, and what sticks out of it, into the title (read it with shot.ps1 -Dom) */
+  if (p.get('probe')) {
+    const doc = D().documentElement, vw = doc.clientWidth;
+    const out = [...D().querySelectorAll('body *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width && r.right > vw + 1; }).slice(0, 6).map((e) => e.tagName.toLowerCase() + '.' + String(e.className).split(' ')[0] + ':' + Math.round(e.getBoundingClientRect().right - vw));
+    const spill = ['#trk-detail', '.speed-summary'].map((sel) => {
+      const c = D().querySelector(sel); if (!c || c.hidden) return '';
+      const cs = getComputedStyle(c), r = c.getBoundingClientRect(), edge = r.right - parseFloat(cs.paddingRight) - parseFloat(cs.borderRightWidth);
+      const bad = [...c.querySelectorAll('*')].filter((e) => { const b = e.getBoundingClientRect(); return b.width && b.right > edge + 1; }).slice(0, 4).map((e) => e.tagName.toLowerCase() + '.' + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).split(' ')[0] + ':' + Math.round(e.getBoundingClientRect().right - edge));
+      return sel + '=[' + bad.join(' ') + ']';
+    }).filter(Boolean).join(' ');
+    document.title = 'PROBE scroll=' + doc.scrollWidth + ' client=' + vw + ' trk=' + (D().getElementById('trk-detail') ? (D().getElementById('trk-detail').hidden ? 'closed' : 'open') : 'none') + ' bar=' + (D().getElementById('speed-bar') ? Math.round(D().getElementById('speed-bar').getBoundingClientRect().height) : '-') + ' out=[' + out.join(' ') + '] spill ' + spill;
+  }
+ } catch (e) { document.title = 'ERR ' + (e && e.message); }
 })();
 </script>
 </body>

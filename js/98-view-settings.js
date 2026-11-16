@@ -1,8 +1,8 @@
-/* Copilot Feature-dle · Settings (comfort, accessibility, facilitator mode, data) */
+/* Copilot Feature-dle · Settings (comfort, accessibility, sound, leaderboard, data) */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
-  const { html, flat, $, $$, mount, attrs } = FD.u;
+  const { html, flat, $, $$, attrs } = FD.u;
   const ui = FD.ui;
 
   /* PWA install + offline status are tracked by 99-app.js */
@@ -15,23 +15,18 @@
     title: 'Settings',
     render(main) {
       const draw = () => {
-        const s = FD.store.settings(), p = FD.store.profile();
+        const s = FD.store.settings();
         const offline = FD.pwa.controlled;
         main.innerHTML = flat(html`<div class="container hub">
           <header class="hub-head"><p class="eyebrow">Make it yours</p><h1>Settings</h1><p class="lede">Comfort, accessibility and event options. Everything saves automatically.</p></header>
           <div class="settings-grid">
-            <section class="card" aria-labelledby="s-player"><h2 id="s-player">Player</h2>
-              <div class="player-now">${FD.avatar(p.name, p.color, 56)}<div><strong>${p.name}</strong><small class="muted">${FD.scoring.rank(p.xp).rank.name} \u00B7 ${p.xp} XP</small></div></div>
-              <div class="btn-row"><button class="btn btn-primary" type="button" data-action="profile">${FD.icon('users', { size: 20 })}Switch, add or rename</button></div>
-              <p class="muted small">Sharing a laptop at an event? Add a player for each person so everyone keeps their own stats.</p></section>
-
+            ${FD.account.card()}
             <section class="card" aria-labelledby="s-comfort"><h2 id="s-comfort">Comfort &amp; accessibility</h2>
               <fieldset class="field"><legend>Motion &amp; animation</legend><div class="pill-radios">
                 ${radio('motion', 'system', 'Match my device', s.motion === 'system')}${radio('motion', 'reduce', 'Reduce motion', s.motion === 'reduce')}${radio('motion', 'full', 'Full motion', s.motion === 'full')}</div></fieldset>
               <fieldset class="field"><legend>Text size</legend><div class="pill-radios">
                 ${radio('textScale', '1', 'Standard', +s.textScale === 1)}${radio('textScale', '1.125', 'Large', +s.textScale === 1.125)}${radio('textScale', '1.25', 'Larger', +s.textScale === 1.25)}</div></fieldset>
               ${sw('contrast', 'High contrast', 'Stronger borders and plain navy-on-white colours.', s.contrast)}
-              ${sw('relaxed', 'Relaxed timing', 'No on-screen clock and no speed bonus. Speed round gets double time.', s.relaxed)}
             </section>
 
             <section class="card" aria-labelledby="s-feel"><h2 id="s-feel">Sound &amp; feedback</h2>
@@ -40,12 +35,11 @@
               ${sw('confetti', 'Confetti', 'Celebrate wins in Engage Squared colours.', s.confetti)}
             </section>
 
-            <section class="card" aria-labelledby="s-fac"><h2 id="s-fac">Events &amp; facilitators</h2>
-              ${sw('unlockAll', 'Facilitator mode', 'Unlock every difficulty in Free play and open the whole Feature Book. Great for demos and training.', s.unlockAll)}
+            <section class="card" aria-labelledby="s-fac"><h2 id="s-fac">Leaderboard &amp; events</h2>
               ${sw('sampleBoard', 'Show sample players on the leaderboard', 'Friendly placeholders (clearly labelled) so the board never looks lonely.', s.sampleBoard)}
               <div class="field event-field"><label for="event-code">Live event code <span class="muted">(optional)</span></label>
                 <div class="inline-form"><input id="event-code" class="input" maxlength="40" value="${(FD.store.state.meta.event || {}).code || ''}" placeholder="e.g. LUNCH26" autocomplete="off"><button class="btn btn-ghost" type="button" data-action="event-set">${FD.config.leaderboard.endpoint ? 'Update' : 'Join'}</button></div>
-                <p class="muted small">Join a shared leaderboard run by your facilitator (see the README). Leave blank to keep scores on this device.</p></div>
+                <p class="muted small">Join a shared leaderboard run by your event host (see the README). Leave blank to keep scores on this device.</p></div>
             </section>
 
             <section class="card" aria-labelledby="s-app"><h2 id="s-app">App &amp; offline</h2>
@@ -61,7 +55,7 @@
                 <label class="btn btn-ghost" for="import-file">${FD.icon('upload', { size: 20 })}Import backup</label><input id="import-file" class="sr-only" type="file" accept="application/json,.json">
               </div>
               <div class="btn-row">
-                <button class="btn btn-ghost" type="button" data-action="reset-player">${FD.icon('refresh', { size: 20 })}Reset ${p.name}</button>
+                <button class="btn btn-ghost" type="button" data-action="reset-player">${FD.icon('refresh', { size: 20 })}Reset my progress</button>
                 <button class="btn btn-danger-ghost" type="button" data-action="reset-all">${FD.icon('trash', { size: 20 })}Erase everything</button>
               </div></section>
           </div></div>`);
@@ -74,14 +68,14 @@
         $('#import-file', main).addEventListener('change', (e) => {
           const file = e.target.files[0]; if (!file) return;
           const r = new FileReader();
-          r.onload = () => { const res = FD.store.importJSON(String(r.result)); ui.toast(res.ok ? `Backup imported (${FD.u.plural(res.players, 'player')})` : res.error, { icon: res.ok ? 'check' : 'x' }); if (res.ok) draw(); };
+          r.onload = () => { const res = FD.store.importJSON(String(r.result)); ui.toast(res.ok ? 'Backup imported' : res.error, { icon: res.ok ? 'check' : 'x' }); if (res.ok) draw(); };
           r.readAsText(file);
         });
       }
       ui.actions['data-export'] = () => { FD.u.download(FD.store.exportJSON(), 'copilot-feature-dle-backup.json', 'application/json'); ui.toast('Backup downloaded', { icon: 'check' }); };
       ui.actions['event-set'] = () => { const v = FD.joinEvent((($('#event-code', main) || {}).value || '').trim()); ui.toast(v ? `Joined event ${v}` : 'Back to device-only scores', { icon: 'check' }); draw(); };
-      ui.actions['reset-player'] = async () => { if (await ui.confirm('Reset this player?', `This clears ${FD.store.profile().name}\u2019s stats, streaks, badges and collection. Other players are untouched.`, 'Reset player', true)) { FD.store.resetProfile(); ui.toast('Player reset', { icon: 'check' }); draw(); } };
-      ui.actions['reset-all'] = async () => { if (await ui.confirm('Erase everything?', 'This removes every player, all stats, settings and community packs from this device. It can\u2019t be undone (unless you exported a backup).', 'Erase everything', true)) { FD.store.resetAll(); ui.toast('All data erased', { icon: 'check' }); ui.render(); } };
+      ui.actions['reset-player'] = async () => { if (await ui.confirm('Reset your progress?', `This clears ${FD.store.profile().name}\u2019s stats, streaks, badges and collection.`, 'Reset my progress', true)) { FD.store.resetProfile(); ui.toast('Progress reset', { icon: 'check' }); draw(); } };
+      ui.actions['reset-all'] = async () => { if (await ui.confirm('Erase everything?', 'This removes all your stats and settings from this device. It can\u2019t be undone (unless you exported a backup).', 'Erase everything', true)) { FD.store.resetAll(); ui.toast('All data erased', { icon: 'check' }); ui.render(); } };
       ui.actions['pwa-install'] = async () => { const d = FD.pwa.deferred; if (!d) return; d.prompt(); try { await d.userChoice; } catch (e) { /* ignore */ } FD.pwa.deferred = null; draw(); };
       draw();
     }

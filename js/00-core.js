@@ -73,16 +73,36 @@
 
   /* ---------- dates: "date keys" are local calendar days, YYYY-MM-DD ---------- */
   const pad2 = (n) => String(n).padStart(2, '0');
-  const dateKey = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const keyOf = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  /* tests and demos can pretend it is another day: ?ns=test&today=2026-11-17.
+     It only works together with ?ns=, which is a separate save slot, so a real player's progress can never be touched. */
+  const pretendToday = (() => {
+    try { const sp = new URLSearchParams(location.search), t = sp.get('today') || ''; return sp.get('ns') && /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : ''; } catch (e) { return ''; }
+  })();
+  const dateKey = (d) => (d ? keyOf(d) : pretendToday || keyOf(new Date()));
   const keyToDay = (k) => { const [y, m, d] = k.split('-').map(Number); return Math.floor(Date.UTC(y, m - 1, d) / 86400000); };
   const dayToKey = (n) => { const d = new Date(n * 86400000); return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`; };
   const addDays = (k, n) => dayToKey(keyToDay(k) + n);
   const weekdayOfKey = (k) => new Date(keyToDay(k) * 86400000).getUTCDay();
   const msToMidnight = (now = new Date()) => { const n = new Date(now); n.setHours(24, 0, 0, 0); return n - now; };
+  /* weekends (local Saturday and Sunday) have no Daily Challenge and never touch a streak */
+  const isWeekend = (k) => { const w = weekdayOfKey(k); return w === 0 || w === 6; };
+  const lastWeekday = (k) => { const w = weekdayOfKey(k); return w === 6 ? addDays(k, -1) : w === 0 ? addDays(k, -2) : k; };
+  const prevWeekday = (k) => lastWeekday(addDays(k, -1));
+  const nextWeekday = (k) => addDays(k, { 5: 3, 6: 2 }[weekdayOfKey(k)] || 1);
+  const keyToLocalMidnight = (k) => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d, 0, 0, 0, 0); };
+  /* time until the next Daily Challenge opens: tomorrow on a weekday before Friday, otherwise Monday */
+  const msToNextChallenge = (now = new Date()) => keyToLocalMidnight(nextWeekday(dateKey(now))) - now;
   const fmtClock = (ms) => {
     const s = Math.max(0, Math.round(ms / 1000));
     const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
     return h ? `${h}:${pad2(m)}:${pad2(ss)}` : `${m}:${pad2(ss)}`;
+  };
+  const fmtCountdown = (ms) => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    if (s < 86400) return fmtClock(ms);
+    const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+    return `${d}d ${h}h ${pad2(m)}m`;
   };
   const fmtSeconds = (ms) => (ms < 60000 ? `${Math.max(1, Math.round(ms / 1000))}s` : fmtClock(ms));
   const fmtDateLong = (k) => new Date(keyToDay(k) * 86400000).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
@@ -97,6 +117,10 @@
   const ordinal = (n) => { const s = ['th', 'st', 'nd', 'rd'], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   const reduceMotion = () => document.documentElement.dataset.motion === 'reduce';
+  /* A choice of several things (categories, features) is a list. Nothing, '' or 'all' means no limit, and a single value (a choice saved by an earlier
+     version) counts as a list of one. selHas asks: does this choice allow x? */
+  const selList = (v) => (Array.isArray(v) ? v : v == null ? [] : [v]).map(String).filter((x) => x && x !== 'all').filter((x, i, a) => a.indexOf(x) === i);
+  const selHas = (v, x) => { const l = selList(v); return !l.length || l.includes(x); };
 
   async function copyText(text) {
     try { await navigator.clipboard.writeText(text); return true; } catch (e) { /* fall through */ }
@@ -136,7 +160,7 @@
 
   FD.u = {
     esc, raw, html, flat, Safe, attrs, $, $$, mount, storage, seeded, hash, shuffle, pick,
-    pad2, dateKey, keyToDay, dayToKey, addDays, weekdayOfKey, msToMidnight, fmtClock, fmtSeconds, fmtDateLong, fmtDateShort,
-    clamp, uid, slug, debounce, plural, ordinal, sleep, reduceMotion, copyText, download, announce, emitter
+    pad2, dateKey, keyToDay, dayToKey, addDays, weekdayOfKey, msToMidnight, isWeekend, lastWeekday, prevWeekday, nextWeekday, msToNextChallenge, fmtClock, fmtCountdown, fmtSeconds, fmtDateLong, fmtDateShort,
+    clamp, uid, slug, debounce, plural, ordinal, sleep, reduceMotion, selList, selHas, copyText, download, announce, emitter
   };
 })();

@@ -1,8 +1,8 @@
-/* Copilot Feature-dle · the play screen (hint card, hint-o-meter, guess box with autocomplete, guess history, results) */
+/* Copilot Feature-dle · the play screen (hint card, hint-o-meter, Pip's extras, guess box with autocomplete, guess history, results) */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
-  const { html, raw, esc, flat, $, $$, announce, mount } = FD.u;
+  const { html, flat, $$, announce, mount } = FD.u;
   const ui = FD.ui;
 
   /* hint colours "warm up" as the hints get easier */
@@ -16,40 +16,45 @@
   };
 
   /**
-   * mount(container, game, opts) -> controller { destroy, update, pause, resume }
-   *   opts.mode            'daily' | 'free' | 'speed' | 'team'
+   * mount(container, game, opts) -> controller { destroy, update, suspend, wake, forceFinish }
+   *   opts.mode            'daily' | 'free' | 'pack' | 'hunt'  (the way it is played: it is what the play history and the stats call it)
    *   opts.title           eyebrow text
-   *   opts.number          daily number (for sharing)
    *   opts.dateKey         daily date key
+   *   opts.number          daily challenge number (shown in the answer block's heading line)
    *   opts.finished        stored summary for an already-finished daily
-   *   opts.compact         compact finish (speed/team): calls opts.onRoundEnd instead of showing the full result
-   *   opts.record          false = do not touch the player's profile (team battle)
-   *   opts.turn            () => ({ label, color }) for team battles
-   *   opts.onGuess/onFinish/onRoundEnd callbacks
-   *   opts.actions         buttons under the learning cards
-   *   opts.headExtra       extra html in the header (e.g. speed-round clock)
+   *   opts.onGuess/onFinish callbacks
+   *   opts.actions         buttons under the learning cards: an array, or (game, data) => array
+   *   opts.next            a button for the top of the answer block, so the next round of a game of rounds is one click away: { label, action, icon }, or (game, data) => that
+   *   opts.headExtra       extra html under the header (a game of rounds puts its round meter here)
+   *   opts.persistKey      keep the running game in storage under this key, so it can be picked up again (Daily Challenge, Packs)
+   *   opts.realtime        true = the clock is real elapsed time and never pauses when the player leaves (the Daily Challenge)
+   *
+   * Except for the Daily Challenge, the clock only runs while the game is on screen. Leaving it (another screen, another tab, closing the app)
+   * pauses it and saves the game; coming back carries on from the same second. The controller also offers suspend() / wake() for the modes
+   * that keep the game themselves. The Daily Challenge is the exception: its clock keeps running in real time, and the challenge still ends at midnight.
    */
   function mountPlay(container, game, opts = {}) {
     const cfg = FD.config;
-    const settings = () => FD.store.settings();
-    let destroyed = false, paused = false, lastShown = game.hintsShown, timerId = 0, lastTick = performance.now();
+    let destroyed = false, autoPaused = false, lastShown = game.hintsShown, timerId = 0, unhook = null;
     let sugIdx = -1, sugList = [];
 
     const isFinishedView = !!opts.finished;
     const f = game.f;
+    /* the stopwatch belongs to the Daily Challenge, where the time on the clock sets the Speed Bonus. Every other way to play keeps time quietly and shows none. */
+    const showClock = FD.scoring.speedApplies(opts.mode);
 
     container.innerHTML = flat(html`
-      <div class="play ${opts.compact ? 'play-compact' : ''}">
-        <header class="play-head">
-          <div class="play-title"><p class="eyebrow">${opts.title || 'Free play'}</p><h1 class="play-h1">${isFinishedView ? 'Today\u2019s mystery feature' : 'Which Copilot feature am I?'}</h1></div>
+      <div class="play">
+        <header class="play-head" id="play-head">
+          <div class="play-title"><p class="eyebrow">${opts.title || 'Free Play'}</p><h1 class="play-h1">Which Copilot feature am I?</h1></div>
           <div class="play-chips" id="play-chips"></div>
         </header>
-        ${opts.turn ? html`<div class="turn-banner" id="turn" role="status" aria-live="polite"></div>` : ''}
         ${opts.headExtra || ''}
+        <div class="result-host" id="result-host" tabindex="-1"></div>
         <div class="play-grid" id="play-grid">
           <div class="play-main">
             <section class="hint-card" id="hint-card" aria-label="Current hint"></section>
-            <section class="earlier" id="earlier" aria-label="Earlier hints"></section>
+            <section class="earlier" id="earlier" aria-label="Hints"></section>
             <form class="guess-form" id="guess-form" novalidate>
               <label class="label" for="guess-input" id="guess-label">Your guess</label>
               <div class="guess-row">
@@ -68,13 +73,13 @@
             </form>
             <section class="history" id="history" aria-labelledby="hist-h"></section>
           </div>
-          <aside class="play-side" aria-label="Progress and score">
+          <aside class="play-side" id="play-side" aria-label="Progress and extras">
             <section class="card meter-card" id="meter"></section>
+            <section class="card extras" id="extras" aria-labelledby="extras-h"></section>
             <section class="card score-panel" id="scorep"></section>
-            <section class="card extras" id="extras"></section>
           </aside>
         </div>
-        <div class="result-host" id="result-host" tabindex="-1"></div>
+        <div class="learn-host" id="learn-host"></div>
       </div>`);
 
     const q = (s) => container.querySelector(s);
@@ -83,15 +88,14 @@
     /* ---------- pieces ---------- */
     function chipsHtml() {
       const lvl = FD.hints.level(game.over ? 5 : game.hintsShown);
-      const timer = !settings().relaxed && !opts.hideTimer && !game.over ? html`<span class="chip timer-chip" title="Time (affects the speed bonus)">${FD.icon('timer', { size: 16 })}<span id="play-timer">${FD.u.fmtClock(game.activeMs)}</span></span>` : '';
+      const timer = showClock && !game.over ? html`<span class="chip timer-chip" title="Time on the clock (it sets your Speed Bonus, and it keeps ticking if you leave the game)">${FD.icon('timer', { size: 16 })}<span class="sr-only">Time on the clock: </span><span id="play-timer">${FD.u.fmtClock(game.activeMs)}</span></span>` : '';
       return html`${ui.diffChip(f.difficulty)}${lvl.category ? ui.catChip(f.category) : html`<span class="chip chip-locked">${FD.icon('lock', { size: 14 })}Category at hint 3</span>`}${timer}`;
     }
     function hintCardHtml(isNew) {
       const n = game.hintsShown, c = hintColor(n);
-      const pts = FD.scoring.base(n);
       return html`<div class="hint-pip">${FD.pip(n === 1 ? 'hello' : 'think', { size: 96 })}</div>
         <div class="hint-bubble c-${c} ${isNew ? 'is-new' : ''}">
-          <p class="hint-label"><span class="hint-n">Hint ${n} of ${cfg.maxAttempts}</span><span class="hint-pts">${FD.icon('star', { size: 14 })}worth up to ${pts}</span></p>
+          <p class="hint-label"><span class="hint-n">Hint ${n} of ${cfg.maxAttempts}</span></p>
           <p class="hint-text">${game.hints[n - 1]}</p>
         </div>`;
     }
@@ -99,6 +103,9 @@
       const n = game.hintsShown;
       if (n < 2) return '';
       return html`<h2 class="mini-h">Earlier hints</h2><ol class="earlier-list">${game.hints.slice(0, n - 1).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="sr-only">Hint ${i + 1}: </span><span class="e-t">${h}</span></li>`).reverse()}</ol>`;
+    }
+    function allHintsHtml() {
+      return html`<h2 class="mini-h">The hints</h2><ol class="earlier-list">${game.hints.slice(0, game.won ? game.hintsUsed : cfg.maxAttempts).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="sr-only">Hint ${i + 1}: </span><span class="e-t">${h}</span></li>`)}</ol>`;
     }
     function meterHtml() {
       const n = game.hintsShown, over = game.over;
@@ -109,27 +116,32 @@
         })}</ol>
         <p class="attempts"><span class="dotrow" aria-hidden="true">${Array.from({ length: cfg.maxAttempts }, (_, i) => html`<i class="${i < game.guesses.length ? 'used' : ''}"></i>`)}</span>${over ? html`<strong>${game.won ? `Solved on guess ${game.guesses.length}` : 'Answer revealed'}</strong>` : html`<strong>${game.attemptsLeft}</strong> ${game.attemptsLeft === 1 ? 'guess' : 'guesses'} left`}</p>`;
     }
+    /* the Speed Bonus line only exists on the Daily Challenge: every other way to play scores the hint alone */
     function scoreHtml() {
-      const relaxed = settings().relaxed;
-      const streakBefore = opts.mode === 'team' ? 0 : FD.store.profile().stats.winStreak;
-      const p = FD.scoring.potential(game.hintsShown, game.activeMs, streakBefore, relaxed);
+      const daily = FD.scoring.speedApplies(opts.mode), p = FD.scoring.potential(game.hintsShown, game.activeMs, opts.mode);
       let speedNote = '';
-      if (!relaxed) { const t = cfg.speedBonus.find((s) => game.activeMs <= s.maxMs); if (t) speedNote = html`<small>${FD.u.fmtSeconds(Math.max(1000, t.maxMs - game.activeMs))} left for this bonus</small>`; }
+      const t = daily ? cfg.speedBonus.find((s) => game.activeMs <= s.maxMs) : null;
+      if (t) speedNote = html`<small>${FD.u.fmtSeconds(Math.max(1000, t.maxMs - game.activeMs))} left for this bonus</small>`;
       return html`<h2 class="mini-h">Score</h2>
         <p class="score-now"><span class="score-num" id="score-num">${p.total}</span><small>points if you nail it now</small></p>
         <ul class="score-lines">
           <li><span>Hint ${game.hintsShown} of ${cfg.maxAttempts}</span><b>${p.base}</b></li>
-          ${relaxed ? '' : html`<li><span>Speed bonus</span><b id="score-speed">+${p.speed}</b>${speedNote}</li>`}
-          <li><span>Streak bonus</span><b>\u00D7${p.multiplier.toFixed(1)}</b>${p.multiplier > 1 ? html`<small>${Math.round((p.multiplier - 1) * 10)} in a row \uD83D\uDD25</small>` : ''}</li>
+          ${daily ? html`<li><span>Speed bonus</span><b id="score-speed">+${p.speed}</b>${speedNote}</li>` : ''}
         </ul>`;
     }
-    function extrasHtml() {
+    /* Pip's extras: three unlocks (category, name shape, first letters), each with a clear locked state.
+       The first letters are shown on the name-shape tiles, so once unlocked their row is just a tick and its label. */
+    function extrasHtml(isNew) {
       const n = game.over ? 5 : game.hintsShown, lvl = FD.hints.level(n);
-      const nameState = lvl.first ? 'First letters revealed' : lvl.lengths ? 'Word lengths revealed' : lvl.count ? 'Word count revealed' : '';
-      return html`<h2 class="mini-h">Pip\u2019s extras</h2>
+      const unlocked = [lvl.category, lvl.shape, lvl.first].filter(Boolean).length;
+      const row = (open, at, label, verb, body) => html`<li class="x-row ${open ? 'is-open' : 'is-locked'} ${open && isNew && !game.over && n === at ? 'is-new' : ''}">
+        <span class="x-label">${FD.icon(open ? 'check' : 'lock', { size: 16 })}${label}${open && isNew && !game.over && n === at ? html`<span class="x-new">New!</span>` : ''}</span>
+        ${open ? body : html`<small class="x-lock">${label} ${verb} at hint ${at}</small>`}</li>`;
+      return html`<h2 class="mini-h extras-h" id="extras-h">${FD.icon('sparkle', { size: 18 })}Pip\u2019s extras <span class="x-count">${unlocked} of 3 unlocked</span></h2>
         <ul class="extras-list">
-          <li><span class="x-label">${FD.icon(lvl.category ? 'check' : 'lock', { size: 16 })}Category</span>${lvl.category ? ui.catChip(f.category) : html`<small>unlocks at hint 3</small>`}</li>
-          <li class="x-name"><span class="x-label">${FD.icon(lvl.count ? 'check' : 'lock', { size: 16 })}Name shape</span>${lvl.count ? html`<div>${ui.nameTiles(f.name, lvl, false)}<small>${nameState}</small></div>` : html`<small>unlocks at hint 3</small>`}</li>
+          ${row(lvl.category, 3, 'Category', 'unlocks', ui.catChip(f.category))}
+          ${row(lvl.shape, 4, 'Name shape', 'unlocks', html`<div>${ui.nameTiles(f.name, lvl, false)}<small>One tile for every letter in each word</small></div>`)}
+          ${row(lvl.first, 5, 'First letters', 'unlock', '')}
         </ul>`;
     }
     function historyHtml() {
@@ -137,44 +149,44 @@
         ${game.guesses.length ? html`<ol class="guess-list">${game.guesses.map((g, i) => g.k === 's'
           ? html`<li class="guess is-skip"><span class="g-n">${i + 1}</span><span class="g-name">Nudge used</span><span class="g-chips">${ui.tempChip('skip')}<span class="chip">Next hint revealed</span></span></li>`
           : html`<li class="guess is-${g.temp}"><span class="g-n">${i + 1}</span><span class="g-name">${g.name}</span><span class="g-chips">${ui.tempChip(g.temp)}
-              ${g.temp === 'correct' ? '' : html`<span class="chip">${FD.icon(g.sameCat ? 'check' : 'x', { size: 14 })}${g.sameCat ? 'Same category' : 'Different category'}</span>
-              <span class="chip">${FD.icon(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', { size: 14 })}${g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same level'}</span>`}</span></li>`)}</ol>`
+              ${g.temp === 'correct' ? '' : html`${ui.defChip(g.sameCat ? 'check' : 'x', g.sameCat ? 'Same category' : 'Different category', 'category')}
+              ${ui.defChip(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same level', 'level')}`}</span></li>`)}</ol>`
           : html`<p class="muted empty">No guesses yet. Each wrong guess gets a hot or cold clue, then unlocks the next hint.</p>`}`;
     }
-    function turnHtml() {
-      if (!opts.turn) return;
-      const t = opts.turn();
-      const el = q('#turn');
-      if (el) el.hidden = game.over;
-      if (el && t && !game.over) { el.className = `turn-banner c-${t.color}`; el.innerHTML = flat(html`${FD.icon('users', { size: 20 })}<strong>${t.label}</strong>`); }
-    }
-
     function drawAll(isNew) {
+      const over = game.over;
       mount(q('#play-chips'), chipsHtml());
-      if (!isFinishedView) {
+      if (!over) {
         mount(q('#hint-card'), hintCardHtml(isNew));
         mount(q('#earlier'), earlierHtml());
         mount(q('#meter'), meterHtml());
+        mount(q('#extras'), extrasHtml(isNew));
         mount(q('#scorep'), scoreHtml());
-        mount(q('#extras'), extrasHtml());
+      } else {
+        /* finished, solved or not: the hint-o-meter and Pip's extras have done their job, so they are put away and the hints and guesses are all that is left */
+        mount(q('#earlier'), allHintsHtml());
       }
       mount(q('#history'), historyHtml());
-      turnHtml();
-      form.hidden = game.over || isFinishedView;
-      q('#play-grid').classList.toggle('is-over', game.over || isFinishedView);
-      if (game.over || isFinishedView) {
-        q('#hint-card').hidden = true; q('#earlier').hidden = true;
-        mount(q('#earlier'), html`<h2 class="mini-h">The hints</h2><ol class="earlier-list">${game.hints.slice(0, game.won ? game.hintsUsed : cfg.maxAttempts).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="e-t">${h}</span></li>`)}</ol>`);
-        q('#earlier').hidden = false;
-        q('#scorep').hidden = true;
-      }
+      form.hidden = over;
+      q('#hint-card').hidden = over;
+      q('#scorep').hidden = over;
+      q('#meter').hidden = over;
+      q('#extras').hidden = over;
+      q('#play-side').hidden = over;
+      q('#play-head').hidden = over; /* the answer block takes over the top of the page */
+      const grid = q('#play-grid');
+      grid.classList.toggle('is-over', over);
+      grid.classList.toggle('is-solved', over);
+      /* post-game, hint N and guess N share one row so the two lists always line up in height */
+      if (over) grid.style.setProperty('--recap-rows', String(1 + Math.max(game.won ? game.hintsUsed : cfg.maxAttempts, game.guesses.length)));
+      else grid.style.removeProperty('--recap-rows');
     }
 
     /* ---------- suggestions (ARIA combobox) ---------- */
     function closeList() { list.hidden = true; input.setAttribute('aria-expanded', 'false'); input.removeAttribute('aria-activedescendant'); sugIdx = -1; }
     function openList() {
       const v = input.value.trim();
-      sugList = v.length ? FD.match.suggest(v, FD.lib.features, 6, game.guessedIds()) : [];
+      sugList = v.length ? FD.match.suggest(v, FD.lib.features, 5, game.guessedIds()) : [];
       if (!sugList.length) { closeList(); return; }
       list.innerHTML = flat(sugList.map((s, i) => html`<li role="option" id="sg-${i}" data-i="${i}" aria-selected="false"><span class="sg-name">${s.name}</span><span class="sg-meta">${s.category}</span></li>`));
       list.hidden = false; input.setAttribute('aria-expanded', 'true'); sugIdx = -1;
@@ -207,7 +219,7 @@
 
     /* ---------- submit ---------- */
     function submit() {
-      if (game.over || paused) return;
+      if (game.over) return;
       const res = game.submit(input.value);
       if (!res.ok) {
         if (res.reason === 'empty') say('Type a feature name first.', 'warn');
@@ -224,12 +236,12 @@
       say(`${TEMP_MSG[res.guess.temp](res.guess)} ${res.guess.dir === 'up' ? 'The answer is a bit harder.' : res.guess.dir === 'down' ? 'The answer is a bit easier.' : ''}`.trim(), res.guess.temp);
       afterStep();
     }
-    function afterStep() {
+    function afterStep(focus = true) {
       const isNew = game.hintsShown !== lastShown; lastShown = game.hintsShown;
       drawAll(isNew);
       if (isNew) { FD.fx.play('hint'); announce(`Hint ${game.hintsShown}: ${game.hints[game.hintsShown - 1]}. ${game.attemptsLeft} guesses left.`); }
       if (opts.onStep) opts.onStep(game);
-      input.focus();
+      if (focus) input.focus();
     }
     function persist() { if (opts.persistKey) FD.store.setActive(opts.persistKey, game.serialize()); }
 
@@ -247,48 +259,47 @@
       }
     });
 
-    /* ---------- timer ---------- */
+    /* ---------- the clock: it runs while the game is on screen (the Daily Challenge's runs in real time, wherever you are, and is the only one shown) ---------- */
     function tick() {
-      const now = performance.now(), dt = Math.min(1000, now - lastTick); lastTick = now;
-      if (destroyed || game.over || paused || document.visibilityState !== 'visible') return;
-      game.activeMs += dt;
+      if (destroyed || game.over || game.pausedAt) return;
+      if (opts.mode === 'daily' && opts.dateKey && FD.u.dateKey() !== opts.dateKey) { game.expire(); persist(); finish(); return; }
+      if (!showClock) return;
       const t = q('#play-timer'); if (t) t.textContent = FD.u.fmtClock(game.activeMs);
-      const sn = q('#score-num');
-      if (sn) { mount(q('#scorep'), scoreHtml()); }
-      if (opts.mode === 'daily' && Math.round(game.activeMs / 1000) % 5 === 0) persist();
+      if (q('#score-num')) mount(q('#scorep'), scoreHtml());
     }
     if (!isFinishedView && !game.over) timerId = setInterval(tick, 1000);
 
-    /* ---------- finish ---------- */
-    function summaryFor(out) {
-      const rk = FD.scoring.rank(FD.store.profile().xp);
-      return {
-        mode: opts.mode, number: opts.number, won: game.won, hintsUsed: game.hintsUsed, score: out && out.breakdown ? out.breakdown.total : (opts.finished && opts.finished.score) || 0,
-        grid: game.grid, streak: FD.store.dailyStreak(), rank: rk.rank.name, difficulty: f.difficulty
-      };
+    /* leaving the game (or hiding the page) stops its clock and saves it; wake() undoes only a pause made here, never the player's own Pause.
+       A real-time game (the Daily Challenge) is only saved: its clock carries on. */
+    function suspend() {
+      if (destroyed || game.over || isFinishedView) return;
+      if (!opts.realtime && !game.pausedAt) { game.pause(); autoPaused = true; }
+      persist();
     }
+    function wake() {
+      if (destroyed || game.over || !autoPaused) return;
+      autoPaused = false; game.resume(); persist(); tick();
+    }
+
+    /* ---------- finish ---------- */
     function finish() {
       if (destroyed) return;
       clearInterval(timerId);
-      const data = { feature: f, won: game.won, hintsUsed: game.hintsUsed, timeMs: Math.round(game.activeMs), grid: game.grid, guesses: game.guesses, mode: opts.mode, number: opts.number, dateKey: opts.dateKey, challenge: opts.challenge };
-      let out = null;
-      if (opts.record !== false) {
-        out = FD.store.recordGame({ mode: opts.mode, dateKey: opts.dateKey, feature: f, won: game.won, hintsUsed: game.hintsUsed, timeMs: data.timeMs, grid: game.grid, guesses: game.guesses, typo: game.typo });
-        Object.assign(data, out);
-      }
+      const data = { feature: f, won: game.won, expired: game.expired, hintsUsed: game.hintsUsed, timeMs: Math.round(game.activeMs), grid: game.grid, guesses: game.guesses, mode: opts.mode, dateKey: opts.dateKey, number: opts.number };
+      const out = FD.store.recordGame({ mode: opts.mode, dateKey: opts.dateKey, feature: f, won: game.won, expired: game.expired, hintsUsed: game.hintsUsed, timeMs: data.timeMs, grid: game.grid, guesses: game.guesses, typo: game.typo });
+      Object.assign(data, out);
       if (opts.persistKey && opts.mode !== 'daily') FD.store.clearActive(opts.persistKey);
       FD.fx.play(game.won ? 'win' : 'lose'); FD.fx.haptic(game.won ? [30, 40, 60] : 120);
       if (game.won) FD.fx.confetti({ count: game.hintsUsed <= 2 ? 220 : 150 });
-      announce(game.won ? `Correct! The answer was ${f.name}.` : `Out of guesses. The answer was ${f.name}.`);
+      announce(game.won ? `Correct! The answer was ${f.name}.` : game.expired ? `The day ended. The answer was ${f.name}.` : `Out of guesses. The answer was ${f.name}.`);
       drawAll(false);
       if (opts.onFinish) opts.onFinish(game, data);
-      if (opts.compact) { if (opts.onRoundEnd) opts.onRoundEnd(game, data); return; }
       showResult(data, out);
     }
+    function actionsFor(data) { return typeof opts.actions === 'function' ? opts.actions(game, data) : opts.actions; }
+    const nextFor = (data) => (typeof opts.next === 'function' ? opts.next(game, data) : opts.next) || null;
     function showResult(data, out) {
-      data.share = summaryFor(out);
-      FD.share.prepare(data.share);
-      FD.result.render(q('#result-host'), data, { actions: opts.actions });
+      FD.result.render(q('#result-host'), data, { actions: actionsFor(data), learnHost: q('#learn-host'), eyebrow: opts.title, next: nextFor(data) });
       if (out) ui.celebrate(out);
       const host = q('#result-host');
       setTimeout(() => { host.scrollIntoView({ behavior: FD.u.reduceMotion() ? 'auto' : 'smooth', block: 'start' }); host.focus({ preventScroll: true }); }, 450);
@@ -298,27 +309,40 @@
     if (isFinishedView) {
       drawAll(false);
       const r = opts.finished;
-      const rk = FD.scoring.rank(FD.store.profile().xp);
-      const data = { feature: f, won: r.won, hintsUsed: r.hints, timeMs: r.timeMs, grid: r.grid, guesses: game.guesses, mode: opts.mode, number: opts.number, dateKey: opts.dateKey, breakdown: r.breakdown || null, xp: r.xp || 0, bonusXp: r.bonusXp || [], firstTime: false, dailyStreak: FD.store.dailyStreak() };
-      data.share = { mode: opts.mode, number: opts.number, won: r.won, hintsUsed: r.hints, score: r.score || 0, grid: r.grid || [], streak: FD.store.dailyStreak(), rank: rk.rank.name, difficulty: f.difficulty };
-      FD.share.prepare(data.share);
-      FD.result.render(q('#result-host'), data, { actions: opts.actions });
+      const data = { feature: f, won: r.won, expired: !!r.expired, hintsUsed: r.hints, timeMs: r.timeMs, grid: r.grid, guesses: game.guesses, mode: opts.mode, dateKey: opts.dateKey, number: opts.number, breakdown: r.breakdown || null, xp: r.xp || 0, bonusXp: r.bonusXp || [], firstTime: false, dailyStreak: FD.store.dailyStreak(), revisit: true };
+      FD.result.render(q('#result-host'), data, { actions: actionsFor(data), learnHost: q('#learn-host'), eyebrow: opts.title });
     } else if (game.over) {
       finish();
     } else {
+      /* picking a game up again starts its clock from where it stopped: the time spent away is never counted.
+         (A real-time game, the Daily Challenge, has no pause to undo, so this does nothing for it.) */
+      if (!opts.realtime) game.resume();
       drawAll(false);
+      persist(); /* the game is saved straight away, so leaving can never lose it or reset its clock */
+      unhook = FD.play.track({ suspend, wake });
+      if (!opts.realtime && document.visibilityState === 'hidden') suspend(); /* opened in a background tab: the clock starts when the tab is shown */
       if (opts.autofocus !== false) setTimeout(() => input.focus({ preventScroll: true }), 50);
     }
 
     return {
       game,
       update: () => drawAll(false),
-      pause() { paused = true; container.classList.add('is-paused'); },
-      resume() { paused = false; lastTick = performance.now(); container.classList.remove('is-paused'); input.focus(); },
-      destroy() { destroyed = true; clearInterval(timerId); },
+      suspend,
+      wake,
+      destroy() { suspend(); destroyed = true; clearInterval(timerId); if (unhook) { unhook(); unhook = null; } },
       forceFinish() { if (!game.over) { game.giveUp(); finish(); } }
     };
   }
 
-  FD.play = { mount: mountPlay, hintColor };
+  /* Everything that keeps a game of its own registers here. Hiding the page or closing the app pauses their clocks and saves the games,
+     and showing the page again carries on. */
+  const tracked = new Set();
+  const track = (o) => { tracked.add(o); return () => tracked.delete(o); };
+  const away = () => { Array.from(tracked).forEach((o) => { try { o.suspend(); } catch (e) { console.error(e); } }); FD.store.saveNow(); };
+  const back = () => Array.from(tracked).forEach((o) => { try { o.wake(); } catch (e) { console.error(e); } });
+  document.addEventListener('visibilitychange', () => (document.visibilityState === 'hidden' ? away() : back()));
+  window.addEventListener('pagehide', away);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) back(); });
+
+  FD.play = { mount: mountPlay, hintColor, track };
 })();

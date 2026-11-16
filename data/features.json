@@ -7,52 +7,60 @@
       "name": "Copilot Chat",
       "color": "blue",
       "icon": "chat",
-      "blurb": "Chatting, creating and finding things with Copilot."
+      "blurb": "The everyday Copilot conversation: ask questions, draft and create things, search across your work and keep good ideas in Pages and Notebooks."
     },
     {
       "name": "Microsoft 365 Apps",
       "color": "red",
       "icon": "apps",
-      "blurb": "Copilot inside Word, Excel, PowerPoint, Outlook and friends."
+      "blurb": "Copilot built into the apps you already use, like Word, Excel, PowerPoint, Outlook, OneNote, OneDrive and SharePoint."
     },
     {
       "name": "Teams & Meetings",
       "color": "purple",
       "icon": "video",
-      "blurb": "Calls, meetings, recaps and chat in Teams."
+      "blurb": "Copilot in Teams: meeting recaps and notes, calls, chat, live translation and helpers that keep every conversation moving."
     },
     {
       "name": "Agents",
       "color": "orange",
       "icon": "agent",
-      "blurb": "Copilot's specialist helpers."
+      "blurb": "Ready-made specialist helpers, like Researcher and Analyst, that take on a whole task for you instead of just answering a question."
     },
     {
       "name": "Studio & Extensibility",
       "color": "navy",
       "icon": "code",
-      "blurb": "Building, connecting and extending your own agents."
+      "blurb": "The maker side: build, connect and extend your own agents with Copilot Studio, connectors, protocols and developer tools."
     },
     {
       "name": "Security & Admin",
       "color": "green",
       "icon": "shield",
-      "blurb": "Keeping Copilot safe, governed and measured."
+      "blurb": "How IT keeps Copilot safe and well run: permissions, data protection, governance, reporting and managing agents."
     },
     {
       "name": "Adoption & Learning",
       "color": "yellow",
       "icon": "graduation",
-      "blurb": "Helping people get the most out of Copilot."
+      "blurb": "Programs, kits and release waves that help people learn Copilot and make it stick across a team."
     },
     {
       "name": "Devices & Mobile",
       "color": "pink",
       "icon": "mobile",
-      "blurb": "Copilot on phones, PCs and browsers."
+      "blurb": "Copilot beyond the desktop apps: on your phone, Windows PC and Edge browser, with voice and vision."
     }
   ],
   "packs": [
+    {
+      "id": "copilot-essentials",
+      "name": "Copilot Essentials",
+      "description": "Twelve features to know first, from Copilot Chat and Pages to the Microsoft 365 apps and Teams meetings.",
+      "kind": "official",
+      "color": "yellow",
+      "icon": "star"
+    },
     {
       "id": "core",
       "name": "Core library",
@@ -89,6 +97,7 @@
   "themes": [
     {
       "month": 1,
+      "year": 2026,
       "id": "new-year-prompts",
       "title": "New year, new prompts",
       "blurb": "Start the year with sharper prompts. Save, reuse and share the ones that work.",
@@ -97,6 +106,7 @@
     },
     {
       "month": 2,
+      "year": 2026,
       "id": "meetings-that-matter",
       "title": "Meetings that matter",
       "blurb": "Recaps, notes and live help so every meeting ends with clear next steps.",
@@ -105,6 +115,7 @@
     },
     {
       "month": 3,
+      "year": 2026,
       "id": "data-day",
       "title": "Data day",
       "blurb": "From messy spreadsheets to clear stories with Copilot's number-crunching features.",
@@ -113,6 +124,7 @@
     },
     {
       "month": 4,
+      "year": 2026,
       "id": "agent-season",
       "title": "Agent season",
       "blurb": "Meet the specialist helpers that research, analyse and tackle tasks for you.",
@@ -121,6 +133,7 @@
     },
     {
       "month": 5,
+      "year": 2026,
       "id": "build-season",
       "title": "Build season",
       "blurb": "Dive into the maker and developer side: studio, connectors, protocols and more.",
@@ -129,6 +142,7 @@
     },
     {
       "month": 6,
+      "year": 2026,
       "id": "inbox-zero",
       "title": "Inbox zero",
       "blurb": "Tame the inbox with summaries, drafting help and smarter prioritising.",
@@ -137,6 +151,7 @@
     },
     {
       "month": 7,
+      "year": 2026,
       "id": "collaboration-summer",
       "title": "Collaboration summer",
       "blurb": "Co-create out in the open with Pages, Loop, Whiteboard and friends.",
@@ -145,6 +160,7 @@
     },
     {
       "month": 8,
+      "year": 2026,
       "id": "back-to-learning",
       "title": "Back to learning",
       "blurb": "Training, adoption and learning resources that help Copilot stick.",
@@ -153,6 +169,7 @@
     },
     {
       "month": 9,
+      "year": 2026,
       "id": "wave-riders",
       "title": "Wave riders",
       "blurb": "Ride the release waves, from Wave 2 to Wave 3 and beyond.",
@@ -161,6 +178,7 @@
     },
     {
       "month": 10,
+      "year": 2026,
       "id": "secure-and-sound",
       "title": "Secure & sound",
       "blurb": "Privacy, permissions and governance, because trust is the foundation of every good Copilot rollout.",
@@ -169,6 +187,7 @@
     },
     {
       "month": 11,
+      "year": 2026,
       "id": "everyday-automation",
       "title": "Everyday automation",
       "blurb": "Let Copilot take care of the repetitive stuff so you can get on with the interesting bit.",
@@ -177,6 +196,7 @@
     },
     {
       "month": 12,
+      "year": 2026,
       "id": "greatest-hits",
       "title": "Greatest hits",
       "blurb": "A friendly refresher of the Copilot essentials everyone should know.",
@@ -184,9 +204,6 @@
       "color": "green"
     }
   ],
-  "schedule": {
-    "2026-10-23": "copilot-pages"
-  },
   "features": [
     {
       "id": "interpreter",
@@ -210,20 +227,6 @@
       ],
       "description": "A Teams agent that interprets what people say in real time, so everyone in a meeting or call can speak and listen in the language they choose. It can even use a simulated version of your own voice.",
       "why": "Language stops being a barrier to joining the conversation, so global teams can meet live without waiting for translated notes or squinting at text captions.",
-      "useCases": [
-        {
-          "title": "Multilingual project call",
-          "text": "A Japanese engineer and a Brazilian project manager each speak and listen in their own language during the weekly project meeting."
-        },
-        {
-          "title": "Supplier negotiation",
-          "text": "A procurement lead in Sydney talks with a German supplier in a one-to-one Teams call, each hearing the other interpreted."
-        },
-        {
-          "title": "Regional clinic huddle",
-          "text": "A health network's regional team mixes Spanish and English speakers in one meeting, with each person listening in their preferred language."
-        }
-      ],
       "prompt": "I run a weekly project meeting with colleagues who speak English, Japanese and Portuguese. Explain how to turn on Interpreter in Teams and how each person sets the language they speak and the language they want to hear.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/interpreter-agent-teams",
       "learnLabel": "Microsoft Learn: Interpreter agent in Teams",
@@ -252,20 +255,6 @@
       ],
       "description": "The central hub in Microsoft Copilot where people discover and add agents from Microsoft, partners and their own organisation. Admins decide which agents are approved, blocked or removed.",
       "why": "Instead of helpful agents being scattered across links and emails, there's one governed place to find them, so good ones get used and risky ones can be controlled.",
-      "useCases": [
-        {
-          "title": "Find a partner agent",
-          "text": "A project lead browses the store and adds a partner-built agent that works with their team's planning tool."
-        },
-        {
-          "title": "Approve a team's agent",
-          "text": "An admin reviews an agent a maker submitted from Copilot Studio and publishes it so colleagues can find it."
-        },
-        {
-          "title": "Share company know-how",
-          "text": "An HR team's policy agent appears in the Built by your org collection, so new starters can find it themselves."
-        }
-      ],
       "prompt": "I'm new to agents. Show me which agents I can add from the Agent Store for research, data analysis and meeting notes, and explain what each one does.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-agent-store",
       "learnLabel": "Microsoft Learn: Agent Store in Microsoft Copilot",
@@ -293,20 +282,6 @@
       ],
       "description": "A lightweight, chat-driven tool inside Microsoft Copilot for creating your own agents. Describe the agent in plain language, add knowledge, test it, then share or publish it.",
       "why": "Anyone can turn a repeatable question-and-answer job into a shared helper without waiting for a developer, which puts automation in the hands of the people who know the work.",
-      "useCases": [
-        {
-          "title": "Policy Q&A agent",
-          "text": "HR builds an agent grounded in the leave policy so staff can ask questions instead of emailing the team."
-        },
-        {
-          "title": "Project digest",
-          "text": "A project lead builds an agent over the team's SharePoint site and Teams chats for quick status updates."
-        },
-        {
-          "title": "Onboarding buddy",
-          "text": "A team leader creates an agent from the onboarding handbook so new starters can ask how-do-I questions."
-        }
-      ],
       "prompt": "Create an agent called Leave Buddy that answers staff questions about our leave policy. Use the HR policy document I've uploaded as its only source and keep answers short and friendly.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/agent-builder",
       "learnLabel": "Microsoft Learn: Agent Builder",
@@ -329,20 +304,6 @@
       ],
       "description": "A graphical, low-code studio for building and managing AI-powered agents and workflows. Makers connect knowledge and tools, then publish to channels like Teams, Microsoft Copilot, websites and mobile apps.",
       "why": "Departments and citizen makers can automate real work and customer conversations, with the governance, analytics and testing a business needs.",
-      "useCases": [
-        {
-          "title": "Customer service agent",
-          "text": "A retailer builds an agent that answers order questions on its website and hands tricky cases to a human."
-        },
-        {
-          "title": "IT helpdesk agent",
-          "text": "An IT team publishes an agent in Teams that guides staff through password resets and raises tickets."
-        },
-        {
-          "title": "Expense approvals",
-          "text": "A finance team connects an agent to approval workflows so staff can submit and track expenses by chat."
-        }
-      ],
       "prompt": "I'm planning an agent in Copilot Studio that answers staff questions about travel policy and raises an approval request. List the knowledge sources, tools and test questions I should set up first.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/fundamentals-what-is-copilot-studio",
       "learnLabel": "Microsoft Learn: What is Copilot Studio?",
@@ -369,20 +330,6 @@
       ],
       "description": "Agents defined by configuration rather than custom code: you declare their purpose, instructions, knowledge and capabilities, and Microsoft 365 Copilot's own orchestrator and models do the rest.",
       "why": "You get tailored, governed assistants that feel native in Copilot, without building or hosting your own AI stack.",
-      "useCases": [
-        {
-          "title": "Sales playbook coach",
-          "text": "A sales team publishes an agent that answers questions from its playbook and product sheets, grounded in a SharePoint library."
-        },
-        {
-          "title": "Compliance checker",
-          "text": "A risk team configures an agent that answers policy questions with citations from approved documents only."
-        },
-        {
-          "title": "Engineering onboarding",
-          "text": "A software team ships an agent that knows its architecture docs and coding standards."
-        }
-      ],
       "prompt": "I'm a developer. Outline the parts of a declarative agent manifest for a sales-playbook assistant: name, instructions, knowledge sources and capabilities, plus how I'd test it before publishing.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/overview-declarative-agent",
       "learnLabel": "Microsoft Learn: Declarative agents",
@@ -406,20 +353,6 @@
       ],
       "description": "Agents that bring their own orchestration, AI models and data integrations into Microsoft 365 Copilot, Teams and other channels, instead of using Microsoft 365 Copilot's orchestrator.",
       "why": "When a business needs its own models, workflows or integrations, it can still deliver the result inside Copilot, where people already work.",
-      "useCases": [
-        {
-          "title": "Proprietary model",
-          "text": "A law firm surfaces its own tuned legal-research model inside Copilot as an agent."
-        },
-        {
-          "title": "Proactive reminders",
-          "text": "A recruiting team's agent nudges interviewers in Teams to enter their feedback."
-        },
-        {
-          "title": "Foundry agent in Copilot",
-          "text": "An engineering team publishes an existing Microsoft Foundry agent so staff can use it from Copilot."
-        }
-      ],
       "prompt": "I'm an architect. Compare when to build a declarative agent versus a custom engine agent for a claims-triage assistant, covering orchestration, models, hosting and licensing questions.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/overview-custom-engine-agent",
       "learnLabel": "Microsoft Learn: Custom engine agents",
@@ -448,20 +381,6 @@
       ],
       "description": "Connectors that bring external data from SaaS apps, file shares, databases and on-premises systems into Microsoft Copilot and Microsoft Search. They either index content into Microsoft Graph or fetch it live, while respecting source permissions.",
       "why": "Copilot's answers are only as good as the knowledge it can reach. Connectors bring the rest of the business into the conversation, safely.",
-      "useCases": [
-        {
-          "title": "Wiki answers",
-          "text": "A support team connects Confluence so Copilot can answer questions from the engineering wiki."
-        },
-        {
-          "title": "Sales context",
-          "text": "A sales team connects its CRM so Copilot can draw on account notes when preparing for a meeting."
-        },
-        {
-          "title": "File-share search",
-          "text": "An IT team indexes a legacy network file share so staff can find old policies from Copilot."
-        }
-      ],
       "prompt": "We store our product documentation in Confluence. Explain how Copilot connectors could make that knowledge available in Copilot, including who needs to configure what and how permissions are respected.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/connectors/overview",
       "learnLabel": "Microsoft Learn: Copilot connectors",
@@ -485,20 +404,6 @@
       ],
       "description": "Deterministic automations built in Copilot Studio from a trigger and actions, optionally with AI steps, human approvals and connectors. Agents can call them as tools.",
       "why": "Some work needs the same result every time. Agent flows give agents a reliable way to handle those steps.",
-      "useCases": [
-        {
-          "title": "Invoice approval",
-          "text": "Finance extracts data from an invoice, validates it against records and routes it for approval."
-        },
-        {
-          "title": "New-starter setup",
-          "text": "HR triggers a flow that creates accounts and notifies the manager, called by an onboarding agent."
-        },
-        {
-          "title": "Weekly report",
-          "text": "An operations team runs a flow each Monday to compile figures and email a summary."
-        }
-      ],
       "prompt": "Help me design an agent flow in Copilot Studio that takes a submitted invoice, extracts the key fields, checks them against our supplier list and sends an approval request. List the trigger and each action.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/flows-overview",
       "learnLabel": "Microsoft Learn: Agent flows",
@@ -522,20 +427,6 @@
       ],
       "description": "A Copilot Studio tool that lets an agent operate websites and desktop apps on a Windows machine by seeing the screen and using a virtual mouse and keyboard, following instructions given in plain language.",
       "why": "Plenty of business systems have no API. This lets agents automate those screens too, without brittle scripts that break when the interface changes.",
-      "useCases": [
-        {
-          "title": "Legacy data entry",
-          "text": "Finance has an agent copy invoice details into an older system that has no integration."
-        },
-        {
-          "title": "Portal checks",
-          "text": "An operations agent logs into a supplier portal to download daily order status."
-        },
-        {
-          "title": "Report grab",
-          "text": "An analyst's agent opens a desktop app, exports a report and saves it to SharePoint."
-        }
-      ],
       "prompt": "Plan how an agent that can use a computer could enter approved purchase orders into our legacy accounting app. Which steps could it handle, and what should a person review?",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/computer-use",
       "learnLabel": "Microsoft Learn: Computer use in Copilot Studio",
@@ -565,20 +456,6 @@
       ],
       "description": "Copilot Studio's ability for a main agent to delegate work to other agents: child agents inside it, other Copilot Studio agents, or external agents over A2A or from Foundry.",
       "why": "Splitting a big solution into focused agents keeps each one simpler to build, test and govern, and lets teams reuse specialists.",
-      "useCases": [
-        {
-          "title": "HR front door",
-          "text": "A main HR agent routes questions to separate leave, payroll and benefits agents."
-        },
-        {
-          "title": "Support triage",
-          "text": "A service agent hands technical issues to an IT agent owned by another team."
-        },
-        {
-          "title": "Sales bundle",
-          "text": "A deal-desk agent calls pricing and contract agents to assemble a proposal."
-        }
-      ],
       "prompt": "We want one front-door agent that routes to separate HR, IT and finance agents. Explain how multi-agent orchestration in Copilot Studio could work and the trade-offs of child versus connected agents.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-add-other-agents",
       "learnLabel": "Microsoft Learn: Add other agents",
@@ -603,20 +480,6 @@
       ],
       "description": "An early-access capability for tuning models on your own organisational data to build task-specific agents that reflect your terminology, tone and quality standards, inside the Microsoft 365 trust boundary.",
       "why": "A generic model doesn't know how your firm writes or what good looks like. Tuning teaches agents your standards.",
-      "useCases": [
-        {
-          "title": "Law firm drafting",
-          "text": "A firm tunes an agent on its best contracts so first drafts reflect its house style."
-        },
-        {
-          "title": "Expert Q&A",
-          "text": "An engineering company tunes an agent on past project reports so staff get expert-level answers."
-        },
-        {
-          "title": "Consistent summaries",
-          "text": "An insurer tunes summaries so every claims file follows the same structure."
-        }
-      ],
       "prompt": "We're considering Copilot Tuning for contract drafting. List the data we'd need to gather, the review steps for quality, and the governance questions to ask before we start.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-tuning-overview",
       "learnLabel": "Microsoft Learn: Copilot Tuning",
@@ -646,20 +509,6 @@
       ],
       "description": "Support for the open Model Context Protocol, so agents can discover and call tools and resources exposed by MCP servers. Copilot Studio can add existing servers or publish your own.",
       "why": "One open standard means agents can plug into many tools without custom glue for each, while makers keep enterprise controls.",
-      "useCases": [
-        {
-          "title": "Ticketing tool",
-          "text": "A platform team lets an agent call its internal ticketing system through an MCP server."
-        },
-        {
-          "title": "Data lookup",
-          "text": "An analyst's agent queries a company data service that is exposed through MCP."
-        },
-        {
-          "title": "Reusable server",
-          "text": "A partner publishes one MCP server that many makers' agents can reuse."
-        }
-      ],
       "prompt": "Explain what an MCP server is and how I could add one to a Copilot Studio agent so it can look up open support tickets. Mention authentication and any admin controls.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp",
       "learnLabel": "Microsoft Learn: MCP in Copilot Studio",
@@ -683,20 +532,6 @@
       ],
       "description": "Microsoft's free pro-code toolkit, formerly Teams Toolkit, for building, debugging, testing and publishing agents and apps for Microsoft 365 Copilot, Teams and Microsoft 365.",
       "why": "Developers get one toolkit from first template to published agent, instead of stitching tools together.",
-      "useCases": [
-        {
-          "title": "Declarative agent",
-          "text": "A developer scaffolds a declarative agent for the sales team and debugs it locally."
-        },
-        {
-          "title": "Custom engine agent",
-          "text": "A software company builds a custom engine agent with the Agents SDK and publishes it to Teams."
-        },
-        {
-          "title": "Internal Teams app",
-          "text": "A company developer uses templates to ship a tab app to staff."
-        }
-      ],
       "prompt": "I'm new to the Microsoft 365 Agents Toolkit. Walk me through creating, debugging and publishing a declarative agent that answers questions from our SharePoint product docs.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/agents-toolkit-fundamentals",
       "learnLabel": "Microsoft Learn: Agents Toolkit",
@@ -714,7 +549,7 @@
       "difficulty": "Medium",
       "category": "Agents",
       "tags": ["agents", "search", "knowledge"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "introduced": "2025-03",
       "hints": [
         "I'm not a quick-answer chatbot. I'd rather vanish for a while and come back with footnotes.",
@@ -725,20 +560,6 @@
       ],
       "description": "A Copilot reasoning agent for big, complex questions. It may ask clarifying questions, then works through your files, emails, meetings, chats and the web, and returns an organised, source-cited report with charts and visuals.",
       "why": "It does the slow legwork of gathering and weighing sources across your work data and the web, so you start from a structured, cited report and spend your time on judgement.",
-      "useCases": [
-        {
-          "title": "Account briefing",
-          "text": "Before a renewal call, ask for a briefing on the customer using recent emails, meeting notes and public news, with cited sources."
-        },
-        {
-          "title": "Market landscape scan",
-          "text": "A strategy lead asks for a competitor and market-trend overview, scoped to the web only, and gets a sectioned report with citations to check."
-        },
-        {
-          "title": "Policy comparison",
-          "text": "An HR manager asks how internal leave guidance compares with current public rules, answering clarifying questions to steer the investigation."
-        }
-      ],
       "prompt": "Prepare a briefing on Contoso ahead of our renewal call on Friday. Look at our recent emails, meeting notes and shared files, plus current public news, and finish with three risks and three opportunities. Ask me any clarifying questions first.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/researcher-agent",
       "learnLabel": "Microsoft Learn: Researcher agent",
@@ -767,20 +588,6 @@
       ],
       "description": "A Copilot reasoning agent that works like a data analyst. Attach spreadsheets or CSV files, ask a question, and it reasons step by step, runs Python you can watch, and returns insights with charts and tables.",
       "why": "Go from a raw data file to trends, outliers and charts without building formulas yourself. Because you can watch the code it runs, you can check the working before you trust the answer.",
-      "useCases": [
-        {
-          "title": "Top-seller review",
-          "text": "A retail manager attaches several store sales exports and asks which products perform best and where outliers appear, without merging the files first."
-        },
-        {
-          "title": "Survey trend check",
-          "text": "An HR partner uploads engagement survey results as a CSV and asks for trends by department and any surprising outliers, with a chart for the leadership update."
-        },
-        {
-          "title": "Budget variance check",
-          "text": "A finance lead attaches budget and actuals workbooks, asks where spending drifted most, and checks the Python on screen to confirm the numbers add up."
-        }
-      ],
       "prompt": "Using the attached files, identify our top-performing products based on customer engagement, flag any outliers, and chart the monthly trend. Explain your reasoning step by step so I can check it.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-analyst-in-microsoft-365-copilot",
       "learnLabel": "Microsoft Support: Get started with Analyst",
@@ -808,20 +615,6 @@
       ],
       "description": "An AI agent for Teams meetings and Teams Rooms that helps keep discussions on track. It keeps collaborative live notes, tracks agenda time, answers questions from meeting and web content, and can draft Word documents during or after the meeting.",
       "why": "Nobody gets stuck being the scribe, and everyone works from the same live notes, agenda and timer, so the conversation stays focused and on schedule.",
-      "useCases": [
-        {
-          "title": "Keeping to the agenda",
-          "text": "A project manager adds agenda topics in meeting chat and lets the timeline markers and midway reminders keep a kick-off from overrunning."
-        },
-        {
-          "title": "Requirements workshop",
-          "text": "In a requirements workshop, a consultant asks the agent to draft a business requirements document in Word during or straight after the meeting."
-        },
-        {
-          "title": "Teams Room huddle",
-          "text": "A school leadership team meets in a Teams Room; everyone edits the shared live notes while timers keep each agenda topic moving."
-        }
-      ],
       "prompt": "@Facilitator Add 'budget review' and 'launch risks' to the agenda, then once we wrap up, draft a Word document of what we decided.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/facilitator-teams",
       "learnLabel": "Microsoft Learn: Facilitator in Teams",
@@ -844,20 +637,6 @@
       ],
       "description": "An AI agent built into Microsoft Planner that you can assign tasks to. It drafts the work for you to review, writes status reports from your plan data and, in premium plans, can turn a high-level goal into tasks.",
       "why": "Routine project admin, such as drafting task output and writing status updates, can be handed to an agent, leaving the team more time for the work that needs people.",
-      "useCases": [
-        {
-          "title": "Fortnightly status update",
-          "text": "A project lead opens the Reports tab, picks the last two weeks and a concise length, and shares the result with stakeholders as a SharePoint newsletter."
-        },
-        {
-          "title": "Delegate a first draft",
-          "text": "A marketing coordinator assigns the agent a task to draft a launch announcement outline, then reviews it once the task shows as ready for review."
-        },
-        {
-          "title": "Goal to task list",
-          "text": "An operations manager on a premium plan types a high-level goal like 'open the new depot by June' and has the agent generate tasks to refine."
-        }
-      ],
       "prompt": "Draft a one-page announcement of our new returns process: what changes, who is affected and the key dates. Use the policy document I've uploaded as your source and note anything you couldn't confirm.",
       "learnMore": "https://support.microsoft.com/en-us/planner/copilot/access-planner-agent",
       "learnLabel": "Microsoft Support: Access Planner Agent",
@@ -887,20 +666,6 @@
       ],
       "description": "A prebuilt set of agent starters for HR and IT that organisations deploy through Copilot Studio. Employees ask questions in Microsoft Copilot, from policies and benefits to IT troubleshooting, and can take actions in systems such as Workday and ServiceNow.",
       "why": "Staff can ask a question or start an HR or IT request in the Copilot they already use, without hunting for the right portal, while organisations start from a prebuilt starter rather than building from scratch.",
-      "useCases": [
-        {
-          "title": "New starter benefits",
-          "text": "A new starter asks which benefits they're eligible for and how to enrol, and gets an answer drawn from the organisation's HR knowledge instead of emailing HR."
-        },
-        {
-          "title": "Device setup help",
-          "text": "A clinic nurse asks how to set up a new tablet and fix a sign-in problem, getting guided steps from the IT agent."
-        },
-        {
-          "title": "Sandbox-first rollout",
-          "text": "A consultant deploys the HR starter in a sandbox, runs FlightCheck to catch configuration issues, then deploys the IT starter separately."
-        }
-      ],
       "prompt": "How much parental leave am I entitled to under our policy, and what do I need to submit? If a case needs to be raised, please start it for me.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/employee-self-service/declarative-agent-overview",
       "learnLabel": "Microsoft Learn: Employee Self-Service agent",
@@ -928,20 +693,6 @@
       ],
       "description": "The Microsoft 365 admin center's central list of every agent available to your organisation, showing ownership, publisher type and status. Admins can filter and export it to monitor, manage and govern agents, and tenants with the right licence also see risk signals.",
       "why": "Agents can come from Microsoft, partners and colleagues, so IT needs one place to see what exists, who owns it and what's unmanaged. That visibility makes it easier to keep agents under control.",
-      "useCases": [
-        {
-          "title": "Cleaning up ownerless agents",
-          "text": "After a staff member's account is deleted, a university IT admin uses the Agents without owners card to find their shared agents and block or delete them."
-        },
-        {
-          "title": "Audit-ready agent list",
-          "text": "A public-sector compliance lead exports the registry to CSV, filtered by publisher type, and hands the list to auditors."
-        },
-        {
-          "title": "Reviewing agent risk",
-          "text": "With the right licence, a bank's security analyst opens an agent's Risk details to see high, medium and low signals from Microsoft Purview, Entra and Defender."
-        }
-      ],
       "prompt": "I'm a Microsoft 365 admin. Give me a weekly checklist for reviewing the agent registry: how to spot agents without owners or unmanaged agents, which filters to use, and what to do before blocking or deleting an agent.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/admin/manage/agent-registry?view=o365-worldwide",
       "learnLabel": "Microsoft Learn: Agent registry"
@@ -970,20 +721,6 @@
       ],
       "description": "A free Microsoft community and resource hub for the people who help colleagues adopt Microsoft 365 and Copilot. Members get peer networking, an adoption asset library, Microsoft experts, community calls and a forum.",
       "why": "New tools stick when someone down the hall can show you how. The community gives those helpers peers, adoption assets and Microsoft experts, so good habits spread through the organisation.",
-      "useCases": [
-        {
-          "title": "Write the role charter",
-          "text": "A public-sector adoption lead drafts a one-page role charter from Microsoft's AI Champion guide, then invites a Champion from each department."
-        },
-        {
-          "title": "Learn from peers",
-          "text": "A hospital digital trainer joins a Driving Adoption call, watches an on-demand recording and asks the forum how other organisations got staff using Copilot."
-        },
-        {
-          "title": "Share early wins",
-          "text": "A bank's internal-comms specialist uses the storytelling guide and sample adoption plan to share early wins with branch staff."
-        }
-      ],
       "prompt": "I'm setting up an AI Champions network for about 800 staff. Help me draft a one-page role charter (purpose, expectations, what Champions don't do) and a short email inviting people to join.",
       "learnMore": "https://adoption.microsoft.com/en-us/become-a-champion/",
       "learnLabel": "Microsoft Adoption: Become a Champion",
@@ -1013,20 +750,6 @@
       ],
       "description": "Gives a Teams channel its own AI expert, currently in public preview. It draws on the channel's messages, files and approved meeting summaries to answer questions, flag deadlines, draft status reports and create tasks.",
       "why": "Project knowledge often sits in scattered threads and files. A dedicated expert for the channel can answer questions from that material and draft status updates, so people spend less time chasing colleagues for the latest.",
-      "useCases": [
-        {
-          "title": "Friday status report",
-          "text": "A project manager asks the agent to draft a weekly status report from the channel's conversations and files, then reviews and edits it before sharing."
-        },
-        {
-          "title": "Deadline check",
-          "text": "A marketing lead in a campaign channel asks which deadlines are coming up and gets an answer drawn from the channel's messages and shared files."
-        },
-        {
-          "title": "Meeting actions to tasks",
-          "text": "After a channel meeting, a programme officer approves the agent's summary, then asks it to create tasks with reminders for the agreed actions."
-        }
-      ],
       "prompt": "Draft this week's status report for our team: summarise progress since Monday, flag any deadlines at risk, and list the open tasks with their owners.",
       "learnMore": "https://support.microsoft.com/en-us/teams/chat-channels/get-started-with-channel-agent-for-teams-channels",
       "learnLabel": "Microsoft Support: Channel Agent",
@@ -1053,20 +776,6 @@
       ],
       "description": "Officially called Microsoft Copilot Academy, this is a ready-made, Microsoft-curated learning academy inside Viva Learning, with structured Copilot learning paths. Knowledge admins can restrict it to Copilot-licensed users, and admins with a Viva licence can duplicate and customise it.",
       "why": "People get more from Copilot when they know how to use it well. The Academy gives everyone ready-made lessons inside Viva Learning, and gives admins a head start on staff training.",
-      "useCases": [
-        {
-          "title": "Tailored company academy",
-          "text": "A manufacturer's L&D lead duplicates the academy, swaps in company-specific learning paths and publishes it to the sales and operations groups."
-        },
-        {
-          "title": "Match training to licences",
-          "text": "A university's Knowledge admin restricts the academy to Copilot-licensed staff, so learning matches who actually has Copilot."
-        },
-        {
-          "title": "Monthly Teams nudge",
-          "text": "A sales rep with a Copilot licence opens the monthly Teams notification, picks a learning path and tries one new Copilot skill before their next customer call."
-        }
-      ],
       "prompt": "I'm a Knowledge admin rolling out Copilot to 300 staff. Draft a plan for introducing Microsoft Copilot Academy in Viva Learning: who gets access, how to customise it for finance and sales, and a short Teams announcement.",
       "learnMore": "https://learn.microsoft.com/en-us/viva/learning/academy-copilot",
       "learnLabel": "Microsoft Learn: Microsoft Copilot Academy",
@@ -1084,7 +793,7 @@
       "difficulty": "Easy",
       "category": "Copilot Chat",
       "tags": ["chat", "essentials"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "introduced": "2023-03",
       "hints": [
         "I'm not a search tab, a canvas or a notebook; I'm the one you simply talk to.",
@@ -1095,20 +804,6 @@
       ],
       "description": "The conversational assistant in the Copilot app, Outlook, Teams and Office: speak or type a request and it drafts, summarises and answers using the web and, via Work IQ, your work data. Once called Business Chat, then Microsoft 365 Copilot Chat.",
       "why": "Instead of hunting through inboxes and folders, you just ask. It can draft, summarise and answer from the web and the work you already have access to, so you spend your time deciding, not digging.",
-      "useCases": [
-        {
-          "title": "Prep for a client call",
-          "text": "Ask for a summary of recent emails and meetings with a client, pointing to the account file with a slash, then draft talking points."
-        },
-        {
-          "title": "Explain a policy",
-          "text": "Ask Copilot to summarise a long HR policy document in plain English and list the three things managers most need to know."
-        },
-        {
-          "title": "Draft a stakeholder update",
-          "text": "A project officer asks for a plain-English status update from this week's team meeting, then refines the tone and length with follow-up requests."
-        }
-      ],
       "prompt": "Goal: draft a 150-word update for my leadership team. Context: we're two weeks from launching our new onboarding portal. Details: friendly, plain English, flag one risk and one decision we need from them. Data: the launch plan file and last Tuesday's project meeting.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-microsoft-365-copilot-chat",
       "learnLabel": "Microsoft Support: Copilot Chat",
@@ -1132,20 +827,6 @@
       ],
       "description": "Microsoft's umbrella framework of guides and tools for securing, managing and measuring Microsoft 365 Copilot, Copilot Chat and Microsoft Copilot Studio, built on three pillars. Microsoft's pages use both 'Copilot Control System' and 'Copilot controls'.",
       "why": "Rolling Copilot and agents out across a whole company is smoother when security, settings and usage reporting follow one plan. IT gets clear guardrails, and the business can scale with confidence.",
-      "useCases": [
-        {
-          "title": "Pre-rollout oversharing check",
-          "text": "A council's IT team works through the oversharing blueprint in the security and governance pillar before switching Copilot on for staff."
-        },
-        {
-          "title": "Agent and web-search rules",
-          "text": "Using the management pillar's admin center scenarios, a retail IT admin decides how staff create and use agents and whether Copilot can search the web."
-        },
-        {
-          "title": "Proving adoption and value",
-          "text": "A change lead at a bank uses the measurement pillar's Copilot Dashboard and analytics playbooks to show executives how Copilot is being adopted."
-        }
-      ],
       "prompt": "I'm the IT admin for a 2,000-person company about to roll out Microsoft 365 Copilot. Using the three pillars of Copilot controls (security and governance, management, measurement and reporting), draft a 30-60-90 day plan with owners and the first checks to run.",
       "learnMore": "https://adoption.microsoft.com/en-us/copilot/copilot-controls/",
       "learnLabel": "Microsoft Adoption: Copilot controls",
@@ -1173,20 +854,6 @@
       ],
       "description": "A creation hub in the Microsoft Copilot app. Describe an image, banner, poster, video, infographic, story or form, or start from a template, and Copilot makes it for you to edit and save to your Library.",
       "why": "Get a first draft of a visual or a written piece just by describing it, then refine it. Official Brand Kits help keep it on brand when your organisation provides one.",
-      "useCases": [
-        {
-          "title": "On-brand event banner",
-          "text": "A marketing coordinator describes a webinar banner and, if the organisation provides an official Brand Kit, gets a draft that stays on brand."
-        },
-        {
-          "title": "Classroom infographic",
-          "text": "A teacher describes an infographic explaining the water cycle for Year 5, then refines it and saves it to their Library."
-        },
-        {
-          "title": "Quick staff survey",
-          "text": "An HR officer describes a short staff pulse survey and gets a draft form to review and tweak before sharing it."
-        }
-      ],
       "prompt": "Create a wide banner for our customer webinar 'Budgeting basics' in a clean, friendly style, using calm blues and leaving space on the left for the title text.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-create-in-the-microsoft-365-copilot-app",
       "learnLabel": "Microsoft Support: Get started with Create",
@@ -1213,20 +880,6 @@
       ],
       "description": "A Viva Insights dashboard that tracks four things: how ready your organisation is for Copilot, how people are adopting it, what impact it's having and how people feel about it. It covers Copilot Chat usage too.",
       "why": "Rolling out AI is easier to steer when readiness, usage, impact and feelings are visible in one place. Leaders can back what's working and show the value with evidence, not hunches.",
-      "useCases": [
-        {
-          "title": "Pre-rollout readiness check",
-          "text": "Before a rollout, a university IT lead checks the Readiness page's recommended steps, like enabling Copilot Chat and activating agents, to decide what to tackle first."
-        },
-        {
-          "title": "Team adoption check-in",
-          "text": "A sales manager reviews her group's adoption metrics to see how often the team uses Copilot and where coaching might help."
-        },
-        {
-          "title": "Telling the impact story",
-          "text": "A change manager at a health provider combines impact metrics with survey-based sentiment to tell executives how Copilot is landing with staff."
-        }
-      ],
       "prompt": "Help me prepare a 10-minute update for our leadership team on Copilot adoption. Using the four categories in the Copilot Dashboard (readiness, adoption, impact and sentiment), outline the questions to answer, the numbers to show and the actions to recommend.",
       "learnMore": "https://learn.microsoft.com/en-us/viva/insights/org-team-insights/copilot-dashboard",
       "learnLabel": "Microsoft Learn: Copilot Dashboard",
@@ -1255,20 +908,6 @@
       ],
       "description": "Copilot built into Microsoft Edge has a side pane that chats about the page you're on, summarises it and compares tabs. Browse with Copilot, which is experimental, can also click and type in your tabs while you watch.",
       "why": "Instead of juggling tabs and copy-pasting into another app, you can ask about the page in front of you. With a work account, enterprise data protection applies, shown by a shield icon.",
-      "useCases": [
-        {
-          "title": "Compare supplier pages",
-          "text": "A buyer opens three supplier pages and asks Copilot to compare prices, delivery terms and warranty details across the tabs."
-        },
-        {
-          "title": "Skim before you read",
-          "text": "A policy analyst opens a long report on the web and asks Copilot to summarise it before deciding whether to read the full text."
-        },
-        {
-          "title": "Supervised browsing",
-          "text": "Where Browse with Copilot is available, a travel coordinator watches it work through open tabs and takes over when it asks for attention before booking."
-        }
-      ],
       "prompt": "Summarise this page in five bullet points, then compare it with my other open tabs and tell me which supplier has the best delivery terms.",
       "learnMore": "https://explore.microsoft.com/en-us/edge/copilot",
       "learnLabel": "Microsoft Edge: Copilot in Edge"
@@ -1290,20 +929,6 @@
       ],
       "description": "Describe the survey or quiz you need and Copilot drafts a title, questions and answer options. It can also review your questions, help you share the form, and summarise the responses into key findings and insights.",
       "why": "A blank form is slow to build and easy to get wrong. Copilot gives you a solid first draft, reviews your questions and turns piles of responses into insights you can act on.",
-      "useCases": [
-        {
-          "title": "Pulse survey check",
-          "text": "An HR partner describes an employee pulse survey, lets Copilot draft the questions, then asks it to review them for leading or double-barrelled wording before sending."
-        },
-        {
-          "title": "Class quiz in minutes",
-          "text": "A teacher describes this week's topic and Copilot drafts a quiz with questions and answer options, ready to keep, refine or regenerate."
-        },
-        {
-          "title": "Resident feedback survey",
-          "text": "A council officer drafts a resident feedback form with Copilot, shares it by QR code, then asks Copilot to summarise the responses into key findings."
-        }
-      ],
       "prompt": "Create a short employee pulse survey about workload, team communication and career growth. Keep the wording neutral and avoid leading or double-barrelled questions.",
       "learnMore": "https://support.microsoft.com/en-us/Forms/welcome-to-copilot-in-forms",
       "learnLabel": "Microsoft Support: Copilot in Forms"
@@ -1326,20 +951,6 @@
       ],
       "description": "Copilot inside the Loop app lets licensed users ask web or work questions in a chat and insert answers onto a page, recap page changes, and generate collaborative notes in meetings. Microsoft has trimmed some features while aligning Loop with Copilot Pages.",
       "why": "Shared pages change fast. A quick recap and auto-drafted meeting notes with suggested tasks keep everyone in step, and colleagues without a Copilot licence can still view and edit what Copilot created.",
-      "useCases": [
-        {
-          "title": "Recap page changes",
-          "text": "A marketing lead opens the Recap pane and asks Copilot to summarise the latest changes on the campaign planning page."
-        },
-        {
-          "title": "Meeting notes with tasks",
-          "text": "An operations manager lets Copilot generate collaborative notes during the weekly stand-up, then shares the suggested tasks as components the whole team can edit."
-        },
-        {
-          "title": "Web answer onto the page",
-          "text": "A school coordinator asks the Copilot chat a web question on exam-preparation techniques and inserts the answer onto the staff planning page."
-        }
-      ],
       "prompt": "Give me five short bullet points on best practice for onboarding remote new starters, with one sentence on why each matters. I'll insert them onto our team page.",
       "learnMore": "https://support.microsoft.com/en-us/loop/frequently-asked-questions-about-copilot-in-loop",
       "learnLabel": "Microsoft Support: Copilot in Loop FAQ",
@@ -1363,20 +974,6 @@
       ],
       "description": "Copilot in OneDrive for Business on the web answers questions across several files, compares and summarises them, and turns Word documents, PDFs and Teams recordings with transcripts into audio overviews. It can also create presentations and reports and organise folders.",
       "why": "Finding the answer often means opening file after file. Copilot reads across several documents at once, so you can compare files, get the gist and move on to the work that matters.",
-      "useCases": [
-        {
-          "title": "Compare supplier proposals",
-          "text": "A procurement officer selects two supplier proposals and asks Copilot to compare them and list the key differences in price terms and delivery commitments."
-        },
-        {
-          "title": "Listen to a board paper",
-          "text": "A finance manager turns a long board paper into an audio overview and listens to the key points on the way to a meeting."
-        },
-        {
-          "title": "Ask across inspection reports",
-          "text": "A site manager asks one question across several inspection reports, without opening each file, to find which sites still have open safety actions."
-        }
-      ],
       "prompt": "Compare these two supplier proposals and list the key differences in pricing, delivery timelines and support terms. Then give me a three-bullet summary of which looks stronger and why.",
       "learnMore": "https://support.microsoft.com/en-us/onedrive/get-started-with-copilot-in-onedrive",
       "learnLabel": "Microsoft Support: Copilot in OneDrive",
@@ -1399,20 +996,6 @@
       ],
       "description": "Copilot inside OneNote reads the page, section or text you point it at to summarise it, rewrite it for clarity, build task lists and analyse ideas. It can also draft new content such as event plans, presentation outlines and meeting agendas.",
       "why": "Notes pile up faster than anyone rereads them. Copilot condenses them, tidies the wording and pulls out task lists, so your scribbles turn into action instead of an archive.",
-      "useCases": [
-        {
-          "title": "Section summary",
-          "text": "A project manager asks Copilot to summarise a whole section of weekly check-in notes into key decisions and open questions before the steering meeting."
-        },
-        {
-          "title": "Lesson outline",
-          "text": "A teacher highlights scattered lesson ideas and asks Copilot to analyse them, then draft a presentation outline for the term's first class."
-        },
-        {
-          "title": "Event plan brainstorm",
-          "text": "An events coordinator jots venue and catering ideas, then asks Copilot to brainstorm an event plan and a task list of what to book next."
-        }
-      ],
       "prompt": "Summarise this section in five bullet points, then create a task list of every follow-up mentioned, with owners where I've named them.",
       "learnMore": "https://support.microsoft.com/en-us/onenote/welcome-to-copilot-in-onenote",
       "learnLabel": "Microsoft Support: Copilot in OneNote",
@@ -1431,7 +1014,7 @@
       "difficulty": "Easy",
       "category": "Microsoft 365 Apps",
       "tags": ["email", "essentials"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "hints": [
         "I'm a chat partner for your messages and meetings, but my home isn't Teams.",
         "I let you manage your mail and calendar just by asking in plain words.",
@@ -1441,20 +1024,6 @@
       ],
       "description": "An AI chat built into Outlook that opens beside your mail. Ask about your messages, calendar and meetings, then have it act: drafting, scheduling, flagging or setting an automatic reply.",
       "why": "Instead of clicking through menus, you just say what you want done with your mail and calendar. Less admin, more time for the work that needs you.",
-      "useCases": [
-        {
-          "title": "Flag the boss's emails",
-          "text": "A regional sales lead asks Copilot to flag all unread emails from their manager before a stand-up, so the boss's requests get answered first."
-        },
-        {
-          "title": "Automatic reply for leave",
-          "text": "A school administrator taking leave next Friday asks Copilot to set an automatic reply for that day, without digging through settings menus."
-        },
-        {
-          "title": "Plan tomorrow's calendar",
-          "text": "Before a busy day, a finance controller asks Copilot what's on their calendar tomorrow, then has it draft a note asking to reschedule a clash."
-        }
-      ],
       "prompt": "Flag all unread emails from my manager, then set up an automatic reply for next Friday saying I'm out of the office and will reply on Monday.",
       "learnMore": "https://support.microsoft.com/en-us/outlook/copilot-outlook/chat-with-copilot-in-outlook",
       "learnLabel": "Microsoft Support: Chat with Copilot in Outlook",
@@ -1486,20 +1055,6 @@
       ],
       "description": "Copilot in SharePoint works with your files, pages, lists and libraries to answer questions, find content and catch you up. It can also create sites, pages, lists, libraries, interactive reports and Office files from plain-English instructions.",
       "why": "Teams keep their knowledge in sites, libraries and lists that nobody has time to trawl. Copilot finds, summarises and builds from that content in plain English, so people spend less time hunting and more time doing.",
-      "useCases": [
-        {
-          "title": "Catch up on a project",
-          "text": "A programme manager back from leave asks Copilot to catch them up on the project site's pages, lists and libraries."
-        },
-        {
-          "title": "Build a tracking list",
-          "text": "An HR coordinator describes a new-starter checklist in plain English and asks Copilot to create a list to track it."
-        },
-        {
-          "title": "Ask the site's agent",
-          "text": "A council employee asks the policy site's agent where the leave procedure lives, rather than searching library by library."
-        }
-      ],
       "prompt": "Catch me up on what's changed in this site since last week: summarise the key updates across its pages and libraries, and list any open items that need my attention.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/copilot-in-sharepoint-get-started",
       "learnLabel": "Microsoft Learn: Copilot in SharePoint",
@@ -1529,20 +1084,6 @@
       ],
       "description": "Copilot appears on the right of a video in the Clipchamp player (the successor to Stream) to summarise it or answer questions, with timestamps you can jump to. It needs the video's transcript to work and can't generate or edit video.",
       "why": "Nobody has time to watch every recorded briefing or training clip from start to finish. Copilot gives you the gist and points you to the exact moment that matters.",
-      "useCases": [
-        {
-          "title": "Onboarding video Q&A",
-          "text": "A new starter opens a recorded onboarding session, asks Copilot where leave policy was covered and jumps straight to that timestamp."
-        },
-        {
-          "title": "Town hall catch-up",
-          "text": "An executive who missed the quarterly town hall asks Copilot to summarise the recording, then checks the timestamp for the budget announcement."
-        },
-        {
-          "title": "Training refresher",
-          "text": "A nurse manager asks Copilot what a recorded safety training said about incident reporting, using the timestamp to rewatch just that section."
-        }
-      ],
       "prompt": "Summarise this video in five bullet points, then tell me where the presenter explains the new expenses policy, with the timestamp.",
       "learnMore": "https://support.microsoft.com/en-us/clipchamp/stream-pages/ask-questions-get-summaries-of-any-video-with-microsoft-copilot-in-the-clipchamp-player",
       "learnLabel": "Microsoft Support: Copilot in the Clipchamp player"
@@ -1570,20 +1111,6 @@
       ],
       "description": "A Copilot pane for Teams chats, meeting chats and channel posts. Open it to summarise what you've missed, pull out action items and decisions, and ask questions about the conversation, with sources that link back to the original messages.",
       "why": "Teams threads pile up fast. Instead of scrolling for an hour, you ask what you missed and get the key points, decisions and next steps, with links back to the messages they came from.",
-      "useCases": [
-        {
-          "title": "What did I miss?",
-          "text": "A ward manager back from two weeks off asks Copilot in the team's group chat what she missed, then clicks a source to check the rota change."
-        },
-        {
-          "title": "Summarise a channel thread",
-          "text": "A marketing lead opens a long campaign-launch thread in a channel and selects Summarize thread to see the decisions and action items before the review."
-        },
-        {
-          "title": "Scope to last month",
-          "text": "A council project officer asks in the team's group chat, 'What did we agree last month about delivery dates?', so Copilot reads just that time frame."
-        }
-      ],
       "prompt": "Summarise what I've missed in this chat over the last two weeks: key decisions, action items with owners, and any links people shared.",
       "learnMore": "https://support.microsoft.com/en-us/teams/copilot/how-to-use-microsoft-365-copilot-in-teams-chats-and-channels",
       "learnLabel": "Microsoft Support: Copilot in Teams chats and channels",
@@ -1601,7 +1128,7 @@
       "difficulty": "Medium",
       "category": "Teams & Meetings",
       "tags": ["meetings", "teams", "chat"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "hints": [
         "I'm the whisper at your shoulder; nobody else in the room hears what we say.",
         "I'll point out where people disagree and suggest questions that might move things forward.",
@@ -1611,20 +1138,6 @@
       ],
       "description": "A private Copilot pane inside a live or finished Teams meeting. It summarises what was said, who said it, where people disagree and what to do next, working from the transcript or speech-to-text plus the meeting chat.",
       "why": "Late to the call, or lost in a long discussion? You can quietly ask what's been said, where people disagree and what to do next, without interrupting anyone or exposing your question.",
-      "useCases": [
-        {
-          "title": "Late-join catch-up",
-          "text": "An operations manager joins a project meeting ten minutes late, accepts Copilot's offer to catch up, and joins the discussion without asking anyone to repeat themselves."
-        },
-        {
-          "title": "Find the disagreements",
-          "text": "A product manager in a heated roadmap discussion privately asks Copilot where the team disagrees and what questions could move things forward, then steers the group."
-        },
-        {
-          "title": "Ideas into Word",
-          "text": "A school principal asks Copilot in the meeting chat to list the ideas and feedback from the transcript and chat, then exports the long answer to Word."
-        }
-      ],
       "prompt": "Where do we disagree on this topic? List each side's main points, then suggest three questions I could ask to move the meeting forward.",
       "learnMore": "https://support.microsoft.com/en-us/teams/copilot/catch-up-on-meetings-with-microsoft-365-copilot-in-teams",
       "learnLabel": "Microsoft Support: Copilot in Teams meetings",
@@ -1653,20 +1166,6 @@
       ],
       "description": "Copilot for Teams calls, including phone-network (PSTN) calls and calls on desk phones. It can list action items and suggest follow-up questions mid-call, and for transcribed or recorded calls it can draft transfer notes and show a summary and recap.",
       "why": "Calls are over in a click, and the details go with them. Copilot captures the next steps and briefs whoever you hand a call to, so nobody has to explain it all again.",
-      "useCases": [
-        {
-          "title": "Smooth call transfers",
-          "text": "Transfer a transcribed customer call to a specialist and Copilot drafts the transfer notes, so the customer isn't asked to repeat the whole problem."
-        },
-        {
-          "title": "Candidate screening call",
-          "text": "A recruiter selects Copilot mid-call to get suggested follow-up questions and a list of action items before the candidate hangs up."
-        },
-        {
-          "title": "Find the unresolved questions",
-          "text": "A council service officer opens a call recap and asks 'What questions were asked, answered, and unresolved?' to plan the callback without replaying the whole call."
-        }
-      ],
       "prompt": "What questions were asked, answered, and unresolved on this call? List the action items, and tell me what the mood of the call was.",
       "learnMore": "https://support.microsoft.com/en-us/teams/copilot/get-started-with-microsoft-365-copilot-in-teams-phone",
       "learnLabel": "Microsoft Support: Copilot in Teams Phone",
@@ -1689,20 +1188,6 @@
       ],
       "description": "Copilot offers three tools for brainstorming with sticky notes. Suggest turns a prompt into ideas to add, Categorize groups notes into coloured clusters with headings, and Summarize writes them up in an editable Loop component.",
       "why": "Workshops stall when ideas dry up or sticky notes pile up. Copilot gets ideas flowing, sorts the mess into themes and produces a summary you can edit and share.",
-      "useCases": [
-        {
-          "title": "Retro theme sorting",
-          "text": "After a sprint retro, the team adds sticky notes and Copilot groups them into coloured clusters with headings, so everyone can vote on the themes."
-        },
-        {
-          "title": "Class brainstorm kick-start",
-          "text": "A teacher enters a prompt, inserts the best suggested ideas as sticky notes and uses Generate more when the class needs fresh angles."
-        },
-        {
-          "title": "Campaign workshop recap",
-          "text": "A marketing manager summarises a campaign brainstorm's sticky notes into an editable Loop component and shares it with the wider team."
-        }
-      ],
       "prompt": "Ideas for reducing meeting overload across our team, from quick wins to bigger changes.",
       "learnMore": "https://support.microsoft.com/en-us/whiteboard/welcome-to-copilot-in-whiteboard",
       "learnLabel": "Microsoft Support: Copilot in Whiteboard"
@@ -1732,20 +1217,6 @@
       ],
       "description": "Copilot can save facts from your chats, learn from past conversations and follow instructions you write, so its answers feel tailored to you. You can review and manage it all in Settings, or start a temporary chat that skips it.",
       "why": "Stop re-explaining your role, tone and preferences every time you open a chat. Copilot can carry that context forward, and you stay in control of what it keeps.",
-      "useCases": [
-        {
-          "title": "Standing writing preferences",
-          "text": "A finance analyst writes custom instructions once: lead with the headline number, use Australian spelling, keep commentary brief. Copilot applies them to later answers."
-        },
-        {
-          "title": "Context that sticks",
-          "text": "A hospital recruiter mentions the nursing roles they hire for; Copilot can save that detail so later job-ad drafts start with the right context."
-        },
-        {
-          "title": "Temporary chat for tough topics",
-          "text": "A manager rehearses a difficult performance conversation in a temporary chat, so Copilot neither uses nor updates its saved memories."
-        }
-      ],
       "prompt": "What do you know about me and my preferences? List what you're using from my saved memories, custom instructions and chat history, then tell me how I can edit or remove anything that's out of date.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-personalization-memory",
       "learnLabel": "Microsoft Learn: Copilot personalization and memory",
@@ -1772,20 +1243,6 @@
       ],
       "description": "The Microsoft Copilot app for iOS and Android. Chat with Copilot, have hands-free voice conversations, share your camera with Vision and open Search, Library, Create, Agents or Notebooks, depending on your licence.",
       "why": "Copilot goes where you go, so questions, voice chats and a quick look through your camera aren't tied to a desk. On iOS there are even Siri, widget and CarPlay integrations.",
-      "useCases": [
-        {
-          "title": "Hands-free on site",
-          "text": "A facilities technician on site shares their camera with Vision and talks to Copilot hands-free about the equipment in front of them."
-        },
-        {
-          "title": "Capture client conversations",
-          "text": "A consultant uses Record, with the client's permission, to capture an in-person meeting, then reads the transcript and summary in Chat."
-        },
-        {
-          "title": "Voice chat between visits",
-          "text": "A regional sales manager holds a hands-free voice conversation with Copilot to prepare for the next client visit while walking in from the car."
-        }
-      ],
       "prompt": "I'm walking into a meeting with a regional water utility in five minutes. Give me a two-minute spoken-style briefing: what they do, recent news and three smart questions I could ask.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-the-microsoft-365-copilot-mobile-app",
       "learnLabel": "Microsoft Support: Copilot mobile app",
@@ -1803,7 +1260,7 @@
       "difficulty": "Medium",
       "category": "Copilot Chat",
       "tags": ["knowledge", "files", "creation"],
-      "packs": ["core", "wave-2"],
+      "packs": ["core", "wave-2", "copilot-essentials"],
       "introduced": "2025-04",
       "hints": [
         "I'm a briefcase whose contents stay live: when a source changes, my answers follow.",
@@ -1814,20 +1271,6 @@
       ],
       "description": "An AI project workspace where you gather chats, files, meetings, pages and links as references, then ask Copilot questions, find themes or draft new content based only on them. It can also produce an audio overview, mind maps and infographics.",
       "why": "Project knowledge is usually scattered across emails, files and meetings. A notebook keeps it in one place, so you can ask questions, spot themes and share the same sources with your team.",
-      "useCases": [
-        {
-          "title": "Project knowledge hub",
-          "text": "A programme manager adds the project's plans, meeting notes and key emails as references, then asks for open risks and who owns each."
-        },
-        {
-          "title": "Tender response prep",
-          "text": "A bid writer adds the tender documents and past proposals, then asks Copilot to list requirements, spot gaps and draft first answers."
-        },
-        {
-          "title": "Audio briefing",
-          "text": "A policy officer adds the new regulations as references and plays the audio overview to grasp the key points before briefing her director."
-        }
-      ],
       "prompt": "Using only the references in this notebook, summarise the five biggest risks to the Q4 launch, say which source each comes from, and list who owns the mitigation for each.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-microsoft-365-copilot-notebooks",
       "learnLabel": "Microsoft Support: Copilot Notebooks",
@@ -1840,8 +1283,9 @@
       "difficulty": "Medium",
       "category": "Copilot Chat",
       "tags": ["collaboration", "creation"],
-      "packs": ["core", "wave-2"],
+      "packs": ["core", "wave-2", "copilot-essentials"],
       "introduced": "2024-09",
+      "daily": false,
       "hints": [
         "I collect ideas, but I'm not OneNote.",
         "I help preserve AI-generated work.",
@@ -1851,20 +1295,6 @@
       ],
       "description": "A shareable, editable canvas beside Copilot Chat where you pin the best bits of an AI answer, keep refining them and co-edit with colleagues in real time. It can hold tables and charts, and convert to Word, PowerPoint or PDF.",
       "why": "Good AI answers stop vanishing into chat history. Pages turns them into living documents your whole team can build on.",
-      "useCases": [
-        {
-          "title": "Kick-off brief",
-          "text": "Pin Copilot's draft project brief to a Page, then invite the team to refine scope and owners together."
-        },
-        {
-          "title": "Vendor comparison",
-          "text": "Ask Copilot to compare shortlisted suppliers on cost, support and risk, then keep the table on a Page where procurement and finance can edit it together."
-        },
-        {
-          "title": "Meeting follow-up",
-          "text": "A team lead turns action items from a meeting summary into a shared Page the whole team can update."
-        }
-      ],
       "prompt": "Create a page that compares the three vendors we shortlisted last week on cost, support and security, with a simple table and a short recommendation the team can edit.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-microsoft-365-copilot-pages",
       "learnLabel": "Microsoft Support: Copilot Pages",
@@ -1877,7 +1307,7 @@
       "difficulty": "Easy",
       "category": "Copilot Chat",
       "tags": ["prompting", "learning", "essentials"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "hints": [
         "I'm a cookbook, not a kitchen.",
         "I offer ready-made starting points, with tips for making each one your own.",
@@ -1887,20 +1317,6 @@
       ],
       "description": "A built-in library of ready-made prompts from Microsoft, your team and your own saved favourites, with tips for tailoring each one. Try one, then save it, share it to a Teams team or schedule it.",
       "why": "Nobody has to invent the perfect request from scratch. Borrow what works, keep your own favourites and share the best ones so the whole team benefits.",
-      "useCases": [
-        {
-          "title": "Reusable weekly update",
-          "text": "A project manager tweaks a Suggested prompt into a weekly status update and saves it to reuse every Friday."
-        },
-        {
-          "title": "Share the winner",
-          "text": "A sales lead shares their best follow-up email prompt to the sales team in Teams, so everyone starts from the same proven wording."
-        },
-        {
-          "title": "Company-wide starters",
-          "text": "An IT admin publishes organisational prompts for common onboarding questions, so everyone in the company sees them."
-        }
-      ],
       "prompt": "Draft a weekly status update on our website relaunch for the leadership team, using my emails and meetings from this week. Keep it to five bullets: progress, risks, decisions needed and next steps. Use a plain, confident tone.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-prompt-gallery",
       "learnLabel": "Microsoft Learn: Copilot Prompt Gallery",
@@ -1918,7 +1334,7 @@
       "difficulty": "Medium",
       "category": "Copilot Chat",
       "tags": ["search", "knowledge"],
-      "packs": ["core", "wave-2"],
+      "packs": ["core", "wave-2", "copilot-essentials"],
       "introduced": "2025-04",
       "hints": [
         "Microsoft calls me the 'organising layer'; my sibling is where the work gets done.",
@@ -1929,20 +1345,6 @@
       ],
       "description": "An AI-powered universal search tab in the Copilot app: ask in plain words or keywords and it finds emails, files, chats, meetings and connected third-party content, sometimes with a short Copilot Answer on top. Formerly Microsoft 365 Copilot Search.",
       "why": "Work lives in inboxes, chat threads, files and other apps. One search across all of them, sometimes with a quick AI answer on top, means less time hunting and more time doing.",
-      "useCases": [
-        {
-          "title": "Find that proposal",
-          "text": "A sales rep searches for 'Contoso renewal' and finds the email thread, the proposal file and the Teams chat in one results page."
-        },
-        {
-          "title": "Decode company jargon",
-          "text": "A new starter searches for an unfamiliar acronym and can get an admin-curated answer, instead of asking around the team."
-        },
-        {
-          "title": "Search beyond Microsoft 365",
-          "text": "A support lead searches once across SharePoint files and a connected third-party knowledge base, then continues in Chat to draft a reply."
-        }
-      ],
       "prompt": "Where is the latest version of the Fabrikam renewal proposal, and who emailed or messaged about pricing changes in the last month?",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-search-overview",
       "learnLabel": "Microsoft Learn: Copilot Search",
@@ -1969,20 +1371,6 @@
       ],
       "description": "Microsoft's free, downloadable rollout resources for Copilot: leader, user-enablement and technical-readiness guides, plus checklists, worksheets and digital swag. Download the parts your role needs to roll Copilot out across your organisation.",
       "why": "A good rollout needs more than licences: leaders, IT and trainers all need to pull the same way. The kit gives each group guides and checklists, so nobody starts from a blank page.",
-      "useCases": [
-        {
-          "title": "IT readiness planning",
-          "text": "An IT lead at a council works through the Technical Readiness Guide, then uses the licence allocation guide to decide who gets Copilot first."
-        },
-        {
-          "title": "User enablement kick-off",
-          "text": "A retail learning manager sends the ready-to-send onboarding emails and runs a Prompt-a-thon from the engagement tools, so store managers start trying Copilot."
-        },
-        {
-          "title": "Executive sponsor briefing",
-          "text": "A hospital's chief operating officer reads the Implementation Summary Guide for Leaders to understand what a Copilot rollout involves before backing the programme."
-        }
-      ],
       "prompt": "I'm rolling out Copilot to about 400 staff. Using Microsoft's Copilot Success Kit as a guide, outline what leaders, IT and user enablement each need to do in the first 30 days, then draft a short onboarding email.",
       "learnMore": "https://adoption.microsoft.com/en-us/copilot/success-kit/",
       "learnLabel": "Microsoft Adoption: Copilot Success Kit",
@@ -2011,20 +1399,6 @@
       ],
       "description": "Two reports in the Microsoft 365 admin center that show how people adopt Copilot: one for licensed users, one for Copilot Chat use by people without a licence. Pick a timeframe from a week to roughly six months and compare trends.",
       "why": "Rolling out Copilot is only half the job. These reports show admins who's actually trying it and in which apps, so they can spot gaps and decide where to encourage people next.",
-      "useCases": [
-        {
-          "title": "Licence value check",
-          "text": "A hospital IT admin checks the active users rate for licensed staff over recent weeks, then plans extra training if few people are trying Copilot."
-        },
-        {
-          "title": "Launch momentum tracking",
-          "text": "A retailer's change manager runs a Copilot awareness month, then uses the trend view to see whether daily activity rises across apps."
-        },
-        {
-          "title": "Chat-only rollout check",
-          "text": "A council's digital team checks how many unlicensed staff use Copilot Chat, then follows the recommendation card's tip to pin Copilot in apps like Teams and Outlook."
-        }
-      ],
       "prompt": "Help me plan a monthly Copilot adoption review. Walk me through which numbers to look at in the Microsoft 365 admin center's Copilot and Copilot Chat usage reports (enabled users, active users, prompts), and what actions to take if adoption is low.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/admin/activity-reports/microsoft-365-copilot-usage?view=o365-worldwide",
       "learnLabel": "Microsoft Learn: Copilot usage report",
@@ -2053,20 +1427,6 @@
       ],
       "description": "Lets Copilot work live in a Teams meeting or call without turning on transcription or recording. The organiser picks 'Only during the meeting' (calls need an admin-enabled Copilot-only mode), then participants start Copilot from the controls for notes and tasks.",
       "why": "Confidential discussions don't have to go without AI help. You can still get live notes and tasks without a transcript or recording being started.",
-      "useCases": [
-        {
-          "title": "Confidential HR meeting",
-          "text": "An HR partner sets the meeting to 'Only during the meeting', then starts Copilot for notes and tasks on a sensitive case without a transcript or recording."
-        },
-        {
-          "title": "Contract strategy huddle",
-          "text": "Finance leads choose 'Only during the meeting' for an internal contract-strategy huddle, so Copilot can list tasks live while nothing is transcribed automatically."
-        },
-        {
-          "title": "Clinical incident review",
-          "text": "A hospital quality team reviewing an incident starts Copilot partway through to capture notes and tasks, without a transcript or recording being started."
-        }
-      ],
       "prompt": "Give me a short list of the key points and action items from this meeting so far, with an owner next to each one.",
       "learnMore": "https://support.microsoft.com/en-us/teams/copilot/use-copilot-without-transcribing-or-recording-a-teams-meeting-or-call",
       "learnLabel": "Microsoft Support: Copilot without transcribing or recording",
@@ -2091,20 +1451,6 @@
       ],
       "description": "A code-first framework for building conversational agents in C#, JavaScript or Python. It handles channels, state and authentication, so one agent can serve Teams, Microsoft Copilot or a website, using any AI service you choose.",
       "why": "Build a conversational assistant once and reach people in Teams, on a website or inside Microsoft 365 Copilot, using the AI service you prefer, instead of rebuilding it for every channel.",
-      "useCases": [
-        {
-          "title": "HR policy assistant",
-          "text": "An HR developer builds one policy-answering assistant on the company's chosen AI service and publishes it to Teams and the intranet website from the same code."
-        },
-        {
-          "title": "Support bot across channels",
-          "text": "A retailer's developers build one support assistant and serve it on the website, in Slack and in Teams, keeping conversation state in the SDK's built-in storage."
-        },
-        {
-          "title": "Custom engine for Copilot",
-          "text": "A hospital IT team connects its approved AI service to an assistant for staff questions, then surfaces it inside Microsoft 365 Copilot as a custom engine agent."
-        }
-      ],
       "prompt": "I'm a C# developer. Outline how I'd use the Microsoft 365 Agents SDK to build an agent that answers HR policy questions in Teams and on our intranet, using our own AI service. Include channels, state and authentication.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/agents-sdk/agents-sdk-overview",
       "learnLabel": "Microsoft Learn: Microsoft 365 Agents SDK",
@@ -2134,20 +1480,6 @@
       ],
       "description": "A family of Microsoft Graph-based APIs that lets your own apps and custom engine agents use Copilot capabilities, like grounded retrieval, chat, search and meeting insights, while respecting existing permissions and keeping data inside the Microsoft 365 service boundary.",
       "why": "Teams can build tools that answer using company content people are already allowed to see, without copying data out of Microsoft 365. Some of the APIs are still in preview.",
-      "useCases": [
-        {
-          "title": "Grounded policy answers",
-          "text": "A public-sector developer grounds a staff helper in SharePoint policies via the Retrieval API, so answers only use content each employee may already access."
-        },
-        {
-          "title": "Compliance review of interactions",
-          "text": "A compliance team uses the Interaction Export API (preview) to bring Copilot interactions into its own review tooling for oversight."
-        },
-        {
-          "title": "Usage dashboard for leadership",
-          "text": "An IT admin pulls Copilot usage reports through Microsoft Graph into a custom dashboard, so executives can track how adoption is progressing."
-        }
-      ],
       "prompt": "I'm a developer planning to ground our internal HR assistant in SharePoint content. Explain how the Microsoft 365 Copilot Retrieval API works, which Graph permissions I'd need, and how permission trimming keeps answers limited to what each user can already access.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/copilot-apis-overview",
       "learnLabel": "Microsoft Learn: Copilot APIs overview",
@@ -2171,20 +1503,6 @@
       ],
       "description": "Microsoft's control plane for AI agents: a central registry of the agents in your organisation, however they were built, plus identity, observability, security and compliance controls through Entra, Defender and Purview.",
       "why": "AI agents are multiplying fast. It gives IT one place to see them, control what they can access and respond to risks, so teams can adopt agents without losing oversight.",
-      "useCases": [
-        {
-          "title": "Quarantine unsanctioned agents",
-          "text": "An IT admin reviews the registry, spots an AI agent nobody approved and quarantines it."
-        },
-        {
-          "title": "Single source of truth",
-          "text": "A bank's risk team uses the registry as one source of truth for its AI agents, whether built on Microsoft platforms, open-source frameworks or partner clouds."
-        },
-        {
-          "title": "Onboard a Studio-built agent",
-          "text": "A maker finishes an agent in Copilot Studio and onboards it to Agent 365, so IT can govern it alongside agents built elsewhere."
-        }
-      ],
       "prompt": "I'm an IT admin. Help me plan a rollout of Agent 365 for our organisation: how to use the agent registry, which Entra, Defender and Purview integrations matter, and what policies to set before teams start building more agents.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-agent-365/overview",
       "learnLabel": "Microsoft Learn: Agent 365 overview",
@@ -2208,20 +1526,6 @@
       ],
       "description": "An identity and security framework in Microsoft Entra that gives AI agents their own governed identities. Agent identities are created from reusable blueprints and can authenticate with standard protocols such as OAuth 2.0, MCP and A2A, on Microsoft or non-Microsoft platforms.",
       "why": "AI agents acting in your systems need an accountable identity, like staff do. Every agent identity can have a human sponsor, and Entra's access and audit controls can be extended to it with Agent 365.",
-      "useCases": [
-        {
-          "title": "Blueprint once, govern many",
-          "text": "An identity admin defines one blueprint so every agent identity created from it gets consistent security policies across the whole fleet."
-        },
-        {
-          "title": "Sponsor leaves, ownership moves",
-          "text": "A hospital's governance lead relies on a Lifecycle Workflow to transfer sponsorship automatically when an agent's sponsor leaves, so no agent identity is left unowned."
-        },
-        {
-          "title": "Bring a third-party agent",
-          "text": "A developer integrates an n8n or AWS Bedrock agent using the Entra ID Auth SDK sidecar or workload identity federation, so it gets a governed identity too."
-        }
-      ],
       "prompt": "I'm an identity architect. Explain how Microsoft Entra Agent ID uses agent identity blueprints, sponsors and Conditional Access to govern AI agents, and draft a checklist for onboarding our Copilot Studio agents and a third-party agent to it.",
       "learnMore": "https://learn.microsoft.com/en-us/entra/agent-id/what-is-microsoft-entra-agent-id",
       "learnLabel": "Microsoft Learn: What is Microsoft Entra Agent ID?",
@@ -2246,20 +1550,6 @@
       ],
       "description": "Microsoft's workplace intelligence layer, which continuously builds a semantic understanding across Microsoft 365 and external systems. It powers Microsoft 365 Copilot, and developers can call it from their own agents through A2A, a remote MCP server or a REST API.",
       "why": "Your own AI helpers can draw on the same workplace understanding that powers Microsoft 365 Copilot, without each team building its own data pipeline, and a policy engine checks every request.",
-      "useCases": [
-        {
-          "title": "Sales prep without plumbing",
-          "text": "A sales team's custom agent pulls context from mail, meetings, chats and files through Work IQ, with no retrieval pipeline to build."
-        },
-        {
-          "title": "Auditable internal assistant",
-          "text": "An IT team builds an internal assistant on the Work IQ MCP server; a policy engine checks every request and every tool call is logged."
-        },
-        {
-          "title": "Working storage for long tasks",
-          "text": "A consultancy's research agent keeps its working files in a Work IQ workspace (SharePoint Embedded), giving a long-running task proper working storage."
-        }
-      ],
       "prompt": "I'm building a custom AI helper for our sales team. Explain how Work IQ fits in: its chat, context, tools and workspaces building blocks, how it differs from Microsoft Graph and the Retrieval API, and what governance and billing questions I should raise with IT first.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/work-iq/",
       "learnLabel": "Microsoft Learn: Work IQ",
@@ -2282,20 +1572,6 @@
       ],
       "description": "Reports in the SharePoint admin center that show which sites are shared widely or hold labelled content. Snapshots cover permissions and sensitivity labels; activity reports track sharing links and 'Everyone except external users' sharing over the last 28 days.",
       "why": "Fixing oversharing before Copilot surfaces content to more people protects colleagues' private files. These reports show IT where sharing is too broad, so problems get sorted before a rollout, not after.",
-      "useCases": [
-        {
-          "title": "Pre-rollout oversharing sweep",
-          "text": "A council IT team runs the site permissions snapshot before a Copilot pilot to find sites with external guests or 'Everyone except external users' permissions."
-        },
-        {
-          "title": "Check one person's reach",
-          "text": "A law firm's security analyst lists every site a departing contractor can reach, directly or through groups, before wrapping up their offboarding."
-        },
-        {
-          "title": "Monthly sharing-links check",
-          "text": "A bank's compliance lead reviews the sharing links activity report each month to see which sites recently created the most Anyone links."
-        }
-      ],
       "prompt": "I'm a SharePoint admin planning a Copilot rollout. Explain how to use data access governance reports to find overshared sites, which snapshot and activity reports to run first and how often, and how to work through the results with site owners.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/data-access-governance-reports",
       "learnLabel": "Microsoft Learn: Data access governance reports",
@@ -2319,20 +1595,6 @@
       ],
       "description": "A Microsoft Purview solution where security teams see where sensitive data lives, who can access it and how well it's protected, including data used by Copilot and agents. It replaces 'DSPM for AI', which is now called classic.",
       "why": "Before AI can be rolled out safely, security teams need to know where sensitive data sits and who can reach it. A guided, one-click workflow turns that insight into action.",
-      "useCases": [
-        {
-          "title": "Preventing exposure in Copilot",
-          "text": "A hospital security analyst picks the objective to prevent data exposure in Copilot interactions, then follows its guided workflow and one-click policies."
-        },
-        {
-          "title": "Automating oversharing fixes",
-          "text": "A university IT security lead uses the oversharing objective to spot risky sharing and automate fixes such as removing public sharing links."
-        },
-        {
-          "title": "Watching agent behaviour",
-          "text": "A bank's risk team uses the AI observability dashboards to watch agent activity for oversharing, exfiltration and unusual access patterns."
-        }
-      ],
       "prompt": "I'm a Microsoft 365 security admin planning our AI rollout. Using Microsoft Purview Data Security Posture Management, suggest which data security objectives to start with, what first-time setup to expect, and a weekly routine for reviewing oversharing and Copilot data-exposure risks.",
       "learnMore": "https://learn.microsoft.com/en-us/purview/data-security-posture-management-learn-about",
       "learnLabel": "Microsoft Learn: Data Security Posture Management",
@@ -2362,20 +1624,6 @@
       ],
       "description": "A Copilot Studio capability that lets an agent start work by itself when something happens, such as a new SharePoint item, a completed Planner task or a timer, instead of waiting for someone to type. It needs generative orchestration turned on.",
       "why": "Agents can go beyond answering chat questions and start handling routine work on their own, reacting to new items, files or schedules while people focus on other things.",
-      "useCases": [
-        {
-          "title": "Order intake",
-          "text": "When an order record changes in Dataverse, the agent checks the details, drafts a customer confirmation and flags anything unusual for the fulfilment team."
-        },
-        {
-          "title": "New starter setup",
-          "text": "When HR adds a new starter to a SharePoint list, the agent creates onboarding tasks in Planner and drafts a welcome email for their manager."
-        },
-        {
-          "title": "Recurring finance check",
-          "text": "A timer wakes the agent on a schedule to find overdue invoices and email the finance team a short summary of what still needs chasing."
-        }
-      ],
       "prompt": "I'm building a Copilot Studio agent that should start by itself when a new item is added to our SharePoint 'Support Requests' list. Help me plan the trigger, what instructions to put in the payload, and which actions the agent should call.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/authoring-triggers-about",
       "learnLabel": "Microsoft Learn: Event triggers overview",
@@ -2405,20 +1653,6 @@
       ],
       "description": "The enterprise data and websites a Copilot Studio agent searches to ground its answers, including public sites, uploaded documents, SharePoint, Dataverse and Copilot connectors. Authenticated sources only return content the person asking is allowed to access.",
       "why": "Answers come from material your team picks, and signed-in users only see what they're already allowed to access, so agents stay useful without oversharing.",
-      "useCases": [
-        {
-          "title": "Policy answers",
-          "text": "An HR agent answers leave and expenses questions from policy documents on SharePoint, so staff get consistent answers without emailing the People team."
-        },
-        {
-          "title": "Approved websites only",
-          "text": "A support agent searches only the company's own help-centre pages, so customers get answers from approved public sites rather than the whole web."
-        },
-        {
-          "title": "Equipment lookup",
-          "text": "A field-service agent answers technicians' questions using equipment records stored in Dataverse, so they don't have to call the back office."
-        }
-      ],
       "prompt": "I'm building an HR agent in Copilot Studio. Which knowledge sources should I add so it answers only from our SharePoint policies and approved public websites, and how do I make sure each person's permissions are respected?",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio",
       "learnLabel": "Microsoft Learn: Knowledge sources summary",
@@ -2449,20 +1683,6 @@
       ],
       "description": "Microsoft's opt-in early-access programme that lets organisations try new Microsoft 365 and Copilot capabilities, including experimental agents, as previews before general availability. IT admins choose which users get which features and agents.",
       "why": "Teams can try emerging features early and plan ahead, while IT stays in control of who gets what and everyone else carries on as normal.",
-      "useCases": [
-        {
-          "title": "Pilot group trial",
-          "text": "An IT admin switches access on for a small pilot group only, so selected colleagues can test new agents while everyone else carries on as usual."
-        },
-        {
-          "title": "Champions go first",
-          "text": "An adoption lead asks IT to enrol Copilot champions, who try preview agents from the Agent Store and report back on what works before a wider rollout."
-        },
-        {
-          "title": "Review before enabling",
-          "text": "A security officer reads the preview terms first and notes that AI providers are never switched on automatically: each model needs separate approval in the admin centre."
-        }
-      ],
       "prompt": "We're planning a pilot of Microsoft's Frontier early-access features. Draft a one-page plan for our IT admin covering who should be in the pilot group, what to tell them about preview terms and support, and how we'll decide whether to widen access.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/admin/manage/get-started-frontier?view=o365-worldwide",
       "learnLabel": "Microsoft Learn: Frontier program",
@@ -2486,20 +1706,6 @@
       ],
       "description": "An agentic mode of Microsoft Copilot that takes an outcome you describe, plans it and carries out the multi-step work across Microsoft 365, such as emails, meetings, documents and Teams posts, pausing for your approval before sensitive actions.",
       "why": "You can hand off time-consuming, multi-step admin and stay in control: watch each step, pause or cancel, and approve important actions before they happen.",
-      "useCases": [
-        {
-          "title": "Client meeting prep",
-          "text": "Before a client call, it gathers recent emails, meetings and files, then drafts a one-page Word brief saved to OneDrive."
-        },
-        {
-          "title": "Interview scheduling",
-          "text": "A recruiter asks it to find slots for three interviews and draft the invitations, then approves the emails before anything is sent."
-        },
-        {
-          "title": "Scheduled weekly report",
-          "text": "Every Friday, a scheduled prompt compiles the week's project updates from emails and Teams into a short report for the leadership team."
-        }
-      ],
       "prompt": "Prepare me for tomorrow's 10am call with Contoso: summarise our recent emails and meetings, list open actions, and save a one-page brief in Word to OneDrive. Then draft an email to the team asking for any last updates, and check with me before sending.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/",
       "learnLabel": "Microsoft Learn: Copilot Cowork",
@@ -2524,20 +1730,6 @@
       ],
       "description": "Microsoft's always-on 'digital teammate' agent for Microsoft 365, previously called Scout. You give it a name, a role and a goal, and it works in the background under its own governed identity. Currently in preview.",
       "why": "Routine follow-ups, monitoring and recurring tasks can carry on in the background without someone prompting each step, while sensitive actions can still require human sign-off.",
-      "useCases": [
-        {
-          "title": "Channel follow-ups",
-          "text": "It keeps an eye on a project channel and follows up on unanswered threads, so questions don't stall while the team is busy."
-        },
-        {
-          "title": "Morning inbox sweep",
-          "text": "Each morning it reviews a shared Outlook inbox for new supplier queries and posts a short summary of what needs attention to the finance team's Teams channel."
-        },
-        {
-          "title": "Ask it in Teams",
-          "text": "A sales manager @mentions it in Teams with a request; it works under its own governed identity and can ask for sign-off on sensitive actions."
-        }
-      ],
       "prompt": "Your name is Riley, a project coordinator agent. Your goal is to keep the Apollo launch on track: watch the project channel, follow up on unanswered questions, and send me a short summary each morning. Ask me before sending anything externally.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-scout/overview",
       "learnLabel": "Microsoft Learn: Microsoft Scout (Frontier) overview",
@@ -2567,20 +1759,6 @@
       ],
       "description": "A Copilot Studio runtime for reasoning-heavy agents and workflows. It takes a goal, plans the steps, calls tools across connectors, knowledge and MCP servers, creates Word, Excel, PowerPoint and PDF files, and runs each task in a secure sandbox.",
       "why": "Makers can build agents that handle multi-step business work, like reading invoices, matching purchase orders and routing exceptions for approval, without scripting every step.",
-      "useCases": [
-        {
-          "title": "Invoice processing",
-          "text": "An agent reads supplier invoices, matches them to purchase orders and routes any exceptions to an approver, adjusting when a step fails."
-        },
-        {
-          "title": "Weekly report pack",
-          "text": "A maker's agent gathers sales figures from connected systems and creates an Excel workbook and a PowerPoint summary ready for Monday's leadership meeting."
-        },
-        {
-          "title": "Shared team skills",
-          "text": "A compliance team packages its contract-review checklist as a skill and adds it to several agents, so each one follows the same instructions."
-        }
-      ],
       "prompt": "I'm a Copilot Studio maker. Help me decide whether my accounts payable agent should run on the GitHub Copilot harness or the standard harness, and list the tools, skills and approval steps I'd set up for invoice matching.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-copilot-studio/harnesses-overview",
       "learnLabel": "Microsoft Learn: Harnesses in Copilot Studio",
@@ -2605,20 +1783,6 @@
       ],
       "description": "Microsoft's umbrella for the shared intelligence layer behind its agents. It brings together Work IQ (how people work), Fabric IQ (the live state of the business), Foundry IQ (curated knowledge) and Web IQ (fresh web grounding).",
       "why": "Developers can build agents once and reuse the same trusted company context wherever those agents run, instead of wiring up data and knowledge separately every time.",
-      "useCases": [
-        {
-          "title": "Build once, reuse",
-          "text": "A developer reuses the same organisational context across agents built for GitHub Copilot, Microsoft Foundry and Copilot Studio, rather than rebuilding it for each."
-        },
-        {
-          "title": "Grounded business answers",
-          "text": "A retail manager asks Copilot about store performance, and the answer can be grounded in the company's own Power BI semantic models through Fabric IQ."
-        },
-        {
-          "title": "Shared policy library",
-          "text": "A compliance team shares one curated knowledge base of policies across several agents, honouring sensitivity labels and running queries under each caller's identity."
-        }
-      ],
       "prompt": "I'm designing an agent for our finance team. Explain how the four Microsoft IQ layers (Work IQ, Fabric IQ, Foundry IQ and Web IQ) could each ground its answers, and which ones we'd need first for a pilot.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-iq/",
       "learnLabel": "Microsoft Learn: Microsoft IQ documentation",
@@ -2646,20 +1810,6 @@
       ],
       "description": "Microsoft's name for the controls and contractual commitments covering prompts, responses and Microsoft Graph data when organisations use Copilot or Copilot Chat. Microsoft acts as data processor, and that content isn't used to train foundation models.",
       "why": "Colleagues can use Copilot on real work knowing their prompts and answers aren't used to train AI models. IT and legal teams get a clear, contract-backed answer to 'is this okay to use?'",
-      "useCases": [
-        {
-          "title": "Board paper polish",
-          "text": "A finance manager asks Copilot Chat to tighten a draft board paper, knowing prompts and replies aren't used to train models."
-        },
-        {
-          "title": "Hospital privacy review",
-          "text": "A hospital privacy officer confirms HIPAA support applies to properly configured Copilot use, and warns staff that web search queries fall outside that coverage."
-        },
-        {
-          "title": "Vendor risk review",
-          "text": "A council's IT security lead gathers evidence for a vendor risk review: encryption, tenant isolation, and named commitments such as GDPR and ISO/IEC 27018."
-        }
-      ],
       "prompt": "Draft a one-page staff briefing on enterprise data protection for Copilot Chat: what the Data Protection Addendum covers, how web search queries are handled differently, and what people should still be careful about typing in.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/enterprise-data-protection",
       "learnLabel": "Microsoft Learn: Enterprise data protection"
@@ -2688,20 +1838,6 @@
       ],
       "description": "Announced in private preview at Microsoft Ignite in November 2024 for Microsoft 365 Copilot at work: set-and-forget prompts with blanks to fill in, like a daily summary of action items. Scheduled prompts and Cowork now cover similar ground.",
       "why": "Recurring chores shouldn't mean retyping the same prompt. Scheduled prompts, today's nearest equivalent, run your saved prompts on a schedule and drop the results into Chats.",
-      "useCases": [
-        {
-          "title": "Daily to-do round-up",
-          "text": "A project manager sets up a daily summary of open action items, so the team starts each morning knowing who owes what."
-        },
-        {
-          "title": "Newsletter input gathering",
-          "text": "A council communications officer sets up a repeating prompt that gathers team inputs for the weekly staff newsletter, instead of chasing everyone by hand."
-        },
-        {
-          "title": "Customer-meeting prep",
-          "text": "An account manager reuses one fill-in-the-blank prompt to prepare for each recurring customer meeting, swapping in just the customer's name."
-        }
-      ],
       "prompt": "Summarise the action items assigned to me across yesterday's meetings, chats and email, group them by due date and flag anything overdue.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/schedule-your-most-used-copilot-prompts",
       "learnLabel": "Microsoft Support: Scheduled prompts (closest today)",
@@ -2730,20 +1866,6 @@
       ],
       "description": "Lets Copilot see what you share during a voice conversation: your desktop screen or your phone's camera. It explains what it sees and guides you step by step, but never clicks, types or scrolls for you.",
       "why": "Instead of typing out a long description of a tricky screen or object, you show Copilot and get step-by-step help in the moment.",
-      "useCases": [
-        {
-          "title": "Demystify a dashboard",
-          "text": "A finance analyst shares a dense dashboard on screen and asks Copilot to explain what each chart shows and which figures to check first."
-        },
-        {
-          "title": "New-starter walk-through",
-          "text": "A new starter shares their screen and asks Copilot to talk them through submitting an expense claim, one step at a time."
-        },
-        {
-          "title": "Point your phone camera",
-          "text": "A facilities technician points a phone camera at an unfamiliar control panel and asks Copilot what each label and switch is for."
-        }
-      ],
       "prompt": "Look at the expense claim form on my screen and talk me through each section, one step at a time. Tell me if anything looks like it's missing.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-vision-microsoft-365-copilot",
       "learnLabel": "Microsoft Support: Get started with Vision",
@@ -2772,20 +1894,6 @@
       ],
       "description": "A real-time spoken conversation with Copilot: you talk, it answers out loud, hands free. It sits alongside dictation (speak instead of typing) and read aloud, and leaves a text transcript when the conversation ends.",
       "why": "Sometimes talking is faster than typing. You can brainstorm, prepare for the day or get coaching hands free, and still have a written transcript afterwards.",
-      "useCases": [
-        {
-          "title": "Prepare for the day",
-          "text": "A sales manager talks through the day's priorities and gets Copilot to suggest, out loud, what to tackle first and what to delegate."
-        },
-        {
-          "title": "Brainstorm hands free",
-          "text": "A teacher brainstorms lesson activities with Copilot out loud while setting up the classroom, then skims the text transcript afterwards."
-        },
-        {
-          "title": "Rehearse a pitch",
-          "text": "A graduate analyst rehearses a client pitch aloud, gets spoken coaching from Copilot, and interrupts to try a different angle."
-        }
-      ],
       "prompt": "Help me plan my day. I have a team meeting at ten, a client call at two and a report due by five. Ask me questions, then suggest an order for my tasks.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-with-voice-features-in-microsoft-365-copilot",
       "learnLabel": "Microsoft Support: Voice features in Microsoft 365 Copilot",
@@ -2815,20 +1923,6 @@
       ],
       "description": "Microsoft's unified front door to Copilot on Windows, Mac, web, iOS and Android, formerly the Microsoft 365 Copilot app. Sign in with a work or personal account to chat, search, use agents, create files and delegate multistep jobs to Cowork.",
       "why": "One familiar starting point for Copilot, whether you're signed in for work or at home. Your chats, creations and agents live in one place, and work and personal accounts stay separate.",
-      "useCases": [
-        {
-          "title": "New hire's starting point",
-          "text": "A new hire signs in with their work account and finds chat, search, agents and a launcher for Word, Excel and PowerPoint all in one place."
-        },
-        {
-          "title": "Delegate multistep jobs",
-          "text": "A project coordinator hands a multistep job to Cowork from the navigation pane, then returns later to review the finished to-dos."
-        },
-        {
-          "title": "Work versus personal",
-          "text": "A consultant using both a work and a personal account checks the Work or Personal label beside their profile, knowing the two stay separate."
-        }
-      ],
       "prompt": "Summarise what changed on the Contoso renewal this week from my emails and meetings, then create a one-page Word briefing I can share with my team.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/what-is-microsoft-copilot-app",
       "learnLabel": "Microsoft Support: What is the Microsoft Copilot app?",
@@ -2847,7 +1941,7 @@
       "difficulty": "Easy",
       "category": "Microsoft 365 Apps",
       "tags": ["creation", "essentials"],
-      "packs": ["core", "wave-3"],
+      "packs": ["core", "wave-3", "copilot-essentials"],
       "introduced": "2023-03",
       "hints": [
         "I turn 'where do I even start?' into a first draft.",
@@ -2858,20 +1952,6 @@
       ],
       "description": "Copilot built into Word: describe a document and it drafts it, reuse your existing files, rewrite selected text, or ask it to edit the document in place. It can add citations, turn text into tables, and respects sensitivity labels.",
       "why": "The blank page is the slowest part of writing. Copilot gives you a first draft built from files you already have, so you spend your time refining and checking rather than starting from scratch.",
-      "useCases": [
-        {
-          "title": "Invoice from a PO",
-          "text": "An accounts officer points Copilot at a purchase-order PDF and asks it to fill in an invoice, then checks the figures before sending."
-        },
-        {
-          "title": "Update a regulatory package",
-          "text": "A compliance analyst asks Copilot to update last year's regulatory package using this year's source files, then reviews each change it makes."
-        },
-        {
-          "title": "Polish a policy draft",
-          "text": "An HR manager selects a dense paragraph in a draft policy and uses Auto Rewrite to make it clearer, choosing whether to replace or insert below."
-        }
-      ],
       "prompt": "Draft a two-page onboarding guide for new customer-support staff. Reuse the structure and headings of our existing support handbook, add a first-week checklist and keep the tone friendly.",
       "learnMore": "https://support.microsoft.com/en-us/word/copilot/draft-and-add-content-with-copilot-in-word",
       "learnLabel": "Microsoft Support: Draft and add content with Copilot in Word",
@@ -2890,7 +1970,7 @@
       "difficulty": "Easy",
       "category": "Microsoft 365 Apps",
       "tags": ["creation", "essentials"],
-      "packs": ["core", "wave-3"],
+      "packs": ["core", "wave-3", "copilot-essentials"],
       "introduced": "2023-03",
       "hints": [
         "Hand me a prompt or a document and I'll hand back a first draft deck.",
@@ -2901,20 +1981,6 @@
       ],
       "description": "Copilot inside PowerPoint: ask it to create a presentation from a prompt or file, add slides, rewrite text, generate images or summarise. It can use your Brand Kit to stay on brand and may ask clarifying questions before it builds.",
       "why": "Building a deck from scratch takes time. Copilot drafts a first version from your prompt or documents and keeps it on-brand, leaving you to shape the story.",
-      "useCases": [
-        {
-          "title": "Proposal to client deck",
-          "text": "A consultant points Copilot at a Word proposal and asks for a ten-slide client deck, then edits the first draft rather than starting blank."
-        },
-        {
-          "title": "Stay on brand",
-          "text": "A marketing coordinator selects the company brand so Copilot builds slides that stay on brand, instead of fixing each one by hand."
-        },
-        {
-          "title": "Summarise an inherited deck",
-          "text": "A training lead asks Copilot to summarise an inherited 60-slide deck into its key messages before updating it for the new cohort."
-        }
-      ],
       "prompt": "Create a presentation from my Q3 sales summary document: ten slides for our quarterly business review, in our company brand, opening with a one-slide headline. Ask me anything you need before you start.",
       "learnMore": "https://support.microsoft.com/en-us/powerpoint/edit-with-copilot-in-powerpoint",
       "learnLabel": "Microsoft Support: Edit with Copilot in PowerPoint",
@@ -2943,20 +2009,6 @@
       ],
       "description": "Announced as generally available in Copilot in PowerPoint in September 2024: type a prompt, edit and refine an outline of topics, then Copilot drafts the first deck. Today's PowerPoint help talks about creating from a prompt or file instead.",
       "why": "Great decks start with a clear storyline. Agreeing the outline first meant you steered the structure early, instead of untangling a finished first draft afterwards.",
-      "useCases": [
-        {
-          "title": "Outline before slides",
-          "text": "A sales director typed a prompt for a client pitch, then reordered and trimmed the proposed topics before Copilot drafted any slides."
-        },
-        {
-          "title": "Refine the storyline",
-          "text": "A programme manager refined the topic outline until the storyline felt right, then let Copilot draft the first version of the deck."
-        },
-        {
-          "title": "On-brand first draft",
-          "text": "A communications lead used the companion Brand manager so the first draft followed the company's branded template, rather than a generic theme."
-        }
-      ],
       "prompt": "Create a presentation on our new customer onboarding process for the leadership team. Start with an outline of the main topics so I can edit and reorder them before you draft any slides.",
       "learnMore": "https://www.microsoft.com/en-us/copilot/blog/2024/09/16/microsoft-365-copilot-wave-2-pages-python-in-excel-and-agents/",
       "learnLabel": "Microsoft Copilot blog: Wave 2 (Sept 2024)",
@@ -2975,7 +2027,7 @@
       "difficulty": "Easy",
       "category": "Microsoft 365 Apps",
       "tags": ["data", "analysis", "essentials"],
-      "packs": ["core", "wave-2", "wave-3"],
+      "packs": ["core", "wave-2", "wave-3", "copilot-essentials"],
       "introduced": "2023-03",
       "hints": [
         "I borrow the tools you already use, so what I leave behind stays editable.",
@@ -2986,20 +2038,6 @@
       ],
       "description": "Copilot inside Excel builds and edits workbooks from plain-English requests, using tables, charts, PivotTables and formulas. Edit mode works on the sheet while you watch, plan mode shows a plan first, and chat mode only analyses.",
       "why": "Not everyone is a spreadsheet expert. Copilot turns a plain request into formulas, charts and PivotTables that stay fully editable, so you can analyse data quickly and still check the workings.",
-      "useCases": [
-        {
-          "title": "Tidy a messy export",
-          "text": "A finance analyst asks Copilot to tidy a messy ledger export and add a variance column, then reviews the changes it made."
-        },
-        {
-          "title": "PivotTable on request",
-          "text": "A sales manager asks for a PivotTable and chart of revenue by region and quarter, and Copilot builds both with links back to the source data."
-        },
-        {
-          "title": "Plan before it edits",
-          "text": "An HR analyst uses plan mode on a headcount workbook, reads Copilot's proposed steps and approves them before anything in the file changes."
-        }
-      ],
       "prompt": "Using the Sales table, create a PivotTable showing revenue by region and quarter, add a column chart beside it, and highlight any region that fell more than 10% quarter on quarter.",
       "learnMore": "https://support.microsoft.com/en-us/excel/copilot/get-started-with-copilot-in-excel",
       "learnLabel": "Microsoft Support: Get started with Copilot in Excel",
@@ -3030,20 +2068,6 @@
       ],
       "description": "Copilot makes multi-step changes inside your open Word, Excel or PowerPoint file and lets you review what changed; in chat, its Word, Excel and PowerPoint Agents ask questions, then build and save a new file to OneDrive. Formerly Agent Mode and Office Agent.",
       "why": "Describe the result you want and let Copilot do the fiddly formatting, formulas and layout work, so you spend your time steering and checking instead of building every step by hand.",
-      "useCases": [
-        {
-          "title": "Variance workbook",
-          "text": "A finance analyst asks Copilot to turn raw ledger data into a table, PivotTable and chart of budget versus actual, then reviews what changed."
-        },
-        {
-          "title": "Policy refresh",
-          "text": "An HR advisor opens last year's leave policy in Word and asks Copilot to restructure it into plain-English sections, then reads the summary of changes."
-        },
-        {
-          "title": "Pitch deck from chat",
-          "text": "A sales lead asks the PowerPoint Agent in chat for a customer pitch deck; it asks clarifying questions, builds the file and saves it to OneDrive."
-        }
-      ],
       "prompt": "In this workbook, turn the raw sales data on the Data sheet into a table, add a PivotTable of revenue by region and month, chart the top five regions, and summarise what you changed so I can review it.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/wordexcelppt-agents",
       "learnLabel": "Microsoft Learn: Word, Excel and PowerPoint Agents",
@@ -3067,20 +2091,6 @@
       ],
       "description": "Microsoft's 16 September 2024 bundle of Copilot announcements: Copilot Pages, upgrades across the Microsoft 365 apps (such as Copilot in Excel going generally available) and Copilot agents with an agent builder. The theme was web + work + Pages.",
       "why": "Pages, agent building and the Copilot Chat name were all announced here, so knowing it helps champions explain where many Copilot features came from.",
-      "useCases": [
-        {
-          "title": "Champion kickoff briefing",
-          "text": "A Copilot champion revisits the September 2024 announcement to explain to new staff where Pages, agents and Copilot Chat came from, in plain English."
-        },
-        {
-          "title": "Release-history review",
-          "text": "An IT lead builds a timeline of what shipped when, separating generally available items from previews announced alongside, such as Python in Excel and Prioritize my inbox."
-        },
-        {
-          "title": "Learning path refresh",
-          "text": "A trainer turns the announcement's Excel, PowerPoint and Outlook upgrades into short practice exercises and adds them to the team's Copilot learning path."
-        }
-      ],
       "prompt": "Summarise what Microsoft announced for Microsoft 365 Copilot on 16 September 2024 (Wave 2): Pages, Excel and PowerPoint upgrades, Outlook and agents. Then build a one-page briefing for our champions on what each item means for our teams today.",
       "learnMore": "https://www.microsoft.com/en-us/copilot/blog/2024/09/16/microsoft-365-copilot-wave-2-pages-python-in-excel-and-agents/",
       "learnLabel": "Microsoft Copilot blog: Wave 2 announcement",
@@ -3109,20 +2119,6 @@
       ],
       "description": "Microsoft's 23 April 2025 bundle of Copilot announcements, mostly rolling out from late May: an updated Copilot app built around Search, Create, Notebooks and an Agent Store, with Researcher and Analyst reasoning agents, memory and personalisation, and the Skills agent.",
       "why": "Search, Create, Notebooks, the Agent Store and the Researcher and Analyst agents were all announced here, so knowing this release helps champions explain where features came from and avoid mixing it up with Wave 2.",
-      "useCases": [
-        {
-          "title": "Champion explainer session",
-          "text": "A Copilot champion explains what the April 2025 announcement promised: Search, Create, Notebooks and the Agent Store, so staff stop confusing it with the 2024 one."
-        },
-        {
-          "title": "Trace the rollout path",
-          "text": "An IT lead reviews the April 2025 announcement to trace how Researcher and Analyst moved from the Frontier program to general availability for licensed users."
-        },
-        {
-          "title": "Curriculum update",
-          "text": "A trainer rebuilds the Copilot curriculum around the app's four areas, Search, Create, Notebooks and agents, and adds a module on memory and personalisation."
-        }
-      ],
       "prompt": "Summarise what Microsoft announced in the Microsoft 365 Copilot 'Wave 2 spring release' on 23 April 2025: Search, Create, Notebooks, the Agent Store, Researcher and Analyst. Then draft a short plan for teaching each one to our team.",
       "learnMore": "https://www.microsoft.com/en-us/copilot/blog/2025/04/23/microsoft-365-copilot-built-for-the-era-of-human-agent-collaboration/",
       "learnLabel": "Microsoft Copilot blog: Wave 2 spring release",
@@ -3147,20 +2143,6 @@
       ],
       "description": "Microsoft's 9 March 2026 bundle of Copilot announcements, moving beyond assistance to AI that acts inside your apps: Copilot Cowork, agentic Word, Excel, PowerPoint and Outlook, agents in chat, Claude alongside OpenAI models, plus Agent 365 and Microsoft 365 E7.",
       "why": "Knowing what Wave 3 brought helps champions and IT leads plan training, governance and licensing for AI that does tasks for people, and makes sense of the names and features appearing since.",
-      "useCases": [
-        {
-          "title": "Rollout plan refresh",
-          "text": "A Copilot champion rebuilds the rollout plan around Cowork, agents in chat and in-app agentic editing, deciding which teams to pilot first."
-        },
-        {
-          "title": "Release notes review",
-          "text": "An IT lead reads the March 2026 announcement and later release notes to see what needs admin attention, from Frontier access to Agent 365 and licensing."
-        },
-        {
-          "title": "Training plan update",
-          "text": "A learning and development trainer updates the Copilot curriculum so staff learn Cowork, chat-first file creation and agent-assisted Word, Excel and PowerPoint, not just prompting basics."
-        }
-      ],
       "prompt": "Summarise what Microsoft announced for Microsoft 365 Copilot on 9 March 2026 (Wave 3): Cowork, agentic Word, Excel, PowerPoint and Outlook, agents in chat, Claude and Agent 365. Then suggest how a champion should plan a phased rollout, in a table by audience.",
       "learnMore": "https://www.microsoft.com/en-us/copilot/blog/2026/03/09/powering-frontier-transformation-with-copilot-and-agents/",
       "learnLabel": "Microsoft Copilot blog: Wave 3 announcement",
@@ -3189,20 +2171,6 @@
       ],
       "description": "A Frontier-preview AI voice agent that answers your incoming Teams calls on your behalf. It screens callers, collects their reason for calling, then schedules a follow-up or escalates urgent calls to you.",
       "why": "Unwanted interruptions break your focus, but missed calls leave people waiting. Screening and capturing the reason for each call lets you deal with the urgent ones first and step in whenever you choose.",
-      "useCases": [
-        {
-          "title": "Workshop day",
-          "text": "A consultant running back-to-back client workshops lets it screen external calls, collect each caller's reason and book callbacks, then reads the summaries in Call history afterwards."
-        },
-        {
-          "title": "Out-of-office cover",
-          "text": "A finance manager on leave lets it take external calls, noting each reason and booking callbacks for after she returns."
-        },
-        {
-          "title": "Step in when urgent",
-          "text": "An operations manager sees the screening banner, watches a live preview of the caller's reason, and picks up from Call history when it sounds urgent."
-        }
-      ],
       "prompt": "Help me plan how to use Intelligent Call Delegation during a week of back-to-back workshops: which calls to screen, whether to turn on follow-ups, and what limits to warn my team about.",
       "learnMore": "https://support.microsoft.com/en-us/teams/copilot/use-copilot-call-delegation-in-microsoft-teams",
       "learnLabel": "Microsoft Support: Intelligent Call Delegation",
@@ -3225,20 +2193,6 @@
       ],
       "description": "The AI layer on top of a Teams recap. It turns the transcript of a meeting, event or call into AI notes and recommended tasks, adds personal timeline markers and chapters, and offers newer audio and video options.",
       "why": "Nobody has time to re-watch every meeting. AI notes, suggested tasks and markers for your own mentions get you to what matters, and what to do next, quickly.",
-      "useCases": [
-        {
-          "title": "Jump to your mentions",
-          "text": "A sales manager, mentioned twice in a long pipeline review, jumps to those timeline markers and reads the AI-recommended tasks before replying to the team."
-        },
-        {
-          "title": "Follow up a call",
-          "text": "After a Teams call with a resident, a council officer opens the call recap for AI notes and recommended tasks, then checks them against what was promised."
-        },
-        {
-          "title": "Watch the highlights",
-          "text": "A training coordinator who missed a recorded onboarding session watches its narrated video highlights first, then decides which parts of the full recording are worth the time."
-        }
-      ],
       "prompt": "From the transcript of this morning's pipeline review, write brief notes in five bullets, list the follow-up tasks and who should do them, and flag anywhere I was mentioned.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/intelligent-recap-calls-meetings",
       "learnLabel": "Microsoft Learn: Intelligent recap in Teams",
@@ -3262,20 +2216,6 @@
       ],
       "description": "A class of Windows 11 laptops and tablets built around a powerful NPU (neural processing unit) that can perform more than 40 trillion operations per second, so AI features such as Recall and Click to Do can run on the device itself.",
       "why": "Some Windows AI features analyse your screen on the device itself, so the processing stays local. Knowing which machines qualify helps you choose the right hardware for your team.",
-      "useCases": [
-        {
-          "title": "Choosing laptops for a team",
-          "text": "An IT buyer confirms new laptops meet the Copilot+ PC bar (a 40+ TOPS NPU) before promising staff on-device AI features like Click to Do."
-        },
-        {
-          "title": "Testing on-device AI",
-          "text": "A developer tests an on-device AI feature on a Copilot+ PC, using Task Manager to watch NPU usage and Windows ML to run the model there."
-        },
-        {
-          "title": "Pilot with teachers",
-          "text": "A school IT lead pilots a handful of Copilot+ PCs with teachers before deciding whether to refresh the wider laptop fleet."
-        }
-      ],
       "prompt": "Help me plan a laptop refresh: explain what makes a PC a Copilot+ PC, which Windows AI features it unlocks, and give me a checklist of questions to ask suppliers before we order.",
       "learnMore": "https://learn.microsoft.com/en-us/windows/ai/npu-devices/",
       "learnLabel": "Microsoft Learn: Copilot+ PCs developer guide",
@@ -3304,20 +2244,6 @@
       ],
       "description": "A dedicated key on many new Windows 11 keyboards that opens Microsoft Copilot with one press. A long press opens voice controls, you can change what it launches in Settings, and Windows key + C does the same on keyboards without one.",
       "why": "It puts Copilot one press away, so a quick question or voice chat starts without hunting for an icon. And if you'd rather it did something else, you can change what it launches.",
-      "useCases": [
-        {
-          "title": "Quick question mid-task",
-          "text": "A project manager presses the key mid-task, types a question into the smaller quick view and gets an answer without opening a browser tab."
-        },
-        {
-          "title": "Voice chat while typing",
-          "text": "A support engineer holds the key to start a voice chat and talks through a troubleshooting checklist while still typing up the ticket."
-        },
-        {
-          "title": "Managed laptop setup",
-          "text": "An IT admin uses the SetCopilotHardwareKey policy to choose which app the key launches on managed laptops."
-        }
-      ],
       "prompt": "I just got a laptop with a Copilot key. Explain what a short press and a long press do, how I can change what the key launches in Settings, and a shortcut for keyboards without one.",
       "learnMore": "https://support.microsoft.com/en-us/accessibility/windows/copilot/understand-updates-to-the-copilot-key-on-windows-devices",
       "learnLabel": "Microsoft Support: Copilot key updates",
@@ -3345,20 +2271,6 @@
       ],
       "description": "A Windows 11 feature on Copilot+ PCs that identifies text and images on your screen and offers actions for them, such as copy, search the web or summarise. The screen analysis always runs locally on your device.",
       "why": "It turns whatever is on your screen into something you can act on right away, without copying between apps. The analysis itself stays on your device.",
-      "useCases": [
-        {
-          "title": "Message from the screen",
-          "text": "A recruiter spots a candidate's email address inside a PDF and starts a message from it, without copying it into another app first."
-        },
-        {
-          "title": "Quick on-device summary",
-          "text": "A policy analyst selects a long passage in a web article and asks for a quick on-device summary before heading into a meeting."
-        },
-        {
-          "title": "Quick photo clean-up",
-          "text": "A marketing coordinator spots a product image on screen and sends it to Paint to remove its background before reusing it."
-        }
-      ],
       "prompt": "Explain the selected paragraph in plain English, then list any dates, owners or decisions it mentions.",
       "learnMore": "https://support.microsoft.com/en-us/windows/ai/ai-features/click-to-do-do-more-with-what-s-on-your-screen",
       "learnLabel": "Microsoft Support: Click to Do",
@@ -3382,20 +2294,6 @@
       ],
       "description": "An opt-in Windows 11 feature for Copilot+ PCs that saves encrypted snapshots of your screen on your device, so you can search a timeline by describing what you remember and jump back to it. Windows Hello must verify you first.",
       "why": "Finding that page, chart or message you saw earlier no longer means remembering where it lived. Because it's opt-in and stays on the device, you stay in control of what's saved.",
-      "useCases": [
-        {
-          "title": "Find the lost chart",
-          "text": "An analyst remembers a chart in a presentation but not the file name, describes it in the search box and jumps back to that moment."
-        },
-        {
-          "title": "IT policy decision",
-          "text": "An IT lead reads the Manage Recall guidance before deciding whether to allow it, since it's removed by default on managed commercial devices."
-        },
-        {
-          "title": "Pause for sensitive work",
-          "text": "A consultant chooses Pause until tomorrow before reviewing confidential client files; snapshots resume automatically at midnight."
-        }
-      ],
       "prompt": "Explain how Recall works on Copilot+ PCs, what it saves, how to pause it or filter apps and websites, and what an IT admin needs to know before allowing it on managed devices.",
       "learnMore": "https://support.microsoft.com/en-us/windows/ai/ai-features/retrace-your-steps-with-recall",
       "learnLabel": "Microsoft Support: Retrace your steps with Recall",
@@ -3425,20 +2323,6 @@
       ],
       "description": "The desktop app for chatting with Microsoft Copilot on Windows 11, usually pre-pinned to the taskbar or Start menu on new PCs. It replaced the older sidebar experience, and Learn says the Microsoft 365 Copilot app is now called Microsoft Copilot.",
       "why": "One familiar place to ask questions, chat by voice, search files on your device and get help with Windows settings, whichever account you sign in with. Personal and work data stay separate.",
-      "useCases": [
-        {
-          "title": "Work and personal accounts",
-          "text": "A consultant uses the account switcher to move between a work account and a personal one, knowing the two sets of chats and data stay separate."
-        },
-        {
-          "title": "Find a file quickly",
-          "text": "An office manager asks the app to find a budget spreadsheet on the laptop, including files synced from OneDrive, without browsing folders."
-        },
-        {
-          "title": "Help with Windows settings",
-          "text": "A call-centre agent types 'Make my screen easier to read' and Copilot guides them to the relevant Windows setting."
-        }
-      ],
       "prompt": "Make my screen easier to read. Show me which Windows settings help, and take me to the right one.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/access-microsoft-365-copilot-on-windows",
       "learnLabel": "Microsoft Support: Access Microsoft Copilot on Windows",
@@ -3461,20 +2345,6 @@
       ],
       "description": "An opt-in voice trigger: say 'Hey Copilot' while the Microsoft Copilot app is running on a Windows desktop and a hands-free voice chat starts. The phrase is detected on your PC, and only audio from the moment it is heard is sent on.",
       "why": "Start a voice chat without reaching for the mouse, handy when your hands are busy or you just want to talk something through. It is off by default, so you decide whether to switch it on.",
-      "useCases": [
-        {
-          "title": "Hands-free calendar summary",
-          "text": "A busy manager says the phrase while making coffee and asks for a summary of today's calendar."
-        },
-        {
-          "title": "Brainstorm out loud",
-          "text": "A teacher preparing a lesson says the phrase and brainstorms activity ideas out loud while tidying their desk."
-        },
-        {
-          "title": "Quick translation",
-          "text": "A front-desk receptionist says the phrase and asks Copilot to translate a short message for an international guest, hands free."
-        }
-      ],
       "prompt": "Hey Copilot, summarise today's calendar and tell me which meeting I should prepare for first.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/how-hey-copilot-wake-word-works-in-microsoft-365-copilot",
       "learnLabel": "Microsoft Support: How the Hey Copilot wake word works",
@@ -3499,20 +2369,6 @@
       ],
       "description": "A Copilot conversation mode that spends a little longer reasoning before it replies, using OpenAI reasoning models. It's meant for complex questions, nuanced perspectives and detailed problem-solving, and it shows its chain of thought while it works.",
       "why": "For a tricky question, a few extra seconds of reasoning can mean a more detailed, thoughtful answer. You choose the mode before you submit, so quick questions can stay quick.",
-      "useCases": [
-        {
-          "title": "Weighing roadmap options",
-          "text": "A product manager asks for the pros, cons and hidden risks of two roadmap options, and follows the reasoning as it unfolds."
-        },
-        {
-          "title": "Untangling a formula",
-          "text": "A finance analyst pastes a stubborn nested formula and asks for careful step-by-step problem-solving to find why the totals don't match."
-        },
-        {
-          "title": "Exploring both perspectives",
-          "text": "A history teacher asks for a nuanced comparison of two perspectives on an event, then turns it into discussion questions."
-        }
-      ],
       "prompt": "Think carefully about this: we can either hire two contractors now or wait a quarter and hire one full-time. Compare the trade-offs, flag hidden risks and recommend an option with your reasoning.",
       "learnMore": "https://support.microsoft.com/en-us/microsoft-365-copilot/conversation-modes-in-microsoft-copilot",
       "learnLabel": "Microsoft Support: Conversation modes in Microsoft Copilot",
@@ -3535,20 +2391,6 @@
       ],
       "description": "A built-in AI agent that lets IT admins run Microsoft 365 in plain language, from Copilot Chat or the admin center. It handles users, licences, Copilot settings, agents, service health and Teams troubleshooting, and asks before making any change.",
       "why": "One plain-language chat covers licences, Copilot settings, agents and service health, so routine IT questions get quick answers. It follows each person's role permissions, and confirmation prompts keep every change under human control.",
-      "useCases": [
-        {
-          "title": "Assign a Copilot licence",
-          "text": "A university IT officer asks the agent to assign a Copilot licence to a new lecturer, reviews the proposed change and confirms it."
-        },
-        {
-          "title": "Review and block agents",
-          "text": "A bank's technology risk lead asks for agents in the registry, checks their usage analytics and blocks one that shouldn't be there."
-        },
-        {
-          "title": "Triage Teams call quality",
-          "text": "A contact-centre IT analyst asks the agent to analyse call and meeting quality for a team reporting choppy audio, then decides what to escalate."
-        }
-      ],
       "prompt": "List everyone who holds the Global Administrator role and find any groups with no owner. Then summarise this week's message center changes that affect Teams or Copilot.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoft-365/copilot/copilot-ai-admin-agent",
       "learnLabel": "Microsoft Learn: Microsoft 365 Admin agent",
@@ -3576,20 +2418,6 @@
       ],
       "description": "An Outlook compose-window feature that reviews your draft email and suggests improvements to tone, clarity and reader sentiment before you send. Apply all the suggestions at once, which regenerates your text, or work through them one by one.",
       "why": "Tricky emails are easier to get right when tone and clarity are checked before you send. You can feel confident the message says what you meant.",
-      "useCases": [
-        {
-          "title": "Sensitive policy update",
-          "text": "An HR advisor drafts a policy-change email and asks Copilot to review the tone, so it reads supportive rather than blunt before it goes to staff."
-        },
-        {
-          "title": "Calming an upset client",
-          "text": "A customer-service lead replying to an upset client reviews the draft's tone and clarity, applies all suggestions, then rereads the result before sending."
-        },
-        {
-          "title": "Fresh feedback on mobile",
-          "text": "A school principal drafts a reply to parents on their phone, taps Regenerate for fresh feedback, then edits the wording by hand before sending."
-        }
-      ],
       "prompt": "Review my draft email for tone, clarity and reader sentiment. Tell me where it might come across as blunt or unclear, and suggest friendlier wording that keeps my message intact.",
       "learnMore": "https://support.microsoft.com/en-us/outlook/copilot-pages/get-email-coaching-with-copilot-in-outlook",
       "learnLabel": "Microsoft Support: Get email coaching with Copilot in Outlook",
@@ -3619,20 +2447,6 @@
       ],
       "description": "Marks new messages high, normal or low priority as they arrive, based on the topics, keywords or people you tell Copilot are important. An up arrow marks the high-priority mail, and the reading pane explains why.",
       "why": "Important messages are easier to spot among the routine ones, and you decide what counts by telling Copilot your topics, keywords and people. Nothing is held back while it works.",
-      "useCases": [
-        {
-          "title": "Escalations stand out",
-          "text": "A customer-support manager tells Copilot that mentions of 'outage' and messages from key account owners are important, so urgent escalations stand out on busy mornings."
-        },
-        {
-          "title": "Spot staffing requests",
-          "text": "A hospital operations lead adds the clinical director and the keyword 'rostering' to their instructions, so staffing requests get an up arrow among routine notices."
-        },
-        {
-          "title": "Month-end focus",
-          "text": "A finance analyst names 'month-end close' as a topic and the CFO as a person, then checks the reading pane to see why a message was marked."
-        }
-      ],
       "prompt": "Prioritise my inbox. High priority: emails from my manager, anything about the Q3 budget and any message mentioning 'contract renewal'.",
       "learnMore": "https://support.microsoft.com/en-us/outlook/copilot-outlook/prioritize-my-inbox",
       "learnLabel": "Microsoft Support: Prioritize my inbox",
@@ -3661,20 +2475,6 @@
       ],
       "description": "An Outlook feature that reads an email thread and writes the key points at the top, which can include numbered citations that jump to the source emails. New Outlook and Outlook on the web can also summarise a PDF, PowerPoint or Word attachment.",
       "why": "Long reply-all threads are slow to untangle. A quick recap of the key points, with links back to the original messages, gets you up to speed before you reply.",
-      "useCases": [
-        {
-          "title": "Back from leave",
-          "text": "After a week away, a project manager reads the key points of a long thread first, then jumps to the cited emails to check who approved what."
-        },
-        {
-          "title": "Digest a supplier PDF",
-          "text": "A procurement officer selects Summarize a file on a supplier's PDF attachment in new Outlook to get the gist before deciding whether to read all of it."
-        },
-        {
-          "title": "Catch up on mobile",
-          "text": "Between visits, a field sales rep taps the Copilot icon on their phone's toolbar and reads a long client thread's summary under the email."
-        }
-      ],
       "prompt": "Summarise this email thread: list the key decisions, open questions and who owns each next step, and cite the email each point comes from.",
       "learnMore": "https://support.microsoft.com/en-us/outlook/copilot-pages/summarize-an-email-thread-with-copilot-in-outlook",
       "learnLabel": "Microsoft Support: Summarize an email thread with Copilot in Outlook",
@@ -3706,20 +2506,6 @@
       ],
       "description": "Microsoft Purview's existing data-security and compliance tools, such as sensitivity labels, data loss prevention, audit and retention, are extended to cover the prompts, responses and files used by Copilot, agents and other AI apps. AI answers never include data the person can't access.",
       "why": "The labels and policies already protecting your files carry over to AI, so people can use Copilot with fewer worries about sensitive data, and compliance teams keep a record.",
-      "useCases": [
-        {
-          "title": "Labelling client files",
-          "text": "A law firm applies encrypting sensitivity labels to client files, so Copilot only returns that content to people holding both the VIEW and EXTRACT usage rights."
-        },
-        {
-          "title": "Stopping card-number pastes",
-          "text": "A retailer's security team uses Endpoint DLP on onboarded Windows PCs to warn or block staff pasting credit card numbers into ChatGPT."
-        },
-        {
-          "title": "Finding AI interactions",
-          "text": "A public-sector compliance officer searches eDiscovery for 'Copilot activity' and sets retention policies, so AI interactions are found and kept like other records."
-        }
-      ],
       "prompt": "I'm a Microsoft 365 admin preparing to roll out Copilot. Explain how sensitivity labels, Endpoint DLP, audit and eDiscovery in Microsoft Purview apply to Copilot interactions, then give me a checklist of what to configure first and who should own each step.",
       "learnMore": "https://learn.microsoft.com/en-us/purview/ai-microsoft-purview",
       "learnLabel": "Microsoft Learn: Purview protections for Copilot and AI apps",
@@ -3747,20 +2533,6 @@
       ],
       "description": "A SharePoint Advanced Management policy that limits a SharePoint site or OneDrive to members of up to 10 chosen groups. People outside them lose access, even with permissions or a shared link, and search and Copilot honour it too.",
       "why": "Old permissions and shared links make oversharing easy. IT can lock a sensitive site down to the right team, so nobody else gets in, even via search or Copilot.",
-      "useCases": [
-        {
-          "title": "Client matter lock-down",
-          "text": "A law firm limits a client-matter site to the matter team's security group, so partners elsewhere can't open it, even with an old link."
-        },
-        {
-          "title": "Dynamic project team",
-          "text": "A hospital research site is limited to a dynamic security group of current project staff, so people who move departments lose access without anyone editing permissions."
-        },
-        {
-          "title": "Deal team confidentiality",
-          "text": "A bank limits its deal-team site to one Microsoft 365 group, so colleagues with stray permissions can't open it or see its files in Copilot."
-        }
-      ],
       "prompt": "I manage SharePoint for a law firm. Explain how Restricted Access Control works, then give me a step-by-step plan to enable it for the organisation and apply it to one client-matter site, including which groups to use and how delegation to site admins works.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/restricted-access-control",
       "learnLabel": "Microsoft Learn: Restricted Access Control",
@@ -3788,20 +2560,6 @@
       ],
       "description": "A SharePoint Advanced Management setting that hides a site's content from organisation-wide search and Microsoft Copilot responses, and removes AI entry points on that site. Permissions don't change, so people with access can still open files directly.",
       "why": "Oversharing worries shouldn't stall your Copilot rollout. Admins can pull risky sites out of Copilot answers while owners review permissions, and nobody loses access to their files.",
-      "useCases": [
-        {
-          "title": "Pause Finance and HR sites",
-          "text": "Before a Copilot rollout, an IT admin restricts the Finance and HR sites so Copilot and organisation-wide search skip them while owners review permissions."
-        },
-        {
-          "title": "Phased Copilot rollout",
-          "text": "A university IT team rolls Copilot out in phases, restricting sites it hasn't reviewed yet so staff don't see their files surface in Copilot answers."
-        },
-        {
-          "title": "Delegated site admin",
-          "text": "Once IT delegates the setting, a council department's site admin restricts their own site and must give a justification when they change it."
-        }
-      ],
       "prompt": "I'm a SharePoint admin preparing a phased Copilot rollout. Draft a plan for using Restricted Content Discovery on our Finance and HR sites: what it hides, what stays the same for people with access, and how I'd report on which sites have it turned on.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/restricted-content-discovery",
       "learnLabel": "Microsoft Learn: Restricted Content Discovery",
@@ -3825,20 +2583,6 @@
       ],
       "description": "A short-term tenant setting that limited organisation-wide search and Copilot to an allow list of up to 100 SharePoint sites. Microsoft has announced its retirement: new enablement has been blocked since 31 July 2026, and Restricted Content Discovery is the recommended alternative.",
       "why": "It was a stopgap for pointing Copilot at reviewed sites, never a security lock, and Microsoft says its 100-site cap doesn't scale. Knowing that helps you choose the right controls today.",
-      "useCases": [
-        {
-          "title": "Stopgap during permission audit",
-          "text": "A manufacturer's admin allow-listed its reviewed sites, so Copilot and organisation-wide search mostly drew on vetted sites while the remaining permissions were audited."
-        },
-        {
-          "title": "Planning the replacement",
-          "text": "An IT lead whose tenant already uses the allow list plans a switch to site-level Restricted Content Discovery for the sites that need hiding."
-        },
-        {
-          "title": "Briefing leadership on limits",
-          "text": "A consultant explains to a council's leadership why recently accessed sites, and sites shared in Teams or Outlook, could still appear despite the allow list."
-        }
-      ],
       "prompt": "Our tenant already has a Restricted SharePoint Search allow list. Explain why Microsoft announced its retirement and what it never guaranteed, then draft a plan to move to Restricted Content Discovery for our sensitive sites, including how I'd review what's on the list today.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/restricted-sharepoint-search",
       "learnLabel": "Microsoft Learn: Restricted SharePoint Search",
@@ -3862,20 +2606,6 @@
       ],
       "description": "The Microsoft Scenario Library, formerly the Copilot Scenario Library, is a Microsoft Adoption website that organises AI scenarios by business function and industry, with downloadable scenario kits, scenario guides and day-in-the-life guides. Anyone can browse it, no licence needed.",
       "why": "Starting with AI is easier when you can see what it could do in your own role or industry. The library turns 'where do we begin?' into ideas and guides you can download.",
-      "useCases": [
-        {
-          "title": "Find HR quick wins",
-          "text": "An HR lead opens the Human Resources function, browses the AI scenarios and downloads a scenario guide to pick two quick wins for their team."
-        },
-        {
-          "title": "Brief the board",
-          "text": "A nonprofit's fundraising manager browses Nonprofit scenarios and picks a day-in-the-life guide to show the board what practical AI help looks like."
-        },
-        {
-          "title": "Plan a team workshop",
-          "text": "An adoption champion filters to Agents scenarios, then downloads a functional scenario kit to run a workshop for the finance team."
-        }
-      ],
       "prompt": "I lead finance operations at a mid-size manufacturer and we're new to AI. Using Microsoft's Scenario Library as inspiration, suggest five Copilot scenarios for my team, what each would save us, and which one to pilot first.",
       "learnMore": "https://adoption.microsoft.com/en-us/scenario-library/",
       "learnLabel": "Microsoft Adoption: Scenario Library",
@@ -3903,20 +2633,6 @@
       ],
       "description": "A vector-based index that sits alongside Microsoft Graph's keyword (lexical) index, helping Copilot find conceptually related content across your organisation. It understands synonyms and intent, only surfaces what a user can already access, and Microsoft switches it on automatically.",
       "why": "Searching by meaning means Copilot can find the right file even when you don't remember its exact words. Because it only shows content you can already open, better answers don't mean looser access.",
-      "useCases": [
-        {
-          "title": "Same idea, different words",
-          "text": "A marketing manager asks Copilot for USA launch plans and also gets documents saying 'United States' or 'U.S.A', provided she can open them."
-        },
-        {
-          "title": "Keep a site out",
-          "text": "An IT admin sets a confidential SharePoint site to not appear in search results, which also removes it from the semantic index."
-        },
-        {
-          "title": "Searching a contracts library",
-          "text": "A paralegal attaches a SharePoint contracts library in Copilot on the web; its column metadata gives Copilot extra signals for finding the right documents."
-        }
-      ],
       "prompt": "I'm a Microsoft 365 admin. Explain how semantic indexing helps Copilot find relevant files, what I can and can't control (like the SharePoint 'Allow this site to appear in search results' setting), and how permissions limit what each user sees.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftsearch/semantic-index-for-copilot",
       "learnLabel": "Microsoft Learn: Semantic indexing for Microsoft Copilot"
@@ -3943,20 +2659,6 @@
       ],
       "description": "A bundle of SharePoint admin center governance tools for taming content sprawl, managing the content lifecycle and preventing oversharing. It helps admins keep sites tidy and tightly governed so Copilot draws on the right content.",
       "why": "Employees get Copilot answers from the right content, with less chance of stumbling over files that were never meant for them. IT gets one toolkit to tidy and tighten sites.",
-      "useCases": [
-        {
-          "title": "Copilot rollout prep",
-          "text": "A state government IT team works through the oversharing tools and tidies stale sites before switching Copilot on for thousands of staff."
-        },
-        {
-          "title": "Tackle abandoned sites",
-          "text": "A university IT team applies an inactive sites policy to abandoned course and project sites so staff and Copilot aren't wading through stale content."
-        },
-        {
-          "title": "Spot and fix oversharing",
-          "text": "A healthcare IT lead spots a clinic site shared with all internal users in a governance report, then sends its owners a site access review."
-        }
-      ],
       "prompt": "I'm a SharePoint admin preparing for a Microsoft 365 Copilot rollout. Using SharePoint Advanced Management, draft a phased plan covering content sprawl, content lifecycle and oversharing, naming the SharePoint admin center area to visit for each step and who should own it.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/advanced-management",
       "learnLabel": "Microsoft Learn: SharePoint Advanced Management",
@@ -3984,20 +2686,6 @@
       ],
       "description": "Lets admins hand an oversharing check to the owners of the affected SharePoint sites. From a data access governance report, an admin selects sites and sends each owner a tailored email; owners then review and update access themselves.",
       "why": "Compliance reasons stop IT seeing file-level detail, but site owners know their own content. Asking owners to check and tighten sharing puts the fix with the people best placed to make it.",
-      "useCases": [
-        {
-          "title": "Anyone links clean-up",
-          "text": "A retail IT admin spots a campaign site with many Anyone links and emails its owner a tailored request to tidy up sharing."
-        },
-        {
-          "title": "Tighten internal-wide sharing",
-          "text": "A school's IT coordinator picks staff sites shared with 'Everyone except external users' and asks each owner to check who really needs access."
-        },
-        {
-          "title": "Customised owner guidance",
-          "text": "A consulting firm's admin starts from the oversharing baseline report and sends client-site owners a customised message linking to a SharePoint page of sharing guidance."
-        }
-      ],
       "prompt": "I'm a SharePoint admin starting site access reviews from a data access governance report because several sites are shared with 'Everyone except external users'. Draft the email to site owners: why IT can't check their files, what to review, and a clear deadline.",
       "learnMore": "https://learn.microsoft.com/en-us/sharepoint/site-access-review",
       "learnLabel": "Microsoft Learn: Site access review",
@@ -4016,7 +2704,7 @@
       "difficulty": "Easy",
       "category": "Teams & Meetings",
       "tags": ["meetings", "teams", "email", "essentials"],
-      "packs": ["core"],
+      "packs": ["core", "copilot-essentials"],
       "hints": [
         "I'm the goodie bag at the end of the party, not the party itself.",
         "I let absentees catch up without juggling a pile of different apps.",
@@ -4026,20 +2714,6 @@
       ],
       "description": "The tab that appears in a Teams event's chat and calendar details once it has been recorded or transcribed. It gathers the recording, transcript, shared files, notes, agenda and follow-up tasks in one place, plus an AI summary where your licence includes it.",
       "why": "Missed the meeting, or can't remember what was agreed? Everything from the event sits in one place, so you can catch up quickly and find the bit that matters without chasing files or people.",
-      "useCases": [
-        {
-          "title": "Back from leave",
-          "text": "A project manager back from leave opens last week's recap to watch the recording, skim the notes and open shared files, rather than asking for a rundown."
-        },
-        {
-          "title": "Town hall catch-up",
-          "text": "A retail store manager who missed the live town hall opens its recap later, watching the recording and reading the transcript for the roster announcement."
-        },
-        {
-          "title": "Email the summary",
-          "text": "After a customer workshop, a sales lead shares the AI summary to email from the recap, edits the drafted Outlook message and sends it to the team."
-        }
-      ],
       "prompt": "I missed Tuesday's project review. Using its transcript and notes, list the decisions made, the follow-up tasks and who owns them, and flag anything that affects my team's deadlines.",
       "learnMore": "https://support.microsoft.com/en-us/teams/meetings/recap-in-microsoft-teams",
       "learnLabel": "Microsoft Support: Recap in Microsoft Teams",
@@ -4068,20 +2742,6 @@
       ],
       "description": "An AI-driven extension of Teams auto attendants that answers incoming calls to a resource account in human-like conversation. It screens callers, answers questions from approved sources, books appointments and routes calls to people, queues or Copilot Studio agents, without fixed menus.",
       "why": "Callers talk naturally instead of pressing through menus, and routine questions and bookings are handled without tying up staff, so people can focus on the calls that need them.",
-      "useCases": [
-        {
-          "title": "Clinic bookings",
-          "text": "A clinic lets the agent answer opening-hours questions, book appointments through Microsoft Bookings and route anyone who needs a person to the front desk."
-        },
-        {
-          "title": "Order status calls",
-          "text": "A retailer's support line hands callers asking about their orders to a Copilot Studio agent that checks order status, leaving staff free for trickier requests."
-        },
-        {
-          "title": "Council enquiries",
-          "text": "A council's customer-service line lets the agent answer rates and bin-collection questions from approved web pages and route complex queries to the right call queue."
-        }
-      ],
       "prompt": "I'm a Teams admin setting up a Teams Phone Agent for our front desk. List what I need before I start (resource account, licences, greeting, Q&A sources) and draft a friendly greeting plus five common questions it should answer.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/aa-cq-setup-teams-phone-agent",
       "learnLabel": "Microsoft Learn: Teams Phone Agent",
@@ -4111,20 +2771,6 @@
       ],
       "description": "The AI side of Teams Rooms devices, centred on Intelligent Speaker. It uses opt-in voice and face profiles to identify who in the room is talking, so transcripts, recaps and Copilot can name who said what.",
       "why": "When people meet together around one device, knowing who said what makes summaries and recaps more useful. Comments can be credited to the right person by name.",
-      "useCases": [
-        {
-          "title": "Weekly sales meeting",
-          "text": "After staff opt in under Recognition, a weekly sales meeting's transcript can name who spoke in the room, so follow-ups trace back to who said what."
-        },
-        {
-          "title": "Admin rollout checklist",
-          "text": "An IT admin assigns a Teams Rooms Pro licence to the room's resource account and manages voice and face enrolment with the CsTeamsAIPolicy PowerShell policy."
-        },
-        {
-          "title": "Answering profile privacy questions",
-          "text": "A council privacy officer notes Microsoft says voice and face profiles aren't used to train models and are removed on unenrol, or after a year unused."
-        }
-      ],
       "prompt": "I manage Teams Rooms devices. Draft a rollout checklist for Intelligent Speaker: what licence each room's resource account needs, how users opt in under Recognition, and what the CsTeamsAIPolicy settings control.",
       "learnMore": "https://learn.microsoft.com/en-us/microsoftteams/rooms/copilot-admin-mtr",
       "learnLabel": "Microsoft Learn: Admin guide to Copilot in Teams",

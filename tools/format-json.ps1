@@ -44,7 +44,7 @@ function Fmt($v, [int]$level) {
     $items = @($v)
     if ($items.Count -eq 0) { return '[]' }
     $nested = @($items | Where-Object { $_ -is [System.Management.Automation.PSCustomObject] -or $_ -is [System.Array] })
-    # short lists of plain values (aliases, tags, packs...) stay on one line; hints and use cases get a line each
+    # short lists of plain values (aliases, tags, packs...) stay on one line; hints and lists of objects (such as a pack's features) get a line each
     if (-not $nested.Count) {
       $one = '[' + ((@($items | ForEach-Object { Fmt $_ 0 })) -join ', ') + ']'
       if ($one.Length + $pad1.Length + 20 -le 110) { return $one }

@@ -1,4 +1,6 @@
-/* Copilot Feature-dle · Free play, Speed round, Team battle, friend challenges */
+/* Copilot Feature-dle · the play modes' shared pieces (mode selector, headers, filters), Feature Hunt, Free Play and the old practice / challenge links.
+   Feature Hunt is the hint-guessing game (Know it) and Free Play serves puzzles from any of the three game modes. Both are played in rounds (1 to 10, the player chooses):
+   their setup screens are here, and the games themselves run in 94-view-rounds.js. Scenario Match and Prompt Lab are in 98-view-quiz.js, Packs in 98-view-packs.js. */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
@@ -6,315 +8,264 @@
   const ui = FD.ui;
   const cfg = FD.config;
 
-  const seg = (active) => html`<nav class="seg" aria-label="Play modes">
-    <a href="#/free"${attrs({ 'aria-current': active === 'free' ? 'page' : null })}>${FD.icon('shuffle', { size: 18 })}Free play</a>
-    <a href="#/speed"${attrs({ 'aria-current': active === 'speed' ? 'page' : null })}>${FD.icon('timer', { size: 18 })}Speed round</a>
-    <a href="#/team"${attrs({ 'aria-current': active === 'team' ? 'page' : null })}>${FD.icon('users', { size: 18 })}Team battle</a>
+  /* the five ways in: Free Play (any game mode), the three game modes (Know it, Use it, Prompt it) and Packs */
+  ui.modeNav = (active) => html`<nav class="seg" aria-label="Play modes">
+    <a href="#/free"${attrs({ 'aria-current': active === 'free' ? 'page' : null })}>${FD.icon('shuffle', { size: 18 })}Free Play</a>
+    <a href="#/hunt"${attrs({ 'aria-current': active === 'hunt' ? 'page' : null })}>${FD.icon('search', { size: 18 })}Feature Hunt</a>
+    <a href="#/match"${attrs({ 'aria-current': active === 'match' ? 'page' : null })}>${FD.icon('puzzle', { size: 18 })}Scenario Match</a>
+    <a href="#/prompts"${attrs({ 'aria-current': active === 'prompts' ? 'page' : null })}>${FD.icon('flask', { size: 18 })}Prompt Lab</a>
+    <a href="#/packs"${attrs({ 'aria-current': active === 'packs' ? 'page' : null })}>${FD.icon('package', { size: 18 })}Packs</a>
   </nav>`;
+  const seg = ui.modeNav;
 
-  /* difficulty pills with lock states + progress towards unlocking */
-  function diffPills(name, selected, includeAll = true) {
-    const un = FD.freeplay.unlocked();
+  /* The header above the mode selector. All five headers sit in one grid cell and only the active one is visible,
+     so the header is always as tall as the tallest and the mode selector never moves when you switch modes. */
+  const MODE_HEADS = {
+    free: ['Mix it up', 'Free Play', 'Unlimited puzzles from any game mode. Choose how many rounds and play at your own pace.'],
+    hunt: ['Know it', 'Feature Hunt', 'Read the hints and guess the Copilot feature being referenced.'],
+    match: ['Use it', 'Scenario Match', 'Read a real work scenario and match it to the Copilot feature that fits best.'],
+    prompts: ['Prompt it', 'Prompt Lab', 'Read the scenario, pick the strongest prompt and build the habits behind great answers.'],
+    packs: ['Themed sets of puzzles', 'Packs', 'Curated bundles that mix all three game modes together.']
+  };
+  ui.modeHead = (active) => html`<header class="hub-head mode-head">${Object.keys(MODE_HEADS).map((k) => {
+    const [eyebrow, title, lede] = MODE_HEADS[k], on = k === active;
+    return html`<div class="mh${on ? ' is-on' : ''}"${attrs({ 'aria-hidden': on ? null : 'true' })}><p class="eyebrow">${eyebrow}</p>${on ? html`<h1>${title}</h1>` : html`<p class="mh-title">${title}</p>`}<p class="lede">${lede}</p></div>`;
+  })}</header>`;
+
+  /* a game mode as a small chip: its icon and name in its own colour (the results of a game of rounds, the Daily result, Feature Book) */
+  ui.kindChip = (kind) => { const m = FD.puzzles.META[kind]; return m ? html`<span class="chip c-${m.color}">${FD.icon(m.icon, { size: 14 })}${m.name}</span>` : ''; };
+
+  /* a new puzzle always starts with the question in view */
+  ui.scrollTop = () => window.scrollTo({ top: 0, behavior: FD.u.reduceMotion() ? 'auto' : 'smooth' });
+
+  /* difficulty pills: Any, then the four levels. Every level is open from the start, in every game mode. */
+  function diffPills(name, selected, o = {}) {
+    const { includeAll = true } = o;
     const items = (includeAll ? ['all'] : []).concat(cfg.difficulties);
-    return html`<div class="pill-radios">${items.map((d) => {
-      const u = d === 'all' ? { unlocked: true } : un[d];
-      const label = d === 'all' ? 'Any unlocked' : d;
-      const hint = !u.unlocked ? `Locked: collect ${u.need} ${u.from} features to unlock (${u.have}/${u.need})` : '';
-      return html`<label class="pill-radio ${u.unlocked ? '' : 'is-locked'}"${attrs({ title: hint })}><input type="radio" name="${name}" value="${d}"${attrs({ checked: selected === d, disabled: !u.unlocked })}><span>${u.unlocked ? '' : FD.icon('lock', { size: 14 })}${label}${u.unlocked ? '' : html`<small>${u.have}/${u.need} ${u.from}</small>`}</span></label>`;
-    })}</div>`;
+    return html`<div class="pill-radios">${items.map((d) => html`<label class="pill-radio"><input type="radio" name="${name}" value="${d}"${attrs({ checked: selected === d })}><span>${d === 'all' ? 'Any' : d}</span></label>`)}</div>`;
   }
-  const catOptions = (sel) => html`<option value="all">All categories</option>${FD.lib.categories.filter((c) => FD.lib.features.some((f) => f.category === c.name)).map((c) => html`<option value="${c.name}"${attrs({ selected: sel === c.name })}>${c.name}</option>`)}`;
-  const packOptions = (sel) => html`<option value="all">All packs</option>${FD.lib.packs.map((p) => html`<option value="${p.id}"${attrs({ selected: sel === p.id })}>${p.name} (${FD.data.packFeatures(p.id).length})</option>`)}`;
-
-  /* ======================================================================== FREE PLAY */
-  const free = { filters: null, container: null, ctl: null, main: null };
-
-  function loadFilters(query) {
-    const saved = (FD.store.state.meta && FD.store.state.meta.free) || {};
-    const f = Object.assign({ difficulty: 'all', category: 'all', pack: 'all', prioritise: true, tag: '' }, saved, { tag: '' });
-    ['difficulty', 'category', 'pack', 'tag'].forEach((k) => { if (query && query[k]) f[k] = query[k]; });
-    return f;
+  /* which game modes a Free Play can pull puzzles from: three tick-pills, and at least one stays ticked */
+  function kindPills(name, selected) {
+    const on = FD.puzzles.kindsOf({ kinds: selected });
+    return html`<div class="pill-radios">${FD.puzzles.KINDS.map((k) => html`<label class="pill-radio"><input type="checkbox" name="${name}" value="${k}"${attrs({ checked: on.includes(k) })}><span>${FD.icon(FD.puzzles.META[k].icon, { size: 16 })}${FD.puzzles.META[k].name}</span></label>`)}</div>`;
   }
-  function saveFilters(f) { FD.store.state.meta.free = { difficulty: f.difficulty, category: f.category, pack: f.pack, prioritise: f.prioritise }; FD.store.save(); }
+  /* keeps one box ticked: ticking nothing is turned straight back */
+  function keepOneKind(form, name) {
+    form.addEventListener('change', (e) => {
+      if (!e.target || e.target.name !== name) return;
+      const boxes = Array.from(form.querySelectorAll(`input[name="${name}"]`));
+      if (!boxes.some((b) => b.checked)) e.target.checked = true;
+    });
+  }
+  const readKinds = (form, name) => Array.from(form.querySelectorAll(`input[name="${name}"]:checked`)).map((b) => b.value);
+  /* the Category dropdown (it ticks any number of categories): every category that has a feature */
+  const libCategories = () => FD.lib.categories.filter((c) => FD.lib.features.some((f) => f.category === c.name)).map((c) => c.name);
+  const catSpec = (id, selected) => ({ id, label: 'Category', options: libCategories().map((name) => ({ value: name, label: name })), selected, allLabel: 'All categories', noun: 'categories' });
+  ui.diffPills = diffPills; ui.kindPills = kindPills; ui.keepOneKind = keepOneKind; ui.readKinds = readKinds; ui.catSpec = catSpec;
+  const plural = FD.u.plural;
 
-  function freeSetup(main) {
-    const f = free.filters;
-    const saved = FD.store.getActive('free');
-    const resume = saved && saved.guesses && saved.status === 'playing' ? FD.Game.restore(saved) : null;
-    const count = FD.freeplay.pool(f).length;
+  /* a saved difficulty or category that no longer makes sense is let go */
+  const cleanDifficulty = (d) => (cfg.difficulties.includes(d) ? d : 'all');
+  const cleanCategories = (v) => { const have = libCategories(); return FD.u.selList(v).filter((c) => have.includes(c)); };
+
+  /* ---------- the setup screens of the two games of rounds ---------- */
+  const roundsText = (n) => plural(n, 'round');
+  /* the Rounds slider: 1 to 10, and never more than the number of puzzles the choices leave */
+  const roundsField = (id, mode, top, value) => {
+    const rd = FD.rounds.limits(mode);
+    return html`<div class="field slider-field">
+      <label for="${id}-rounds">Rounds <output id="${id}-out" for="${id}-rounds">${roundsText(value)}</output></label>
+      <input id="${id}-rounds" class="range" type="range" min="${rd.min}" max="${top}" step="1" value="${value}" aria-valuetext="${roundsText(value)}"${attrs({ disabled: top <= rd.min })}>
+      <div class="range-scale" aria-hidden="true"><span>${roundsText(rd.min)}</span><span id="${id}-scale-max">${roundsText(top)}</span></div>
+    </div>`;
+  };
+  /* keeps the slider in step with the choices (it can't go past the puzzles on offer, and it remembers the number that was asked for) */
+  function syncRounds(main, id, mode, filters, want) {
+    const range = $('#' + id + '-rounds', main), top = FD.rounds.maxRounds(mode, filters), val = Math.min(want, top), t = roundsText(val);
+    range.max = String(top); range.value = String(val); range.disabled = top <= FD.rounds.limits(mode).min;
+    ui.rangeFill(range);
+    $('#' + id + '-out', main).textContent = t; range.setAttribute('aria-valuetext', t);
+    $('#' + id + '-scale-max', main).textContent = roundsText(top);
+  }
+  /* a game that is waiting: where it got to, with the way to carry on or let it go */
+  function waitingCard(mode, run) {
+    const M = FD.rounds.MODES[mode], g = run.game, q = run.q;
+    const line = run.total > 1
+      ? (run.done && run.i >= run.total - 1
+        ? html`All ${run.total} rounds played \u00B7 ${plural(FD.rounds.solvedOf(run), 'puzzle')} solved \u00B7 ${plural(FD.rounds.pointsOf(run), 'point')}, and the results are waiting`
+        : html`Round <strong>${run.done ? run.i + 2 : run.i + 1}</strong> of ${run.total} \u00B7 ${plural(FD.rounds.solvedOf(run), 'puzzle')} solved \u00B7 ${plural(FD.rounds.pointsOf(run), 'point')} so far`)
+      : g ? html`Hint <strong>${Math.min(g.guesses.length + 1, cfg.maxAttempts)}</strong> of ${cfg.maxAttempts} \u00B7 ${plural(g.guesses.length, 'guess', 'guesses')} so far, waiting just as you left it`
+        : q ? html`${q.wrong.length ? plural(q.wrong.length, 'weaker pick') + ' so far' : 'Not answered yet'}, waiting just as you left it`
+          : html`A puzzle, waiting for you`;
+    return html`<section class="card in-progress" aria-labelledby="ip-h">
+      <div class="ip-pip" aria-hidden="true">${FD.pip('think', { size: 76 })}</div>
+      <div class="ip-body">
+        <h2 id="ip-h">You have a ${M.name} game in progress</h2>
+        <p>${line}</p>
+        <div class="btn-row"><button class="btn btn-primary" type="button" data-action="${mode}-resume">${FD.icon('play', { size: 20 })}Resume game</button><button class="btn btn-ghost" type="button" data-action="${mode}-discard">${FD.icon('refresh', { size: 20 })}Start a new game</button></div>
+      </div></section>`;
+  }
+  const askNewGame = () => ui.confirm('Start a new game?', 'Your game in progress will be put down, and you\u2019ll get a fresh one. Rounds you\u2019ve already answered keep their XP.', 'Start a new game');
+  const focusHead = (main) => { const h = main.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } };
+
+  /* ======================================================================== FEATURE HUNT
+     Five sneaky hints about one Copilot feature. Choose a level and categories (or let Pip surprise you) and how many rounds, guess, learn. */
+  const hunt = { filters: null, ctl: null, main: null };
+
+  function loadHuntFilters() {
+    const saved = (FD.store.state.meta && FD.store.state.meta.hunt) || {};
+    return { difficulty: cleanDifficulty(saved.difficulty), category: cleanCategories(saved.category), prioritise: saved.prioritise !== false, rounds: FD.rounds.clamp('hunt', saved.rounds) };
+  }
+  function saveHuntFilters(f) { FD.store.state.meta.hunt = { difficulty: f.difficulty, category: f.category, prioritise: f.prioritise, rounds: f.rounds }; FD.store.save(); }
+  const featuresText = (n) => `${n} ${n === 1 ? 'feature matches' : 'features match'} right now.`;
+  const huntChoices = (f) => ({ difficulty: f.difficulty, category: f.category, prioritise: f.prioritise });
+
+  function huntSetup(main) {
+    const f = hunt.filters, waiting = FD.rounds.read('hunt');
+    const count = FD.freeplay.pool(f).length, top0 = FD.rounds.maxRounds('hunt', f), rounds0 = Math.min(f.rounds, top0);
     main.innerHTML = flat(html`<div class="container hub">
-      <header class="hub-head"><p class="eyebrow">Practise &amp; play together</p><h1>Free play</h1><p class="lede">Unlimited puzzles, no pressure. Pick a level or let Pip surprise you.</p></header>
-      ${seg('free')}
-      ${resume ? html`<div class="banner c-blue">${FD.icon('play', { size: 22 })}<p><strong>You have a game in progress</strong> (hint ${resume.hintsShown} of ${cfg.maxAttempts}).</p><button class="btn btn-accent btn-sm" type="button" data-action="free-resume">Resume</button></div>` : ''}
-      ${f.tag ? html`<div class="banner c-purple">${FD.icon('sparkle', { size: 22 })}<p>Playing the <strong>${f.tag}</strong> spotlight.</p></div>` : ''}
-      <form class="card setup" id="free-form">
+      ${ui.modeHead('hunt')}
+      ${seg('hunt')}
+      ${waiting ? waitingCard('hunt', waiting) : ''}
+      <form class="card setup" id="hunt-form">
         <fieldset class="field"><legend>Difficulty</legend>${diffPills('difficulty', f.difficulty)}</fieldset>
-        <div class="field-row">
-          <div class="field"><label for="f-cat">Category</label><select id="f-cat" class="select">${catOptions(f.category)}</select></div>
-          <div class="field"><label for="f-pack">Pack</label><select id="f-pack" class="select">${packOptions(f.pack)}</select></div>
-        </div>
-        <label class="check"><input type="checkbox" id="f-pri"${attrs({ checked: f.prioritise })}><span>Prioritise features I haven\u2019t collected yet</span></label>
-        <p class="muted" id="f-count" aria-live="polite">${count} ${count === 1 ? 'feature matches' : 'features match'} right now.</p>
-        <div class="btn-row"><button class="btn btn-primary btn-lg" type="submit">${FD.icon('shuffle', { size: 22 })}Surprise me</button></div>
+        ${ui.msel.html(catSpec('h-cat', f.category))}
+        ${roundsField('h', 'hunt', top0, rounds0)}
+        <label class="check"><input type="checkbox" id="h-pri"${attrs({ checked: f.prioritise })}><span>Prioritise features I haven\u2019t solved yet</span></label>
+        <p class="muted" id="h-count" aria-live="polite">${featuresText(count)}</p>
+        <div class="btn-row"><button class="btn btn-primary btn-lg" type="submit">${FD.icon('search', { size: 22 })}Start Feature Hunt</button></div>
       </form>
     </div>`);
-    const form = $('#free-form', main);
+    const form = $('#hunt-form', main), range = $('#h-rounds', main);
+    let want = f.rounds; /* the number of rounds asked for: a narrow choice can hold the game below it without forgetting it */
+    ui.rangeFill(range);
     const read = () => {
       const d = form.querySelector('input[name="difficulty"]:checked');
-      free.filters = Object.assign({}, free.filters, { difficulty: d ? d.value : 'all', category: $('#f-cat', form).value, pack: $('#f-pack', form).value, prioritise: $('#f-pri', form).checked });
-      const n = FD.freeplay.pool(free.filters).length;
-      $('#f-count', main).textContent = `${n} ${n === 1 ? 'feature matches' : 'features match'} right now.`;
-      saveFilters(free.filters);
+      hunt.filters = { difficulty: d ? d.value : 'all', category: ui.msel.values($('#h-cat', form)), prioritise: $('#h-pri', form).checked, rounds: want };
+      syncRounds(main, 'h', 'hunt', hunt.filters, want);
+      $('#h-count', main).textContent = featuresText(FD.freeplay.pool(hunt.filters).length);
+      saveHuntFilters(hunt.filters);
     };
-    form.addEventListener('change', read);
-    form.addEventListener('submit', (e) => { e.preventDefault(); read(); freeStart(); });
+    range.addEventListener('input', () => { want = FD.rounds.clamp('hunt', range.value, hunt.filters); read(); });
+    form.addEventListener('change', (e) => { if (e.target !== range) read(); });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); read();
+      if (!FD.freeplay.pool(hunt.filters).length) { ui.toast('No features match those filters. Try widening them a little.', { icon: 'x' }); return; }
+      if (FD.rounds.read('hunt') && !(await askNewGame())) return;
+      FD.rounds.start('hunt', FD.rounds.clamp('hunt', want, hunt.filters), huntChoices(hunt.filters));
+    });
   }
+  ui.actions['hunt-resume'] = () => { if (!FD.rounds.resume('hunt')) huntSetup(hunt.main); };
+  ui.actions['hunt-discard'] = async () => {
+    if (!(await ui.confirm('Start a new game?', 'Your game in progress will be put down, and you can pick a fresh one. Rounds you\u2019ve already answered keep their XP.', 'Start a new game'))) return;
+    FD.rounds.discard('hunt');
+    huntSetup(hunt.main); focusHead(hunt.main);
+  };
 
-  function freeStart(fixed, extra = {}) {
-    const feature = fixed || FD.freeplay.pick(free.filters);
-    if (!feature) { ui.toast('No features match those filters. Try widening them a little.', { icon: 'x' }); return; }
-    const game = new FD.Game(feature, { mode: 'free' });
-    freePlay(game, extra);
-  }
-  function freePlay(game, extra = {}) {
-    if (free.ctl) free.ctl.destroy();
-    free.main.innerHTML = '<div class="container play-wrap" id="play-root"></div>';
-    const actions = extra.actions || [
-      { label: 'Play again', action: 'free-again', icon: 'shuffle', cls: 'btn-primary' },
-      { label: 'Change filters', action: 'free-setup', icon: 'sliders' },
-      { label: 'Feature Book', href: '#/book', icon: 'book' }
-    ];
-    FD.store.setActive('free', game.serialize());
-    free.ctl = FD.play.mount($('#play-root', free.main), game, { mode: 'free', title: extra.title || 'Free play', persistKey: 'free', challenge: !!extra.challenge, actions });
-  }
-
-  ui.actions['free-again'] = () => { if (free.filters) freeStart(); else ui.go('/free'); };
-  ui.actions['free-setup'] = () => { if (free.ctl) free.ctl.destroy(); free.ctl = null; FD.store.clearActive('free'); freeSetup(free.main); window.scrollTo(0, 0); const h = free.main.querySelector('h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } };
-  ui.actions['free-resume'] = () => { const g = FD.Game.restore(FD.store.getActive('free')); if (g) freePlay(g); };
-
-  FD.views.free = {
-    title: 'Free play',
+  FD.views.hunt = {
+    title: 'Feature Hunt',
     render(main, ctx) {
-      free.main = main; free.filters = loadFilters(ctx.query);
-      if (ctx.query.start) { freeStart(); } else freeSetup(main);
-      return () => { if (free.ctl) free.ctl.destroy(); free.ctl = null; };
+      hunt.main = main; hunt.filters = loadHuntFilters();
+      FD.rounds.attach('hunt', main, () => huntSetup(main));
+      if (ctx.query.start) FD.rounds.start('hunt', FD.rounds.clamp('hunt', hunt.filters.rounds, hunt.filters), huntChoices(hunt.filters)) || huntSetup(main); else huntSetup(main);
+      return () => FD.rounds.detach();
     }
   };
 
-  /* direct play of one feature: practise from the Feature Book, or a friend's challenge link */
+  /* direct play of one feature (a deep link, or a friend challenge link from an earlier version): a single hunt that is not kept */
+  const unb64 = (s) => { try { return decodeURIComponent(escape(atob(String(s).replace(/-/g, '+').replace(/_/g, '/')))); } catch (e) { return ''; } };
+  function huntPlay(game, extra) {
+    if (hunt.ctl) hunt.ctl.destroy();
+    hunt.main.innerHTML = '<div class="container play-wrap" id="play-root"></div>';
+    hunt.ctl = FD.play.mount($('#play-root', hunt.main), game, { mode: 'hunt', title: extra.title, actions: extra.actions });
+    ui.scrollTop();
+  }
   function fixedView(kind) {
     return {
-      title: kind === 'challenge' ? 'Friend challenge' : 'Practise',
+      title: kind === 'challenge' ? 'Friend challenge' : 'Practice',
       render(main, ctx) {
-        free.main = main; free.filters = loadFilters({});
-        const id = kind === 'challenge' ? FD.share.challengeId(ctx.params.code) : ctx.params.id;
+        hunt.main = main;
+        const id = kind === 'challenge' ? (unb64(ctx.params.code).startsWith('fd:') ? unb64(ctx.params.code).slice(3) : '') : ctx.params.id;
         const f = FD.lib.byId[id];
-        if (!f) { ui.toast('Hmm, I couldn\u2019t find that feature. Try free play instead!', { icon: 'x' }); ui.go('/free'); return; }
+        if (!f) { ui.toast('Hmm, I couldn\u2019t find that feature. Try Free Play instead!', { icon: 'x' }); ui.go('/free'); return; }
         const actions = kind === 'challenge'
-          ? [{ label: 'Play today\u2019s challenge', href: '#/daily', icon: 'calendar', cls: 'btn-primary' }, { label: 'Free play', href: '#/free', icon: 'shuffle' }]
-          : [{ label: 'Back to Feature Book', href: '#/book', icon: 'book', cls: 'btn-primary' }, { label: 'Play something random', href: '#/free', icon: 'shuffle' }];
-        freePlay(new FD.Game(f, { mode: 'free' }), { title: kind === 'challenge' ? 'A friend challenged you!' : 'Practice round', challenge: kind === 'challenge', actions });
-        return () => { if (free.ctl) free.ctl.destroy(); free.ctl = null; };
+          ? [{ label: 'Play today\u2019s challenge', href: '#/daily', icon: 'calendar', cls: 'btn-primary' }, { label: 'Free Play', href: '#/free', icon: 'shuffle' }]
+          : [{ label: 'Free Play', href: '#/free', icon: 'shuffle', cls: 'btn-primary' }, { label: 'Feature Book', href: '#/book', icon: 'book' }];
+        huntPlay(new FD.Game(f, { mode: 'hunt' }), { title: kind === 'challenge' ? 'A friend challenged you!' : 'Practice round', actions });
+        return () => { if (hunt.ctl) hunt.ctl.destroy(); hunt.ctl = null; };
       }
     };
   }
-  FD.views.play = fixedView('practise');
+  FD.views.play = fixedView('practice');
   FD.views.challenge = fixedView('challenge');
 
-  /* ======================================================================== SPEED ROUND */
-  const speed = { main: null, ctl: null, timer: 0, filters: { difficulty: 'all' } };
+  /* ======================================================================== FREE PLAY
+     Puzzles from any game mode (or just the ones you tick): a Feature Hunt puzzle, a Scenario Match question or a Prompt Lab question, in as many rounds as you choose. A game
+     left unfinished is kept. */
+  const free = { filters: null, main: null };
 
-  function speedCleanup() { clearInterval(speed.timer); speed.timer = 0; if (speed.ctl) speed.ctl.destroy(); speed.ctl = null; speed.over = true; }
+  function loadFreeFilters() {
+    const saved = (FD.store.state.meta && FD.store.state.meta.free) || {};
+    return { kinds: FD.puzzles.kindsOf({ kinds: saved.kinds }), difficulty: cleanDifficulty(saved.difficulty), category: cleanCategories(saved.category), prioritise: saved.prioritise !== false, rounds: FD.rounds.clamp('free', saved.rounds) };
+  }
+  function saveFreeFilters(f) { FD.store.state.meta.free = { kinds: f.kinds, difficulty: f.difficulty, category: f.category, prioritise: f.prioritise, rounds: f.rounds }; FD.store.save(); }
+  const matchesText = (n) => `${n} ${n === 1 ? 'puzzle matches' : 'puzzles match'} right now.`;
+  const freeChoices = (f) => ({ kinds: f.kinds, difficulty: f.difficulty, category: f.category, prioritise: f.prioritise });
 
-  function speedSetup(main) {
-    speedCleanup(); speed.over = false;
-    const secs = (FD.store.settings().relaxed ? 2 : 1) * cfg.speedRoundSeconds;
+  function freeSetup(main) {
+    const f = free.filters, waiting = FD.rounds.read('free');
+    const count = FD.puzzles.count(f), top0 = FD.rounds.maxRounds('free', f), rounds0 = Math.min(f.rounds, top0);
     main.innerHTML = flat(html`<div class="container hub">
-      <header class="hub-head"><p class="eyebrow">Beat the clock</p><h1>Speed round</h1><p class="lede">${Math.round(secs / 60)} minutes on the clock. Solve as many features as you can \u2013 a miss just moves you along.</p></header>
-      ${seg('speed')}
-      <form class="card setup" id="speed-form">
-        <ul class="ticks"><li>${FD.icon('check', { size: 18 })}Same five-hint puzzles, but the clock never stops</li><li>${FD.icon('check', { size: 18 })}Solve a feature to go straight to the next one</li><li>${FD.icon('check', { size: 18 })}Streak bonuses stack up as you go${FD.store.settings().relaxed ? ' (relaxed timing is on, so you get double time)' : ''}</li></ul>
-        <fieldset class="field"><legend>Difficulty</legend>${diffPills('difficulty', speed.filters.difficulty)}</fieldset>
-        <div class="btn-row"><button class="btn btn-primary btn-lg" type="submit">${FD.icon('play', { size: 22 })}Start the clock</button></div>
-      </form></div>`);
-    $('#speed-form', main).addEventListener('submit', (e) => {
-      e.preventDefault();
-      const d = e.target.querySelector('input[name="difficulty"]:checked');
-      speed.filters = { difficulty: d ? d.value : 'all' };
-      speedStart();
+      ${ui.modeHead('free')}
+      ${seg('free')}
+      ${waiting ? waitingCard('free', waiting) : ''}
+      <form class="card setup" id="free-form">
+        <fieldset class="field"><legend>Game modes</legend>${kindPills('kinds', f.kinds)}</fieldset>
+        <fieldset class="field"><legend>Difficulty</legend>${diffPills('difficulty', f.difficulty)}</fieldset>
+        ${ui.msel.html(catSpec('f-cat', f.category))}
+        ${roundsField('f', 'free', top0, rounds0)}
+        <label class="check"><input type="checkbox" id="f-pri"${attrs({ checked: f.prioritise })}><span>Prioritise puzzles I haven\u2019t tried yet</span></label>
+        <p class="muted" id="f-count" aria-live="polite">${matchesText(count)}</p>
+        <div class="btn-row"><button class="btn btn-primary btn-lg" type="submit" id="f-go">${FD.icon('shuffle', { size: 22 })}Surprise me</button></div>
+      </form>
+    </div>`);
+    const form = $('#free-form', main), range = $('#f-rounds', main);
+    let want = f.rounds; /* the number of rounds asked for: a narrow choice can hold the game below it without forgetting it */
+    keepOneKind(form, 'kinds');
+    ui.rangeFill(range);
+    const read = () => {
+      const d = form.querySelector('input[name="difficulty"]:checked');
+      free.filters = { kinds: readKinds(form, 'kinds'), difficulty: d ? d.value : 'all', category: ui.msel.values($('#f-cat', form)), prioritise: $('#f-pri', form).checked, rounds: want };
+      syncRounds(main, 'f', 'free', free.filters, want);
+      $('#f-count', main).textContent = matchesText(FD.puzzles.count(free.filters));
+      saveFreeFilters(free.filters);
+    };
+    range.addEventListener('input', () => { want = FD.rounds.clamp('free', range.value, free.filters); read(); });
+    form.addEventListener('change', (e) => { if (e.target !== range) read(); });
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault(); read();
+      if (!FD.puzzles.count(free.filters)) { ui.toast('Nothing matches those choices. Try another level, category or more game modes.', { icon: 'x' }); return; }
+      if (FD.rounds.read('free') && !(await askNewGame())) return;
+      FD.rounds.start('free', FD.rounds.clamp('free', want, free.filters), freeChoices(free.filters));
     });
   }
-
-  function speedStart() {
-    const total = (FD.store.settings().relaxed ? 2 : 1) * cfg.speedRoundSeconds * 1000;
-    Object.assign(speed, { total, ms: total, solved: 0, score: 0, items: [], paused: false, over: false, last: performance.now(), used: [] });
-    speed.main.innerHTML = flat(html`<div class="container play-wrap">
-      <div class="speed-bar" id="speed-bar" role="group" aria-label="Speed round status">
-        <div class="sb-clock">${FD.icon('timer', { size: 22 })}<strong id="sb-time" role="timer" aria-live="off">${FD.u.fmtClock(total)}</strong></div>
-        <div class="sb-meter">${ui.bar(100, 'pink', 'Time left')}</div>
-        <div class="sb-stat"><span>Solved</span><strong id="sb-solved">0</strong></div>
-        <div class="sb-stat"><span>Score</span><strong id="sb-score">0</strong></div>
-        <button class="btn btn-ghost btn-sm" type="button" data-action="speed-pause" id="sb-pause">${FD.icon('minus', { size: 16 })}Pause</button>
-      </div>
-      <div id="speed-play"></div></div>`);
-    speed.timer = setInterval(speedTick, 250);
-    speedNext();
-  }
-  function speedTick() {
-    const now = performance.now(), dt = Math.min(500, now - speed.last); speed.last = now;
-    if (speed.over || speed.paused || document.visibilityState !== 'visible') return;
-    speed.ms -= dt;
-    const t = $('#sb-time'); if (t) t.textContent = FD.u.fmtClock(speed.ms);
-    const bar = $('#speed-bar .bar span'); if (bar) bar.style.width = Math.max(0, (speed.ms / speed.total) * 100) + '%';
-    if (speed.ms <= 0) speedEnd();
-  }
-  function speedNext() {
-    if (speed.over) return;
-    const f = FD.freeplay.pick(speed.filters, { exclude: speed.used });
-    if (!f) { speedEnd(); return; }
-    speed.used.push(f.id);
-    if (speed.used.length > 30) speed.used.shift();
-    if (speed.ctl) speed.ctl.destroy();
-    const game = new FD.Game(f, { mode: 'speed' });
-    speed.ctl = FD.play.mount($('#speed-play'), game, {
-      mode: 'speed', title: 'Speed round', compact: true, hideTimer: true,
-      onRoundEnd: (g, data) => {
-        if (speed.over) return;
-        speed.items.push({ f: g.f, won: g.won, points: data.breakdown ? data.breakdown.total : 0, hints: g.hintsUsed });
-        if (g.won) { speed.solved++; speed.score += data.breakdown.total; }
-        $('#sb-solved').textContent = speed.solved; $('#sb-score').textContent = speed.score;
-        FD.result.compact($('#result-host', $('#speed-play')), { ...data, points: g.won ? data.breakdown.total : null }, {
-          footer: html`<div class="btn-row"><button class="btn btn-primary" type="button" data-action="speed-next" autofocus>Next feature ${FD.icon('right', { size: 18 })}</button></div>`
-        });
-        const nb = $('[data-action="speed-next"]'); if (nb) nb.focus({ preventScroll: true });
-        speed.autoNext = setTimeout(() => { if (!speed.over) speedNext(); }, g.won ? 1800 : 3200);
-      }
-    });
-  }
-  ui.actions['speed-next'] = () => { clearTimeout(speed.autoNext); speedNext(); };
-  ui.actions['speed-pause'] = () => {
-    speed.paused = !speed.paused; speed.last = performance.now();
-    const b = $('#sb-pause');
-    if (speed.paused) { speed.ctl && speed.ctl.pause(); clearTimeout(speed.autoNext); b.innerHTML = flat(html`${FD.icon('play', { size: 16 })}Resume`); }
-    else { speed.ctl && speed.ctl.resume(); b.innerHTML = flat(html`${FD.icon('minus', { size: 16 })}Pause`); }
-    document.getElementById('speed-play').classList.toggle('is-paused', speed.paused);
+  ui.actions['free-resume'] = () => { if (!FD.rounds.resume('free')) freeSetup(free.main); };
+  ui.actions['free-discard'] = async () => {
+    if (!(await ui.confirm('Start a new game?', 'Your game in progress will be put down, and you can pick a fresh one. Rounds you\u2019ve already answered keep their XP.', 'Start a new game'))) return;
+    FD.rounds.discard('free');
+    freeSetup(free.main); focusHead(free.main);
   };
 
-  function speedEnd() {
-    if (speed.over) return;
-    speed.over = true; clearInterval(speed.timer); clearTimeout(speed.autoNext);
-    if (speed.ctl) speed.ctl.destroy(); speed.ctl = null;
-    const p = FD.store.profile(), rk = FD.scoring.rank(p.xp);
-    const earned = FD.store.bump('speedRounds').concat(FD.store.bump('speedBestSolved', speed.solved, true));
-    const isBest = speed.score > (p.speedBest || 0); if (isBest) { p.speedBest = speed.score; FD.store.save(); }
-    const attempted = speed.items.length, acc = attempted ? Math.round((speed.solved / attempted) * 100) : 0;
-    const share = { mode: 'speed', solved: speed.solved, score: speed.score, won: speed.solved > 0, hintsUsed: 0, grid: [], streak: FD.store.dailyStreak(), rank: rk.rank.name, difficulty: speed.filters.difficulty === 'all' ? 'Mixed levels' : speed.filters.difficulty };
-    FD.result.current = share; FD.share.prepare(share);
-    FD.fx.play('win'); if (speed.solved) FD.fx.confetti({ count: 140 });
-    ui.celebrate({ newBadges: earned });
-    speed.main.innerHTML = flat(html`<div class="container hub"><section class="speed-summary card" aria-labelledby="ss-h">
-      <div class="ss-top">${FD.pip(speed.solved ? 'cheer' : 'oops', { size: 130 })}<div><p class="eyebrow">Speed round complete</p><h1 id="ss-h">Time\u2019s up!</h1>
-        <p class="lede">${speed.solved ? `You solved ${FD.u.plural(speed.solved, 'feature')}${isBest ? ' \u2013 a new personal best!' : '.'}` : 'No solves this time, but you met a few new features.'}</p></div></div>
-      <div class="ss-stats"><div><strong>${speed.solved}</strong><span>solved</span></div><div><strong>${speed.score}</strong><span>points</span></div><div><strong>${acc}%</strong><span>accuracy</span></div><div><strong>${p.speedBest || 0}</strong><span>best score</span></div></div>
-      <div class="btn-row"><button class="btn btn-primary" type="button" data-action="share-go">${FD.icon('share', { size: 20 })}Share</button><button class="btn btn-ghost" type="button" data-action="share-copy">${FD.icon('copy', { size: 20 })}Copy text</button><button class="btn btn-ghost" type="button" data-action="share-save">${FD.icon('download', { size: 20 })}Save image</button></div>
-      <h2 class="mini-h">What you met</h2>
-      <ul class="review-list">${speed.items.map((it) => html`<li><details><summary><span class="rv-dot ${it.won ? 'won' : 'lost'}" aria-hidden="true"></span><span class="rv-name">${it.f.name}</span>${it.won ? html`<span class="chip chip-solid c-green">+${it.points}</span>` : html`<span class="chip">Missed</span>`}</summary>${FD.result.learn(it.f)}</details></li>`)}</ul>
-      <div class="btn-row"><button class="btn btn-primary" type="button" data-action="speed-again">${FD.icon('refresh', { size: 20 })}Go again</button><a class="btn btn-ghost" href="#/free">${FD.icon('shuffle', { size: 20 })}Free play</a><a class="btn btn-ghost" href="#/stats">${FD.icon('chart', { size: 20 })}My stats</a></div>
-    </section></div>`);
-    window.scrollTo(0, 0); const h = $('#ss-h'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-  }
-  ui.actions['speed-again'] = () => speedStart();
-
-  FD.views.speed = { title: 'Speed round', render(main) { speed.main = main; speedSetup(main); return speedCleanup; } };
-
-  /* ======================================================================== TEAM BATTLE */
-  const TEAM_COLORS = ['blue', 'pink', 'green', 'orange', 'purple', 'red'];
-  const TEAM_NAMES = ['Team Blue', 'Team Pink', 'Team Green', 'Team Orange', 'Team Purple', 'Team Red'];
-  const team = { main: null, ctl: null, cfg: { n: 3, rounds: 5, difficulty: 'all', names: TEAM_NAMES.slice() }, s: null };
-
-  function teamSetup(main) {
-    const c = team.cfg;
-    main.innerHTML = flat(html`<div class="container hub">
-      <header class="hub-head"><p class="eyebrow">Workshops, lunch-and-learns &amp; team socials</p><h1>Team battle</h1><p class="lede">Teams take turns guessing the same feature. Each wrong guess unlocks an easier hint and passes the turn. Project it on the big screen!</p></header>
-      ${seg('team')}
-      <form class="card setup" id="team-form">
-        <fieldset class="field"><legend>How many teams?</legend><div class="pill-radios">${[2, 3, 4, 5, 6].map((n) => html`<label class="pill-radio"><input type="radio" name="n" value="${n}"${attrs({ checked: c.n === n })}><span>${n} teams</span></label>`)}</div></fieldset>
-        <div class="field"><span class="label">Team names</span><div class="team-names" id="team-names">${TEAM_COLORS.slice(0, c.n).map((col, i) => html`<label class="team-name c-${col}"><span class="sr-only">Team ${i + 1} name</span><span class="tn-dot" aria-hidden="true"></span><input class="input" maxlength="20" value="${c.names[i]}" data-i="${i}"></label>`)}</div></div>
-        <fieldset class="field"><legend>Rounds</legend><div class="pill-radios">${[5, 8, 10].map((n) => html`<label class="pill-radio"><input type="radio" name="rounds" value="${n}"${attrs({ checked: c.rounds === n })}><span>${n} rounds</span></label>`)}</div></fieldset>
-        <fieldset class="field"><legend>Difficulty</legend>${diffPills('difficulty', c.difficulty)}</fieldset>
-        <div class="btn-row"><button class="btn btn-primary btn-lg" type="submit">${FD.icon('play', { size: 22 })}Start the battle</button></div>
-      </form></div>`);
-    const form = $('#team-form', main);
-    const names = () => $$('#team-names input', form).forEach((i) => { c.names[+i.dataset.i] = i.value.trim() || TEAM_NAMES[+i.dataset.i]; });
-    form.addEventListener('change', (e) => {
-      names();
-      if (e.target.name === 'n') { c.n = +e.target.value; teamSetup(main); const r = $('input[name="n"]:checked', main); if (r) r.focus(); }
-    });
-    form.addEventListener('submit', (e) => {
-      e.preventDefault(); names();
-      c.rounds = +form.querySelector('input[name="rounds"]:checked').value;
-      c.difficulty = (form.querySelector('input[name="difficulty"]:checked') || { value: 'all' }).value;
-      teamStart();
-    });
-  }
-
-  function teamStart() {
-    const c = team.cfg;
-    team.s = { teams: c.names.slice(0, c.n).map((name, i) => ({ name, color: TEAM_COLORS[i], score: 0, wins: 0 })), round: 0, used: [] };
-    teamRound();
-  }
-  function teamBar() {
-    const s = team.s;
-    const active = team.game && !team.game.over ? (s.round - 1 + team.game.guesses.length) % s.teams.length : -1;
-    return html`<div class="team-bar" role="group" aria-label="Scoreboard"><span class="tb-round">Round <strong>${s.round}</strong> of ${team.cfg.rounds}</span>${s.teams.map((t, i) => html`<span class="tb-team c-${t.color} ${i === active ? 'is-active' : ''}"><span class="tb-name">${t.name}</span><strong>${t.score}</strong></span>`)}</div>`;
-  }
-  function teamRound() {
-    const s = team.s;
-    if (s.round >= team.cfg.rounds) { teamEnd(); return; }
-    s.round++;
-    const f = FD.freeplay.pick({ difficulty: team.cfg.difficulty, prioritise: false }, { exclude: s.used });
-    if (!f) { teamEnd(); return; }
-    s.used.push(f.id);
-    if (team.ctl) team.ctl.destroy();
-    team.game = new FD.Game(f, { mode: 'team' });
-    const starter = (s.round - 1) % s.teams.length;
-    team.main.innerHTML = flat(html`<div class="container play-wrap"><div id="team-bar-host">${teamBar()}</div><div id="team-play"></div></div>`);
-    team.ctl = FD.play.mount($('#team-play'), team.game, {
-      mode: 'team', title: `Team battle \u00B7 round ${s.round}`, compact: true, record: false, hideTimer: true,
-      turn: () => { const t = s.teams[(starter + team.game.guesses.length) % s.teams.length]; return { label: `${t.name}, it\u2019s your guess!`, color: t.color }; },
-      onStep: () => { mount($('#team-bar-host'), teamBar()); },
-      onRoundEnd: (g, data) => {
-        let who = null, points = null;
-        if (g.won) { const t = s.teams[(starter + g.guesses.length - 1) % s.teams.length]; points = FD.scoring.base(g.hintsUsed); t.score += points; t.wins++; who = t.name; }
-        mount($('#team-bar-host'), teamBar());
-        const last = s.round >= team.cfg.rounds;
-        FD.result.compact($('#result-host', $('#team-play')), { ...data, who, points }, {
-          learn: true,
-          footer: html`<div class="btn-row"><button class="btn btn-primary" type="button" data-action="team-next">${last ? 'See the final scores' : 'Next round'} ${FD.icon('right', { size: 18 })}</button></div>`
-        });
-        const nb = $('[data-action="team-next"]'); if (nb) nb.focus({ preventScroll: true });
-      }
-    });
-  }
-  ui.actions['team-next'] = () => teamRound();
-
-  function teamEnd() {
-    const s = team.s;
-    if (team.ctl) team.ctl.destroy(); team.ctl = null; team.game = null;
-    const ranked = s.teams.slice().sort((a, b) => b.score - a.score || b.wins - a.wins);
-    const top = ranked[0].score;
-    const winners = ranked.filter((t) => t.score === top);
-    const earned = FD.store.bump('teamBattles');
-    ui.celebrate({ newBadges: earned }); FD.fx.play('win'); FD.fx.confetti({ count: 220 });
-    team.main.innerHTML = flat(html`<div class="container hub"><section class="card podium-card" aria-labelledby="pod-h">
-      <div class="ss-top">${FD.pip('cheer', { size: 130 })}<div><p class="eyebrow">Team battle complete</p><h1 id="pod-h">${winners.length > 1 ? 'It\u2019s a tie!' : `${winners[0].name} wins!`}</h1><p class="lede">${winners.length > 1 ? winners.map((w) => w.name).join(' & ') + ' share the crown.' : 'Brilliant effort from every team \u2013 and everyone learned a few new Copilot features.'}</p></div></div>
-      <ol class="podium">${ranked.map((t, i) => html`<li class="c-${t.color} ${t.score === top ? 'is-top' : ''}"><span class="pod-rank">${i + 1}</span><span class="pod-name">${t.name}</span><span class="pod-wins">${FD.u.plural(t.wins, 'round')} won</span><strong class="pod-score">${t.score}</strong></li>`)}</ol>
-      <div class="btn-row"><button class="btn btn-primary" type="button" data-action="team-again">${FD.icon('refresh', { size: 20 })}Rematch</button><button class="btn btn-ghost" type="button" data-action="team-setup">${FD.icon('sliders', { size: 20 })}Change setup</button><a class="btn btn-ghost" href="#/">${FD.icon('home', { size: 20 })}Home</a></div>
-    </section></div>`);
-    window.scrollTo(0, 0); const h = $('#pod-h'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); }
-  }
-  ui.actions['team-again'] = () => teamStart();
-  ui.actions['team-setup'] = () => teamSetup(team.main);
-
-  FD.views.team = { title: 'Team battle', render(main) { team.main = main; teamSetup(main); return () => { if (team.ctl) team.ctl.destroy(); team.ctl = null; }; } };
+  FD.views.free = {
+    title: 'Free Play',
+    render(main, ctx) {
+      free.main = main; free.filters = loadFreeFilters();
+      FD.rounds.attach('free', main, () => freeSetup(main));
+      /* links from the old Packs & themes screen now live in Packs */
+      if (ctx.query.pack) { ui.go('/pack/' + encodeURIComponent(ctx.query.pack)); return; }
+      if (ctx.query.tag) { const t = (FD.lib.themes || []).find((x) => x.tag === ctx.query.tag); ui.go(t ? '/pack/' + encodeURIComponent('spot-' + t.id) : '/packs'); return; }
+      if (ctx.query.start) FD.rounds.start('free', FD.rounds.clamp('free', free.filters.rounds, free.filters), freeChoices(free.filters)) || freeSetup(main); else freeSetup(main);
+      return () => FD.rounds.detach();
+    }
+  };
 })();

@@ -24,6 +24,14 @@
 .btn-link { background: none; border: 0; padding: .4rem .25rem; min-height: 44px; color: var(--blue); text-decoration: underline; text-underline-offset: .2em; font-weight: 700; }
 .btn-link:hover { background: none; color: var(--navy); transform: none; box-shadow: none; }
 .btn-sm { min-height: 40px; padding: .4rem 1rem; font-size: .88rem; }
+/* "Sign in with Microsoft" uses Microsoft's own logo, wording and light colours (their branding guidelines), so it keeps its own look */
+.btn-ms { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; padding: 0 18px 0 14px; border: 1px solid #8C8C8C; border-radius: var(--r-pill); background: #fff; color: #5E5E5E; font: 600 15px/1.2 "Segoe UI", "Noto Sans", Calibri, sans-serif; text-align: left; cursor: pointer; transition: background-color .15s, border-color .15s; }
+.btn-ms:hover { background: #F3F3F3; border-color: #5E5E5E; }
+.btn-ms .ms-logo { flex: none; }
+.btn-ms-sm { min-height: 40px; font-size: 14px; }
+.btn-ms-block { display: flex; width: 100%; }
+.ms-tag { display: inline-flex; align-items: center; gap: .35rem; font: 700 .78rem/1.3 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--grey); }
+.eyebrow .ms-tag { margin-left: .6rem; color: inherit; font-family: var(--font-head); text-transform: uppercase; letter-spacing: .09em; }
 .btn-lg { min-height: 58px; padding: .85rem 1.9rem; font-size: 1.05rem; }
 .btn-icon { padding: 0; width: 44px; min-height: 44px; }
 .btn small { font: 400 .78rem var(--font-body); opacity: .85; }
@@ -65,8 +73,14 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 .input:focus, .select:focus, .textarea:focus { border-color: var(--blue); outline: 3px solid var(--navy); outline-offset: 2px; box-shadow: 0 0 0 2px #fff; }
 .input-lg { min-height: 60px; font-size: 1.15rem; padding-inline: 1.6rem; }
 .select { appearance: none; padding-right: 2.6rem; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2312134B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .9rem center; background-size: 1.1rem; }
+/* a dropdown that waits for another one (Prompt Lab's Feature waits for its Category) is plainly switched off */
+.select:disabled { background-color: var(--navy-10); border-color: var(--navy-10); cursor: not-allowed; }
+.select:disabled:hover { border-color: var(--navy-10); }
+.label-hint { margin-left: .35rem; font: 500 .8rem var(--font-body); color: var(--grey); }
 .field { margin: 0 0 1.25rem; }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+/* two dropdowns side by side; each .field keeps its own bottom margin, so they stack with the usual spacing on a phone */
+.field-row.pl-pick-row { gap: 0 1.25rem; }
 .field.grow { flex: 1 1 240px; }
 .inline-form { display: flex; gap: .6rem; margin-top: 1rem; }
 .inline-form .input { flex: 1; }
@@ -80,11 +94,10 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 .pill-radios { display: flex; flex-wrap: wrap; gap: .5rem; }
 .pill-radio { position: relative; display: inline-flex; }
 .pill-radio input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
-.pill-radio > span { display: inline-flex; align-items: center; gap: .45rem; min-height: 46px; padding: .55rem 1.15rem; border: 2px solid var(--navy-10); border-radius: var(--r-pill); background: #fff; font: 700 .9rem var(--font-head); color: var(--navy); transition: background-color .15s, border-color .15s; }
+.pill-radio > span { display: inline-flex; align-items: center; gap: .45rem; min-height: 46px; padding: .55rem 1.15rem; border: 2px solid var(--navy-10); border-radius: var(--r-pill); background: #fff; font: 700 .9rem var(--font-head); color: var(--navy); transition: border-color .15s; /* the fill and the text colour swap together, so a pill never shows white text on a white fill */ }
 .pill-radio:hover > span { border-color: var(--blue-50); background: var(--blue-10); }
 .pill-radio input:checked + span { background: var(--blue); border-color: var(--blue); color: #fff; }
 .pill-radio input:focus-visible + span { outline: 3px solid var(--navy); outline-offset: 2px; box-shadow: 0 0 0 2px #fff; }
-.pill-radio.is-locked > span { background: var(--navy-10); border-style: dashed; color: var(--grey); }
 .pill-radio input:disabled { cursor: not-allowed; }
 .pill-radio small { font: 400 .72rem var(--font-body); opacity: .9; }
 
@@ -102,11 +115,28 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 .seg a { display: inline-flex; align-items: center; gap: .45rem; padding: .6rem 1.2rem; border-radius: var(--r-pill); font: 700 .92rem var(--font-head); text-decoration: none; color: var(--navy); }
 .seg a:hover { background: #fff; }
 .seg a[aria-current="page"] { background: var(--blue); color: #fff; }
+/* the five modes are one long pill on a wide screen; narrower, they sit in a neat grid (three across, then two, the last row filling the width) so the pill never wraps into a blob */
+@media (max-width: 980px) {
+  .seg { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); width: 100%; border-radius: var(--r-xl); }
+  .seg a { grid-column: span 2; justify-content: center; padding-inline: .6rem; text-align: center; line-height: 1.2; }
+  .seg a:nth-child(n + 4) { grid-column: span 3; }
+}
+@media (max-width: 560px) {
+  .seg { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seg a, .seg a:nth-child(n + 4) { grid-column: auto; }
+  .seg a:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
 
 .tabs { display: flex; gap: .4rem; overflow-x: auto; padding: .35rem .25rem; margin: 1rem 0; }
 .tab { display: inline-flex; align-items: center; gap: .45rem; min-height: 46px; padding: .55rem 1.1rem; border: 2px solid var(--line); border-radius: var(--r-pill); background: #fff; font: 700 .9rem var(--font-head); white-space: nowrap; color: var(--navy); }
 .tab:hover { background: var(--blue-10); border-color: var(--blue-50); }
 .tab[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+/* on a phone the tabs sit in a tidy two-column grid (a last odd one spans the row), so none of them hides off the edge of the screen */
+@media (max-width: 560px) {
+  .tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-x: visible; padding-inline: 0; }
+  .tab { justify-content: center; padding-inline: .6rem; white-space: normal; text-align: center; line-height: 1.2; }
+  .tab:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
 
 /* ---------- visual bits ---------- */
 .ic { flex: none; vertical-align: middle; }
@@ -119,12 +149,19 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 .ring-label small { font-size: .72rem; color: var(--grey); }
 .bar { height: 12px; border-radius: var(--r-pill); background: var(--navy-10); overflow: hidden; }
 .bar > span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--c); transition: width .6s ease; }
+/* the two-fill bar of the Feature Tracker (ui.nbar): grey for every feature, diagonal stripes in the colour (with an outline) for the collected ones, and a solid fill for the
+   mastered ones, over the start of the striped one. The stripes are anchored to the left of the bar, so they stay put as the fill grows. */
+.nbar { position: relative; display: block; height: 14px; border-radius: var(--r-pill); background: var(--navy-10); overflow: hidden; }
+.nbar > span { position: absolute; top: 0; bottom: 0; left: 0; border-radius: var(--r-pill); transition: width .6s ease; }
+.nbar-have { background: repeating-linear-gradient(135deg, var(--c) 0 3px, var(--c-tint) 3px 7px); box-shadow: inset 0 0 0 2px var(--c); }
+.nbar-done { background: var(--c); }
+[data-contrast="high"] .nbar { box-shadow: inset 0 0 0 1px #000; }
+[data-contrast="high"] .nbar-have { background: repeating-linear-gradient(135deg, #000 0 3px, #fff 3px 7px); box-shadow: inset 0 0 0 2px #000; }
+[data-contrast="high"] .nbar-done { background: #000; }
+@media (forced-colors: active) { .nbar, .nbar > span { forced-color-adjust: none; } .nbar { border: 2px solid CanvasText; } }
 .medal { display: inline-grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--c); color: var(--c-ink); flex: none; }
 .medal.is-locked { background: var(--navy-10); color: var(--navy-75); }
 .medal-lg { width: 72px; height: 72px; }
-.stars { display: inline-flex; gap: 2px; }
-.star svg { fill: none; stroke: var(--navy-50); }
-.star.on svg { fill: var(--yellow); stroke: var(--navy); }
 .dotrow { display: inline-flex; gap: 6px; }
 .dotrow i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--navy-50); background: #fff; }
 .dotrow i.used { background: var(--navy-50); }
@@ -175,17 +212,142 @@ dialog.dlg-wide { max-width: min(94vw, 900px); }
 .more-link { display: flex; align-items: center; gap: .9rem; padding: .85rem 1rem; border-radius: var(--r-md); text-decoration: none; color: var(--navy); font: 700 1rem var(--font-head); background: var(--blue-10); }
 .more-link span { flex: 1; }
 .more-link:hover { background: var(--blue); color: #fff; }
-.player-list { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .5rem; }
-.player-row { display: flex; align-items: center; gap: .9rem; width: 100%; padding: .6rem .9rem .6rem .6rem; border: 2px solid var(--line); border-radius: var(--r-pill); background: #fff; text-align: left; }
-.player-row:hover { border-color: var(--blue-50); background: var(--blue-10); }
-.player-row.is-me { border-color: var(--blue); background: var(--blue-10); }
-.pr-text { display: flex; flex-direction: column; flex: 1; line-height: 1.25; }
-.pr-text small { color: var(--grey); }
-.welcome { display: grid; grid-template-columns: auto 1fr; gap: 1.25rem; align-items: center; }
+
+/* ---------- welcome: Pip says hello the first time someone opens the game ---------- */
+.welcome { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.25rem; align-items: center; margin: 0 0 1.25rem; }
 .welcome-art { background: var(--blue-10); border-radius: 50% 50% var(--r-lg) var(--r-lg); padding: 1rem 1rem 0; }
-.ticks { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .4rem; }
-.ticks li { display: flex; gap: .6rem; align-items: flex-start; }
-.ticks .ic { color: var(--green); background: var(--navy); border-radius: 50%; padding: 3px; margin-top: .2rem; box-sizing: content-box; width: 14px; height: 14px; }
+.welcome-lede { margin: 0; font-size: 1.1rem; }
+.welcome-h { margin: 0 0 .6rem; font-size: 1.1rem; }
+.welcome-grid { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+.welcome-item { display: flex; gap: .75rem; align-items: flex-start; padding: .75rem .9rem; border-radius: var(--r-md); background: var(--c-tint); }
+.welcome-item:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.welcome-ic { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--c); color: var(--c-ink); }
+.welcome-item strong { display: block; font: 700 .95rem var(--font-head); }
+.welcome-item div > span { display: block; font-size: .9rem; line-height: 1.45; }
+.welcome-foot { display: flex; align-items: center; gap: .5rem; margin: 0; color: var(--grey); font-size: .92rem; }
+.welcome-signin { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.25rem; margin: 1.1rem 0 0; padding: .9rem 1.1rem; border-radius: var(--r-md); background: var(--blue-10); }
+.welcome-signin > div { flex: 1 1 16rem; min-width: 0; }
+.welcome-signin strong { display: block; font: 700 .98rem var(--font-head); color: var(--navy); }
+.welcome-signin div span { display: block; font-size: .9rem; line-height: 1.45; color: var(--navy); }
+@media (max-width: 640px) { .welcome { grid-template-columns: 1fr; justify-items: start; } .welcome-grid { grid-template-columns: 1fr; } }
+
+/* ---------- rank borders: every icon gets a ring in its rank's colour; Copilot Champion glows and slowly spins ---------- */
+.rank-ring { --rw: max(3px, calc(var(--sz, 40px) * .085)); --rg: max(2px, calc(var(--sz, 40px) * .035)); --ring: var(--blue); position: relative; display: inline-grid; place-items: center; flex: none; isolation: isolate; border-radius: 50%; width: calc(var(--sz, 40px) + 2 * (var(--rw) + var(--rg))); height: calc(var(--sz, 40px) + 2 * (var(--rw) + var(--rg))); }
+.rank-ring::before { content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 50%; background: var(--ring); }
+.rank-ring > .avatar { box-shadow: 0 0 0 var(--rg) #fff; }
+.rank-ring[data-rank="newcomer"]  { --ring: var(--blue); }
+.rank-ring[data-rank="explorer"]  { --ring: var(--green); }
+.rank-ring[data-rank="finder"]    { --ring: var(--yellow); }
+.rank-ring[data-rank="wizard"]    { --ring: var(--orange); }
+.rank-ring[data-rank="whisperer"] { --ring: var(--pink); }
+.rank-ring[data-rank="ace"]       { --ring: var(--purple); }
+.rank-ring[data-rank="coach"]     { --ring: linear-gradient(135deg, var(--navy) 0%, var(--blue) 55%, var(--purple) 100%); }
+.rank-ring[data-rank="champion"]  { --rainbow: conic-gradient(from 0deg, #165AF1, #9C3DB3, #FA146E, #E7662E, #F3B029, #21C795, #165AF1); --ring: var(--rainbow); }
+.rank-ring[data-rank="champion"]::before { animation: ringspin 6s linear infinite; }
+.rank-ring[data-rank="champion"]::after { content: ""; position: absolute; inset: calc(var(--rw) * -.35); z-index: -2; border-radius: 50%; background: var(--rainbow); filter: blur(calc(var(--sz, 40px) * .14 + 2px)); opacity: .55; animation: ringspin 6s linear infinite, ringglow 3.4s ease-in-out infinite alternate; }
+@keyframes ringspin { to { transform: rotate(360deg); } }
+@keyframes ringglow { from { opacity: .3; } to { opacity: .65; } }
+
+/* ---------- info bubbles: the explainers on the "Same category" / "Same level" chips of a guess ---------- */
+.info-wrap { position: relative; display: inline-flex; }
+.info-pop { display: none; position: absolute; z-index: 45; top: calc(100% + 10px); left: var(--pop-x, -8px); width: min(280px, 78vw); padding: .85rem 1.05rem; border-radius: var(--r-md); background: var(--navy); color: #fff; font: 400 .9rem/1.5 var(--font-body); text-align: left; text-transform: none; letter-spacing: 0; box-shadow: var(--shadow-lg); }
+.info-pop strong { display: block; margin-bottom: .2rem; font: 700 .95rem var(--font-head); color: var(--yellow); }
+.info-pop::before { content: ""; position: absolute; top: -6px; left: var(--arrow-x, 21px); width: 12px; height: 12px; background: var(--navy); transform: translateX(-50%) rotate(45deg); }
+.info-pop::after { content: ""; position: absolute; left: 0; right: 0; top: -14px; height: 14px; }
+/* hidden with display:none so a bubble near the edge of the screen can never widen the page; it is placed on-screen by script when it opens */
+.info-wrap:hover .info-pop, .info-wrap:focus-within .info-pop, .info-wrap.is-open .info-pop { display: block; animation: popfade .15s ease both; }
+@keyframes popfade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+.info-wrap.is-dismissed .info-pop { display: none; }
+/* "Same category" and "Same level" on a guess: hover, focus or tap to read what the word means */
+.chip-def { border: 0; margin: 0; cursor: help; text-decoration: underline dotted var(--navy-50); text-decoration-thickness: 1.5px; text-underline-offset: 3px; transition: background .15s, color .15s; }
+.chip-def:hover, .info-wrap.is-open > .chip-def { background: var(--navy); color: #fff; text-decoration-color: #fff; }
+.def-pop { width: min(320px, 82vw); }
+.def-pop .def-line { display: block; margin-top: .45rem; }
+.def-pop .def-tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .5rem; }
+.def-pop .def-tags span { padding: .12rem .6rem; border-radius: var(--r-pill); background: rgba(255, 255, 255, .16); font: 700 .74rem/1.45 var(--font-head); }
+.def-pop .def-levels { display: grid; gap: .3rem; margin-top: .45rem; padding-left: .7rem; border-left: 3px solid var(--yellow); }
+.def-pop .def-levels b { color: var(--yellow); }
+
+/* ---------- multi-select dropdown (Category, Feature): a button that opens a list of tick boxes ---------- */
+.msel { position: relative; }
+.msel-btn { display: block; width: 100%; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+/* on a phone two long names (Studio & Extensibility, Adoption & Learning) wrap onto a second line rather than being cut short */
+@media (max-width: 560px) { .msel-btn { white-space: normal; text-overflow: clip; border-radius: 26px; line-height: 1.3; } }
+.msel-btn:hover { border-color: var(--navy-75); }
+.msel-btn:focus-visible { border-color: var(--blue); outline: 3px solid var(--navy); outline-offset: 2px; box-shadow: 0 0 0 2px #fff; border-radius: var(--r-pill); }
+.msel-btn:disabled { background-color: var(--navy-10); border-color: var(--navy-10); cursor: not-allowed; color: var(--grey); }
+.msel.is-open .msel-btn { border-color: var(--blue); }
+.msel-panel { position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; right: 0; min-width: min(100%, 15rem); max-height: 18rem; overflow-y: auto; padding: .4rem; border: 2px solid var(--navy-50); border-radius: var(--r-md); background: #fff; box-shadow: var(--shadow-lg); }
+.msel-panel:focus { outline: none; }
+.msel-opt { display: flex; align-items: center; gap: .65rem; min-height: 44px; padding: .4rem .7rem; border-radius: var(--r-sm); font-weight: 500; line-height: 1.3; cursor: pointer; }
+.msel-opt:hover { background: var(--blue-10); }
+.msel-opt input { flex: none; width: 22px; height: 22px; margin: 0; accent-color: var(--blue); cursor: pointer; }
+.msel-opt:has(input:focus-visible) { outline: 3px solid var(--navy); outline-offset: -3px; }
+.msel-all { font-weight: 700; border-bottom: 1px solid var(--line); border-radius: var(--r-sm) var(--r-sm) 0 0; margin-bottom: .2rem; }
+.msel-set { margin: .3rem 0 0; padding: 0; border: 0; }
+.msel-set legend { padding: .4rem .7rem .1rem; font: 700 .72rem/1.3 var(--font-head); text-transform: uppercase; letter-spacing: .08em; color: var(--grey); }
+
+/* ---------- range sliders (the rounds in a game) ---------- */
+.slider-field label { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.slider-field output { font: 900 1.25rem var(--font-head); color: var(--blue); font-variant-numeric: tabular-nums; }
+.range { --fill: 0%; -webkit-appearance: none; appearance: none; display: block; width: 100%; height: 44px; margin: .25rem 0 0; padding: 0; background: transparent; cursor: pointer; }
+.range::-webkit-slider-runnable-track { height: 12px; border-radius: var(--r-pill); background: linear-gradient(to right, var(--blue) var(--fill), var(--navy-10) var(--fill)); }
+.range::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 30px; margin-top: -9px; border-radius: 50%; border: 4px solid var(--blue); background: #fff; box-shadow: var(--shadow-md); transition: transform .15s; }
+.range:hover::-webkit-slider-thumb { transform: scale(1.1); }
+.range::-moz-range-track { height: 12px; border-radius: var(--r-pill); background: var(--navy-10); }
+.range::-moz-range-progress { height: 12px; border-radius: var(--r-pill); background: var(--blue); }
+.range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; border: 4px solid var(--blue); background: #fff; box-shadow: var(--shadow-md); }
+.range:focus { outline: none; }
+.range:focus-visible::-webkit-slider-thumb { outline: 3px solid var(--navy); outline-offset: 3px; }
+.range:focus-visible::-moz-range-thumb { outline: 3px solid var(--navy); outline-offset: 3px; }
+.range:disabled { cursor: not-allowed; opacity: .5; }
+.range-scale { display: flex; justify-content: space-between; margin: -.1rem .15rem .4rem; font-size: .82rem; color: var(--grey); }
+
+/* ---------- player profile ---------- */
+.dlg-profile { max-width: min(92vw, 540px); }
+.pf-head { display: flex; align-items: center; gap: 1.25rem; margin: .25rem 0 1rem; }
+.pf-who { flex: 1; min-width: 0; }
+.pf-who p { margin: 0 0 .3rem; }
+.pf-rank { display: flex; align-items: center; gap: .45rem; font: 700 1.2rem var(--font-head); color: var(--navy); }
+.pf-rank .ic { color: var(--orange); }
+.pf-who .bar { margin: .5rem 0; }
+.pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 1rem 0; }
+.pf-stat { display: flex; flex-direction: column; padding: .8rem 1rem; border-radius: var(--r-md); background: var(--blue-10); line-height: 1.25; }
+.pf-stat strong { font: 900 1.8rem/1.1 var(--font-head); color: var(--navy); font-variant-numeric: tabular-nums; }
+.pf-stat strong small { font: 700 .95rem var(--font-head); }
+.pf-stat span { font-weight: 500; color: var(--grey); font-size: .9rem; }
+.pf-stat > small { color: var(--grey); font-size: .8rem; }
+.pf-coll { display: grid; gap: .55rem; padding: .9rem 1rem; border-radius: var(--r-md); background: var(--green-10); }
+.pf-coll-top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: .25rem 1rem; }
+
+/* ---------- rank-up celebration ---------- */
+.dlg-rankup { max-width: min(92vw, 460px); }
+.dlg-rankup .dlg-card { text-align: center; }
+.rankup { display: grid; justify-items: center; gap: .15rem; padding: .25rem 0 .5rem; }
+.rankup-art { display: flex; align-items: flex-end; justify-content: center; gap: 1.25rem; margin: 0 0 .75rem; padding: 1.25rem 2rem .5rem; border-radius: 50% 50% var(--r-lg) var(--r-lg); background: var(--yellow-10); }
+.rankup-avatar { align-self: center; padding: 1.1rem 0; animation: popin .7s cubic-bezier(.2, 1.4, .3, 1) .25s both; }
+.rankup-lead { margin: 0; font-weight: 500; color: var(--grey); }
+.rankup-name { margin: 0 0 .4rem; font-size: clamp(1.9rem, 1.4rem + 2.5vw, 2.6rem); color: var(--navy); animation: popin .6s cubic-bezier(.2, 1.3, .3, 1) .15s both; }
+
+/* ---------- changelog ("What's new") ---------- */
+.cl-ver { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem; margin: 0 0 .6rem; }
+.cl-intro { margin: 0 0 .5rem; }
+.cl section { margin: 1.4rem 0; }
+.cl h3 { display: flex; align-items: center; gap: .55rem; margin: 0 0 .7rem; font-size: 1.2rem; }
+.cl h3 .ic { color: var(--blue); }
+.cl-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+.cl-list li { display: grid; gap: .2rem; padding: .8rem 1rem; border-radius: var(--r-md); background: var(--blue-10); }
+.cl-list li > strong { font: 700 1rem var(--font-head); }
+.cl-list li > span { font-size: .95rem; }
+.cl-ms li { background: var(--purple-10); }
+.cl-empty { margin: 0; padding: .8rem 1rem; border-radius: var(--r-md); background: var(--purple-10); color: var(--navy); font-weight: 500; }
+.cl-ms-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .35rem .75rem; }
+.cl-ms a { justify-self: start; font-weight: 700; }
+.cl-history { margin-top: 1.25rem; padding-top: .35rem; border-top: 2px solid var(--line); }
+.cl-history summary { display: flex; align-items: center; min-height: 44px; cursor: pointer; font: 700 .95rem var(--font-head); color: var(--blue); }
+.cl-old h4 { margin: .8rem 0 .25rem; font-size: 1rem; }
+.cl-old h4 small { color: var(--grey); font: 400 .85rem var(--font-body); }
+.cl-old ul { margin: 0; padding-left: 1.2rem; }
 
 /* ---------- toasts + confetti ---------- */
 .toasts { position: fixed; z-index: 120; left: 50%; bottom: 1.25rem; transform: translateX(-50%); display: flex; flex-direction: column-reverse; align-items: center; gap: .5rem; pointer-events: none; width: min(92vw, 520px); }
@@ -193,5 +355,5 @@ dialog.dlg-wide { max-width: min(94vw, 900px); }
 .toast.in { opacity: 1; transform: none; }
 .toast-good { background: var(--green); color: var(--navy); }
 .confetti { position: fixed; inset: 0; z-index: 110; pointer-events: none; }
-@media (max-width: 1020px) { .toasts { bottom: calc(var(--nav-h) + 1rem + env(safe-area-inset-bottom)); } dialog.dlg-sheet { margin-bottom: 0; max-width: 100vw; } .dlg-sheet .dlg-card { border-radius: var(--r-lg) var(--r-lg) 0 0; } }
-@media (max-width: 560px) { .welcome { grid-template-columns: 1fr; justify-items: center; text-align: left; } .dlg-head, .dlg-body, .dlg-foot { padding-inline: 1.1rem; } }
+@media (max-width: 920px) { .toasts { bottom: calc(var(--nav-h) + 1rem + env(safe-area-inset-bottom)); } dialog.dlg-sheet { margin-bottom: 0; max-width: 100vw; } .dlg-sheet .dlg-card { border-radius: var(--r-lg) var(--r-lg) 0 0; } }
+@media (max-width: 560px) { .dlg-head, .dlg-body, .dlg-foot { padding-inline: 1.1rem; } }

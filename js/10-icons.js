@@ -71,7 +71,10 @@
     offline: '<path d="M3.5 9.5a13 13 0 0 1 17 0M6.5 13a8.5 8.5 0 0 1 11 0M9.5 16.3a4 4 0 0 1 5 0M12 19.5h.01M4 4l16 16"/>',
     dice: '<rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/>',
     leaf: '<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14"/><path d="M5 19c2-4 5-7 8-9"/>',
-    puzzle: '<path d="M10 4.5a2 2 0 1 1 4 0V6h3.5A1.5 1.5 0 0 1 19 7.5V11h-1.5a2 2 0 1 0 0 4H19v3.5a1.5 1.5 0 0 1-1.5 1.5H14v-1.5a2 2 0 1 0-4 0V20H6.5A1.5 1.5 0 0 1 5 18.5V15h1.5a2 2 0 1 0 0-4H5V7.5A1.5 1.5 0 0 1 6.5 6H10V4.5Z"/>'
+    puzzle: '<path d="M10 4.5a2 2 0 1 1 4 0V6h3.5A1.5 1.5 0 0 1 19 7.5V11h-1.5a2 2 0 1 0 0 4H19v3.5a1.5 1.5 0 0 1-1.5 1.5H14v-1.5a2 2 0 1 0-4 0V20H6.5A1.5 1.5 0 0 1 5 18.5V15h1.5a2 2 0 1 0 0-4H5V7.5A1.5 1.5 0 0 1 6.5 6H10V4.5Z"/>',
+    pause: '<path d="M8.5 5.5v13M15.5 5.5v13"/>',
+    eye: '<path d="M2.8 12S6.2 5.8 12 5.8 21.2 12 21.2 12 17.8 18.2 12 18.2 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="2.8"/>',
+    flask: '<path d="M9.5 3.5h5M10.5 3.5v5.2L5.3 17.4a2.2 2.2 0 0 0 1.9 3.3h9.6a2.2 2.2 0 0 0 1.9-3.3L13.5 8.7V3.5"/><path d="M7.9 14.5h8.2"/>'
   };
 
   function icon(name, opts = {}) {
@@ -130,7 +133,7 @@
   }
   FD.pip = pip;
 
-  /* ---------- wordmark: "Feature-dle" with the -dle in Wordle-style tiles ---------- */
+  /* ---------- wordmark: "Feature-dle" with the -dle in letter tiles ---------- */
   function wordmark(opts = {}) {
     const { cls = '', kicker = true } = opts;
     return html`<span class="wordmark ${cls}" role="img" aria-label="Copilot Feature-dle">
@@ -155,11 +158,15 @@
   const tagline = (word = 'people', cls = '') => html`<span class="tagline ${cls}">&lt;${word}&gt; friendly technology</span>`;
   FD.tagline = tagline;
 
-  /* initials avatar */
-  function avatar(name, color = 'blue', size = 40) {
+  /* initials avatar. Give it a rank id and it gets that rank's border (Copilot Champion glows and spins). */
+  function avatar(name, color = 'blue', size = 40, rankId = '') {
     const parts = String(name || '?').trim().split(/\s+/);
     const ini = ((parts[0] || '?')[0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
-    return html`<span class="avatar c-${color}" style="--sz:${size}px" aria-hidden="true">${ini}</span>`;
+    const core = html`<span class="avatar c-${color}" style="--sz:${size}px" aria-hidden="true">${ini}</span>`;
+    return rankId ? html`<span class="rank-ring" data-rank="${rankId}" style="--sz:${size}px" aria-hidden="true">${core}</span>` : core;
   }
   FD.avatar = avatar;
+
+  /* The Microsoft logo (four squares) for the "Sign in with Microsoft" button. Microsoft's own colours: they are not ours to change. */
+  FD.msLogo = (size = 21) => raw(`<svg class="ms-logo" viewBox="0 0 23 23" width="${size}" height="${size}" aria-hidden="true" focusable="false"><path fill="#F25022" d="M1 1h10v10H1z"/><path fill="#7FBA00" d="M12 1h10v10H12z"/><path fill="#00A4EF" d="M1 12h10v10H1z"/><path fill="#FFB900" d="M12 12h10v10H12z"/></svg>`);
 })();

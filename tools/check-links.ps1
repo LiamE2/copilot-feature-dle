@@ -1,10 +1,12 @@
 <#
-  Copilot Feature-dle  - link checker. Every "Learn more" link in data\features.json should open a real Microsoft page.
+  Copilot Feature-dle  - link checker. Every "Learn more" link in data\features.json (and the Prompt Lab guide link in data\prompts.json) should open a real Microsoft page.
     powershell -ExecutionPolicy Bypass -File tools\check-links.ps1
 #>
 param([string]$Json = (Join-Path $PSScriptRoot '..\data\features.json'))
 $lib = [System.IO.File]::ReadAllText((Resolve-Path $Json), [System.Text.Encoding]::UTF8) | ConvertFrom-Json
 $items = @($lib.features | Where-Object { $_.learnMore } | ForEach-Object { [pscustomobject]@{ Name = $_.name; Url = $_.learnMore } })
+$promptsPath = Join-Path $PSScriptRoot '..\data\prompts.json'
+if (Test-Path $promptsPath) { $pl = [System.IO.File]::ReadAllText((Resolve-Path $promptsPath), [System.Text.Encoding]::UTF8) | ConvertFrom-Json; if ($pl.learnMore -and $pl.learnMore.url) { $items += [pscustomobject]@{ Name = 'Prompt Lab guide'; Url = $pl.learnMore.url } } }
 Write-Host "Checking $($items.Count) links..." -ForegroundColor Cyan
 $ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'
 $results = $items | ForEach-Object -Begin { } -Process {

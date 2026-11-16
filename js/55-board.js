@@ -11,18 +11,32 @@
     ['Chloe B.', 'red'], ['Luca R.', 'yellow'], ['Sam W.', 'navy'], ['Ngozi A.', 'green'], ['Ben K.', 'blue']
   ];
 
+  /* one sample player is already a Copilot Champion, past the top rank's XP, so the champion look can be seen on the board without weeks of play */
+  const CHAMPION = 'Priya S.';
+
+  /* hunt, match or prompt: the day's game mode is the same for everyone, so a board that doesn't say (a shared event board) is talking about it too */
+  const dayKindOf = (day) => { try { const i = FD.daily.info(day); return i && !i.weekend && i.kind ? i.kind : 'hunt'; } catch (e) { return 'hunt'; } };
+
   function samplePlayers(today) {
+    const totalFeatures = FD.lib.features.length, totalBadges = FD.badges.all(FD.lib).length;
+    const topXp = FD.config.ranks[FD.config.ranks.length - 1].xp;
+    /* a Scenario Match or Prompt Lab day is answered in up to three picks, worth 50, 30 and 10, not in hints */
+    const dayKind = dayKindOf(today), qcfg = dayKind === 'match' ? FD.config.scenarioMatch : dayKind === 'prompt' ? FD.config.promptLab : null;
     return SAMPLE.map(([name, color], i) => {
-      const r = seeded('sample|' + name);
-      const played = 14 + Math.floor(r() * 120);
+      const r = seeded('sample|' + name), champ = name === CHAMPION;
+      const played = champ ? 188 : 14 + Math.floor(r() * 120);
       const rd = seeded('sample-day|' + name + '|' + today);
       const playedToday = rd() < 0.75;
-      const hints = 1 + Math.floor(rd() * 4);
-      const mult = 1 + Math.floor(rd() * 4) * 0.1;
+      const hints = 1 + Math.floor(rd() * 4), tries = qcfg ? Math.min(hints, qcfg.points.length) : hints;
+      const totalScore = Math.round(played * (55 + r() * 35));
+      const collected = champ ? Math.max(0, totalFeatures - 3) : Math.min(totalFeatures, Math.round(played * (0.35 + r() * 0.3)));
+      const mastered = champ ? Math.max(0, totalFeatures - 9) : Math.min(collected, Math.round(played * (0.03 + r() * 0.09)));
       return {
         id: 'sample-' + i, sample: true, name, color, played,
-        maxStreak: 2 + Math.floor(r() * 24), bestScore: 120 + Math.floor(r() * 110), totalScore: Math.round(played * (55 + r() * 35)),
-        today: playedToday ? { score: Math.round(FD.config.points[hints - 1] * mult) + (rd() < 0.4 ? 10 : 0), hints, timeMs: 9000 + Math.floor(rd() * 70000), won: true } : null
+        maxStreak: champ ? 36 : 2 + Math.floor(r() * 24), bestScore: champ ? 120 : 120 + Math.floor(r() * 110), totalScore,
+        xp: champ ? topXp + 1480 : Math.min(topXp - 1, Math.round(totalScore * (0.9 + r() * 0.4))), collected, collectedTotal: totalFeatures, mastered,
+        achievements: champ ? Math.round(totalBadges * 0.8) : Math.min(totalBadges, 2 + Math.round(collected / 5 + r() * 3)), achievementsTotal: totalBadges,
+        today: playedToday ? { score: (qcfg ? qcfg.points[tries - 1] : FD.config.points[hints - 1]) + (rd() < 0.5 ? FD.config.speedBonus[Math.floor(rd() * FD.config.speedBonus.length)].pts : 0), hints: tries, timeMs: 9000 + Math.floor(rd() * 70000), won: true, kind: dayKind } : null
       };
     });
   }
@@ -30,11 +44,12 @@
   function localPlayers(today) {
     const me = FD.store.profile().id;
     return FD.store.profiles().map((p) => {
-      const t = p.daily.results[today];
+      const t = p.daily.results[today], s = FD.scoring.summary(p, FD.lib), tot = FD.scoring.totals(p);
       return {
-        id: p.id, sample: false, you: p.id === me, name: p.name, color: p.color, played: p.stats.played,
-        maxStreak: p.daily.max, bestScore: p.stats.bestScore, totalScore: p.stats.totalScore,
-        today: t ? { score: t.score, hints: t.hints, timeMs: t.timeMs, won: t.won } : null
+        id: p.id, sample: false, you: p.id === me, name: p.name, color: p.color, played: tot.puzzles,
+        maxStreak: p.daily.max, bestScore: p.stats.bestScore, totalScore: p.stats.totalScore + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0),
+        xp: p.xp, collected: s.collected, collectedTotal: s.collectedTotal, mastered: FD.scoring.masteredCount(p, FD.lib), achievements: s.achievements, achievementsTotal: s.achievementsTotal,
+        today: t ? { score: t.score, hints: t.hints, timeMs: t.timeMs, won: t.won, kind: t.kind || 'hunt' } : null
       };
     });
   }
@@ -45,7 +60,8 @@
       daily: byDaily,
       streak: players.filter((p) => p.maxStreak > 0).sort((a, b) => b.maxStreak - a.maxStreak || b.totalScore - a.totalScore),
       score: players.filter((p) => p.totalScore > 0).sort((a, b) => b.totalScore - a.totalScore),
-      games: players.filter((p) => p.played > 0).sort((a, b) => b.played - a.played),
+      puzzles: players.filter((p) => p.played > 0).sort((a, b) => b.played - a.played),
+      mastery: players.filter((p) => p.mastered > 0).sort((a, b) => b.mastered - a.mastered || b.collected - a.collected),
       players
     };
   }
@@ -68,10 +84,13 @@
     const j = await r.json();
     const me = FD.store.profile().id;
     const BRAND = ['blue', 'red', 'purple', 'orange', 'green', 'pink', 'yellow', 'navy'];
+    const int = (v, max) => Math.min(max, Math.max(0, Math.round(+v || 0)));
+    const dayKind = dayKindOf(dateKey());
     const players = (Array.isArray(j.players) ? j.players : []).filter((p) => p && typeof p === 'object').slice(0, 500).map((p) => ({
       id: String(p.playerId || p.name || ''), sample: false, live: true, you: String(p.playerId || '') === me, name: String(p.name || 'Player').slice(0, 24), color: BRAND.includes(p.color) ? p.color : 'blue',
       played: +p.played || 0, maxStreak: +p.maxStreak || 0, bestScore: +p.bestScore || 0, totalScore: +p.totalScore || 0,
-      today: p.today ? { score: +p.today.score || 0, hints: +p.today.hints || 0, timeMs: +p.today.timeMs || 0, won: p.today.won !== false } : null
+      xp: int(p.xp, 1e7), collected: int(p.collected, 1000), collectedTotal: FD.lib.features.length, mastered: int(p.mastered, 1000), achievements: int(p.achievements, 200), achievementsTotal: FD.badges.all(FD.lib).length,
+      today: p.today ? { score: +p.today.score || 0, hints: +p.today.hints || 0, timeMs: +p.today.timeMs || 0, won: p.today.won !== false, kind: dayKind } : null
     }));
     return rank(players);
   }
@@ -79,11 +98,12 @@
   /* fire-and-forget: never block or break gameplay if the endpoint is down */
   function submit(r, out) {
     if (!remoteEnabled() || r.mode !== 'daily') return;
-    const p = FD.store.profile();
+    const p = FD.store.profile(), sm = FD.scoring.summary(p, FD.lib), tot = FD.scoring.totals(p);
     const body = {
       eventCode: lb().eventCode || '', date: r.dateKey, playerId: p.id, name: p.name, color: p.color,
       today: { score: out.breakdown ? out.breakdown.total : 0, hints: r.hintsUsed, timeMs: r.timeMs, won: !!r.won },
-      maxStreak: p.daily.max, totalScore: p.stats.totalScore, bestScore: p.stats.bestScore, played: p.stats.played
+      maxStreak: p.daily.max, totalScore: p.stats.totalScore + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0), bestScore: p.stats.bestScore, played: tot.puzzles,
+      xp: p.xp, collected: sm.collected, mastered: FD.scoring.masteredCount(p, FD.lib), achievements: sm.achievements
     };
     try { fetch(lb().endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {}); } catch (e) { /* ignore */ }
   }

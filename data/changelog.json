@@ -1,0 +1,19 @@
+{
+  "version": "1.5.0",
+  "date": "2026-11-17",
+  "intro": "A clearer Feature Tracker, a quick guide to great prompts in Prompt Lab, and a tidier Play tab and Home.",
+  "game": [
+    { "title": "A clearer Feature Tracker", "text": "Each bar shows the features you have collected (striped) and mastered (solid), with the numbers beside it, for every difficulty and category." },
+    { "title": "What makes a good prompt?", "text": "Prompt Lab has a quick guide to the four ingredients of a great prompt, with an example of each. Find the link at the top of its setup screen." },
+    { "title": "A tidier Play tab", "text": "Shorter descriptions, less space under them, and a Start Feature Hunt button." },
+    { "title": "Home tiles, reordered", "text": "Feature Hunt, Scenario Match and Prompt Lab lead the way, then Free Play, Packs and the Feature Book." }
+  ],
+  "microsoft": [],
+  "microsoftEmpty": "No new Microsoft updates for now",
+  "history": [
+    { "version": "1.4.0", "date": "2026-11-16", "notes": ["Free Play and Feature Hunt are played in rounds, from 1 to 10, and the Free Play timer is gone.", "Every level is open from the start, and the Feature Book shows every prompt.", "A tidier Prompt Lab results page, a lined-up Feature Tracker and three new badges."] },
+    { "version": "1.3.0", "date": "2026-11-16", "notes": ["Free Play mixes all three game modes, and Category and Feature became drop-downs that let you tick several.", "The Feature Tracker, a clearer Feature Book and one Prompt it list for every feature.", "Scenario Match and Prompt Lab give three picks, worth 50, 30 and 10 points, and the Speed Bonus belongs to the Daily Challenge.", "A simpler Home and Stats."] },
+    { "version": "1.2.0", "date": "2026-11-16", "notes": ["Three game modes: Feature Hunt, Scenario Match and Prompt Lab.", "Free Play, Packs and the Daily Challenge draw puzzles from all three.", "A richer Feature Book, a Copilot Essentials pack, and new Most puzzles and Mastery rankings. Team Battle retired."] },
+    { "version": "1.1.0", "date": "2026-11-14", "notes": ["Made the game even more awesome."] }
+  ]
+}

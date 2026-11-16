@@ -1,7 +1,7 @@
 {
   "name": "Copilot Feature-dle",
   "short_name": "Feature-dle",
-  "description": "A friendly daily guessing game that helps you learn Microsoft Copilot features. By Engage Squared.",
+  "description": "A friendly daily puzzle game that helps you learn Microsoft Copilot features: Know it, Use it and Prompt it. By Engage Squared.",
   "id": "./",
   "start_url": "./#/",
   "scope": "./",
@@ -19,7 +19,9 @@
   ],
   "shortcuts": [
     { "name": "Today's challenge", "short_name": "Daily", "url": "./#/daily", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Free play", "short_name": "Free play", "url": "./#/free", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Team battle", "short_name": "Team", "url": "./#/team", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+    { "name": "Free Play", "short_name": "Free Play", "url": "./#/free", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Feature Hunt", "short_name": "Hunt", "url": "./#/hunt", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Scenario Match", "short_name": "Match", "url": "./#/match", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Prompt Lab", "short_name": "Prompt Lab", "url": "./#/prompts", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }

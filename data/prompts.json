@@ -1,0 +1,524 @@
+{
+  "title": "Prompt Lab",
+  "updated": "2026-11-15",
+  "help": "One scenario = one question in Prompt Lab. Each has exactly four prompts and exactly one marked best. 'has' lists which of the four ingredients a prompt really contains (goal, context, source, expectations). Run tools\\build.ps1 to check this file; it prints friendly errors and refreshes data\\prompts.js.",
+  "learnMore": {
+    "url": "https://support.microsoft.com/en-us/microsoft-365-copilot/get-started-writing-prompts-in-microsoft-365-copilot",
+    "label": "How to write Copilot prompts"
+  },
+  "ingredients": [
+    { "id": "goal", "name": "Goal", "color": "blue", "text": "What you want Copilot to do.", "example": "Summarise the decisions from Tuesday's project review." },
+    { "id": "context", "name": "Context", "color": "purple", "text": "Why you need it, and who it is for.", "example": "It's for my manager, who missed the meeting." },
+    { "id": "source", "name": "Source", "color": "green", "text": "The files, meetings, emails or sites to use.", "example": "Use the meeting transcript and my notes." },
+    { "id": "expectations", "name": "Expectations", "color": "orange", "text": "The format, length and tone you want back.", "example": "Give me five friendly bullets, under 100 words." }
+  ],
+  "scenarios": [
+    {
+      "id": "missed-meeting-recap",
+      "app": "Teams",
+      "feature": "teams-meeting-recap",
+      "situation": "You missed Tuesday's project review, and your manager wants the decisions by lunchtime.",
+      "options": [
+        { "text": "Summarise the meeting.", "has": ["goal"], "why": "Copilot can do it, but it doesn't know which meeting, who it's for or what matters, so you'd get a very general summary." },
+        { "text": "Using the transcript and notes from Tuesday's project review, list the decisions made, the follow-up tasks and who owns each one. Keep it to five bullets I can paste into an email to my manager.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "A clear goal, the exact meeting, the audience and the format. Copilot has everything it needs to get it right first go." },
+        { "text": "Tell me everything that was said in the meeting, in as much detail as possible.", "has": ["goal"], "why": "Asking for everything buries the decisions. Say what matters most and how long you want it to be." },
+        { "text": "Hi Copilot! I wasn't at the meeting and I'm in a bit of a rush, so could you please help me work out what I missed? Thanks so much!", "has": ["goal", "context"], "why": "Friendly, and it hints at the situation, but it doesn't name the meeting, say who it's for or ask for a format. Be specific about what you need." }
+      ],
+      "tip": "Name the meeting, say what you need from it, and set the format."
+    },
+    {
+      "id": "long-email-thread",
+      "app": "Outlook",
+      "feature": "copilot-in-outlook",
+      "situation": "A 40-message email thread has landed in your inbox, and you need to reply today.",
+      "options": [
+        { "text": "What's this thread about?", "has": ["goal"], "why": "Handy for a first look, but it won't get you to a reply. Say what you want to end up with." },
+        { "text": "Summarise this thread: list the options people are debating, any deadlines and who still owes an answer. Then draft a friendly two-paragraph reply from me backing the option most people prefer.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It points at the thread, asks for the details you need, and sets the length and tone of the reply." },
+        { "text": "Write a really good reply to this email.", "has": ["goal", "source"], "why": "Copilot has to guess what you want to say. Give it your position and the tone you're after." },
+        { "text": "Reply to this thread in under 50 words.", "has": ["goal", "source", "expectations"], "why": "Short is good, but Copilot doesn't know your position or what the thread decided, so it has to guess. Ask for a summary first, then say what you want the reply to back." }
+      ],
+      "tip": "Ask for the summary and the next step together, so one prompt does both jobs."
+    },
+    {
+      "id": "late-delivery-reply",
+      "app": "Outlook",
+      "feature": "copilot-in-outlook",
+      "situation": "A customer is unhappy that their order arrived late. You want to reply with empathy and a clear fix.",
+      "options": [
+        { "text": "Write a reply to this customer.", "has": ["goal", "source"], "why": "Too open. Copilot doesn't know how you'd like to handle it, so the tone and the offer would be guesswork." },
+        { "text": "Draft a reply to this email. Apologise for the late delivery, offer 10% off their next order, and keep the tone warm and under 120 words.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the email, the situation, the offer and the tone, so the draft is nearly ready to send." },
+        { "text": "Be nice and apologise a lot.", "has": ["expectations"], "why": "Tone is only part of it. Without the facts, such as what happened and what you'll offer, the apology will feel generic." },
+        { "text": "Reply to this email and promise them a full refund, a replacement and free delivery on everything from now on.", "has": ["goal", "source"], "why": "Copilot will happily write promises you can't keep. Decide the fix first, then ask for a warm reply that offers only that." }
+      ],
+      "tip": "Give Copilot the facts you want in the message, not just the feeling."
+    },
+    {
+      "id": "proposal-from-template",
+      "app": "Word",
+      "feature": "copilot-in-word",
+      "situation": "You need a first draft of a proposal for a new client, and last year's winning proposal is saved in your files.",
+      "options": [
+        { "text": "Write a proposal.", "has": ["goal"], "why": "Copilot will write something, but it won't sound like you and it won't use what you already know works." },
+        { "text": "Draft a six-page proposal for Fabrikam's website refresh. Reuse the structure and tone of our Contoso proposal from last year, add a pricing section, and keep the language friendly and plain.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the client and project, points at a proven example, and says what to add and how it should sound." },
+        { "text": "Write a long, detailed, professional proposal that covers everything a client could want.", "has": ["goal", "expectations"], "why": "'Everything' and 'professional' don't narrow anything down. Name the client, the project and the sections you want." },
+        { "text": "Write a proposal like the one we did last year.", "has": ["goal", "source"], "why": "Copilot can't tell which proposal you mean, or who this one is for. Name the file, the client and what should change this time." }
+      ],
+      "tip": "A great example in your files is the best source you can give Copilot."
+    },
+    {
+      "id": "rewrite-for-executives",
+      "app": "Word",
+      "feature": "copilot-in-word",
+      "situation": "Your technical summary reads well for engineers, but the executives only have two minutes.",
+      "options": [
+        { "text": "Make this better.", "has": ["goal"], "why": "'Better' means different things to different readers. Say who it's for and what to change." },
+        { "text": "Rewrite this summary for our executive team. Lead with the business impact, cut the technical detail, keep it to 150 words and use a confident, plain tone.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the reader, the priority, the length and the tone, so Copilot knows exactly what to keep and what to cut." },
+        { "text": "Rewrite this so it is shorter.", "has": ["goal", "source", "expectations"], "why": "Shorter helps, but Copilot doesn't know who's reading, so it may trim the very details your executives care about." },
+        { "text": "Rewrite this for executives.", "has": ["goal", "context", "source"], "why": "Naming the audience helps, but Copilot still has to guess how short to go and what to lead with. Add a word limit and ask for the business impact first." }
+      ],
+      "tip": "Tell Copilot who will read it. It changes what 'good' looks like."
+    },
+    {
+      "id": "sales-by-region",
+      "app": "Excel",
+      "feature": "copilot-in-excel",
+      "situation": "Your Sales table has revenue by region, month and product, and you want to see what's changed.",
+      "options": [
+        { "text": "Analyse my data.", "has": ["goal"], "why": "Copilot has to guess which numbers matter. Name the table and the question you want answered." },
+        { "text": "Using the Sales table, show revenue by region for each quarter, add a column chart, and highlight any region that fell more than 10% from the previous quarter.", "has": ["goal", "source", "expectations"], "best": true, "why": "It names the table, asks a precise question and says exactly how to show the answer." },
+        { "text": "Make a pivot table, a chart and some conditional formatting for everything in the sheet.", "has": ["goal", "expectations"], "why": "Asking for everything gives you clutter. Pick the question first, then ask for the view that answers it." },
+        { "text": "Predict exactly what our sales will be next year.", "has": ["goal"], "why": "Copilot can spot patterns in the numbers you have, but it can't tell the future. Ask what changed by region and quarter, then decide what to expect." }
+      ],
+      "tip": "Name the table and columns you mean, and say what counts as interesting."
+    },
+    {
+      "id": "flag-overdue-invoices",
+      "app": "Excel",
+      "feature": "copilot-in-excel",
+      "situation": "Your Invoices table has a Due Date column and a Paid column, and you want to see which invoices need chasing.",
+      "options": [
+        { "text": "Add a formula to flag the late ones.", "has": ["goal"], "why": "'The late ones' could mean several things. Point Copilot at the columns so it uses the right rule." },
+        { "text": "In the Invoices table, add a column called Overdue that shows Yes when Due Date is before today and Paid is blank. Shade those rows light red.", "has": ["goal", "source", "expectations"], "best": true, "why": "It uses the real column names, spells out the rule and says how to show the result." },
+        { "text": "Look at the invoices and tell me what you think.", "has": ["goal", "source"], "why": "An open question gets an open answer. Ask for something specific that you can act on." },
+        { "text": "Email every customer with an unpaid invoice and demand payment.", "has": ["goal"], "why": "This goes well beyond the spreadsheet, and the tone is harsh. Start by flagging the overdue invoices in the table, then decide how to chase them." }
+      ],
+      "tip": "Use your column names. They are the clearest instructions Copilot can get."
+    },
+    {
+      "id": "deck-from-report",
+      "app": "PowerPoint",
+      "feature": "copilot-in-powerpoint",
+      "situation": "You've written a Word report on Q3 results and need a presentation for Friday's leadership meeting.",
+      "options": [
+        { "text": "Make a presentation.", "has": ["goal"], "why": "With no source, Copilot starts from scratch. Point it at your report." },
+        { "text": "Create a 10-slide presentation from my Q3 results report for Friday's leadership meeting. Open with a one-slide headline, keep each slide to three bullets and use our company template.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "Your report is the source, the audience is clear, and the length and layout are set." },
+        { "text": "Turn my whole report into slides: every section, every table.", "has": ["goal", "source"], "why": "Copying everything onto slides makes a wall of text. Say how many slides you want and what the audience needs." },
+        { "text": "Create a presentation from my Q3 report with lots of animations, transitions and fun pictures on every slide.", "has": ["goal", "source", "expectations"], "why": "Style is the least important part. Say who it's for, how many slides and what the first slide should say, then add the polish." }
+      ],
+      "tip": "Slides are a summary. Tell Copilot how much of the story to tell."
+    },
+    {
+      "id": "simplify-a-slide",
+      "app": "PowerPoint",
+      "feature": "copilot-in-powerpoint",
+      "situation": "One slide is crammed with numbers, and your audience is a room of non-technical managers.",
+      "options": [
+        { "text": "Fix this slide.", "has": ["goal", "source"], "why": "Fix what? Copilot can't tell if you want it shorter, prettier or clearer." },
+        { "text": "Simplify this slide for non-technical managers. Keep only the three numbers that matter most, make the title a one-line takeaway, and suggest a simple chart.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the audience, what to keep, and the shape of the finished slide." },
+        { "text": "Delete most of the text.", "has": ["expectations"], "why": "Cutting text isn't the same as making a slide clear. Tell Copilot who it's for and what should stay." },
+        { "text": "Add more numbers and charts to this slide so it looks impressive.", "has": ["goal", "source"], "why": "That's the opposite of what this audience needs. Say who it's for and ask Copilot to cut it down to the few numbers that matter." }
+      ],
+      "tip": "'Make it clearer' works better when you say clearer for whom."
+    },
+    {
+      "id": "prepare-for-customer-call",
+      "app": "Copilot Chat",
+      "feature": "copilot-chat",
+      "situation": "You have a renewal call with a customer tomorrow, and you want to walk in prepared.",
+      "options": [
+        { "text": "Tell me about Contoso.", "has": ["goal"], "why": "You'd get a general company profile. Copilot can do much more when it knows what the call is for and which of your files to use." },
+        { "text": "I have a renewal call with Contoso tomorrow. Using our recent emails, meeting notes and shared files, summarise where the relationship stands, list any open issues and suggest three questions I should ask. Keep it to one page.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It explains the purpose, points at your own work data and asks for a page you can actually use." },
+        { "text": "Give me everything you can find on Contoso, including all emails ever sent.", "has": ["goal", "source"], "why": "A very wide net brings back noise. Say what you're preparing for and how much you can read." },
+        { "text": "Write me a script for tomorrow's call with Contoso.", "has": ["goal", "context"], "why": "A script puts words in your mouth before you know where things stand. Ask for a summary of the relationship and some questions to ask, then lead the call yourself." }
+      ],
+      "tip": "Tell Copilot what the information is for. Purpose helps it choose what matters."
+    },
+    {
+      "id": "workshop-ideas",
+      "app": "Copilot Chat",
+      "feature": "copilot-chat",
+      "situation": "You're running a 90-minute workshop for a team that's new to Copilot, and you need some fresh ideas.",
+      "options": [
+        { "text": "Give me workshop ideas.", "has": ["goal"], "why": "Too open. You'd get a list that suits any team. Give Copilot the audience and the time." },
+        { "text": "I'm running a 90-minute hands-on workshop for a team of 12 who are new to Copilot. Suggest a simple agenda with three activities, and say what each activity should help them learn. Keep it practical and upbeat.", "has": ["goal", "context", "expectations"], "best": true, "why": "It describes the room, the time and the outcome, and it asks for a shape you can run with." },
+        { "text": "Plan a super engaging, amazing workshop that everyone will love.", "has": ["goal"], "why": "'Engaging' is the result you want, not the instructions. Say who's in the room and what they should learn." },
+        { "text": "Workshop ideas, 90 minutes, 12 people.", "has": ["goal", "context"], "why": "The size and length help. Add who they are, what you want them to learn and the format you'd like back, like a simple agenda." }
+      ],
+      "tip": "Give the size of the group, the time and the outcome you're after."
+    },
+    {
+      "id": "competitor-briefing",
+      "app": "Researcher",
+      "feature": "researcher",
+      "situation": "Your boss asks for a briefing on a competitor ahead of a pricing decision.",
+      "options": [
+        { "text": "Research our competitor Fabrikam.", "has": ["goal"], "why": "Researcher can dig deep, but it needs to know what decision this supports and what you want back." },
+        { "text": "Research Fabrikam's pricing and packaging ahead of our pricing review. Use public sources and our internal sales notes. Give me a two-page briefing with a comparison table, three risks and three opportunities, and cite your sources.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "The decision, the sources and the finished format are all clear, and asking for citations lets you check the work." },
+        { "text": "Write an essay on everything about Fabrikam.", "has": ["goal", "expectations"], "why": "An essay on everything is long and unfocused. A brief built around your decision is far more useful." },
+        { "text": "Is Fabrikam going to beat us?", "has": ["goal"], "why": "That's a prediction, and Copilot can't see inside Fabrikam. Ask it to research what's public about their pricing and packaging, and compare it with your own notes." }
+      ],
+      "tip": "For deep research, say what decision the answer will feed."
+    },
+    {
+      "id": "survey-low-scores",
+      "app": "Analyst",
+      "feature": "analyst",
+      "situation": "You've attached customer survey results and want to know what's behind the low satisfaction scores.",
+      "options": [
+        { "text": "Analyse this data.", "has": ["goal", "source"], "why": "Analyst needs a question to answer. Say what you're trying to find out." },
+        { "text": "Using the attached survey results, find what's driving low satisfaction scores in our support team. Compare scores by region and tenure, flag any outliers, and explain your steps so I can check them.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It asks a real question, names the cuts of data to compare, and asks for the working so you can trust the answer." },
+        { "text": "Make a chart of the survey.", "has": ["goal", "source"], "why": "A chart without a question is just a picture. Decide what you want to understand first." },
+        { "text": "Prove that our support team is doing a great job.", "has": ["goal"], "why": "Asking for a conclusion up front can steer the answer. Ask what's driving the low scores, say what to compare, and have Copilot show its steps." }
+      ],
+      "tip": "Ask a question, not just for a chart, and ask to see the working."
+    },
+    {
+      "id": "chat-to-shared-page",
+      "app": "Pages",
+      "feature": "copilot-pages",
+      "situation": "Copilot Chat helped you draft a launch plan, and now your team needs to add their ideas.",
+      "options": [
+        { "text": "Save this.", "has": ["goal"], "why": "Saving isn't enough. Say what you want it to become so your team can work on it together." },
+        { "text": "Turn this plan into a page my team can edit. Use headings for goals, owners and timeline, and add a short list of open questions at the end.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It says who will use the page and what sections it needs, so it's ready for your team to build on." },
+        { "text": "Make this into a document with everything in it.", "has": ["goal", "source"], "why": "'Everything' doesn't give the page a shape. Say which sections your team will work on." },
+        { "text": "Put this plan in an email so the team can reply with their ideas.", "has": ["goal", "context"], "why": "Replies land in separate emails, and nobody sees the plan change. Ask Copilot to turn it into a page the whole team can edit together." }
+      ],
+      "tip": "Think about the people who will edit the result, and shape it for them."
+    },
+    {
+      "id": "notebook-risks",
+      "app": "Notebooks",
+      "feature": "copilot-notebooks",
+      "situation": "Your notebook holds the launch plan, two meeting recordings and a risk register.",
+      "options": [
+        { "text": "What are the risks?", "has": ["goal"], "why": "Without pointing at the notebook, Copilot might draw on anything. Tell it to stick to what's in there." },
+        { "text": "Using only the sources in this notebook, summarise the five biggest risks to the Q4 launch. For each one, say which source it comes from and who owns the fix.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It limits Copilot to your references and asks it to show where each answer came from." },
+        { "text": "Summarise everything in this notebook.", "has": ["goal", "source"], "why": "A summary of everything is a long one. Ask for the specific thing you need, like the risks." },
+        { "text": "What do experts say about launch risks in general?", "has": ["goal"], "why": "That sends Copilot off to general advice instead of your own plan and risk register. Tell it to use only the sources in this notebook." }
+      ],
+      "tip": "Telling Copilot to use only your sources keeps the answer grounded."
+    },
+    {
+      "id": "notebook-new-starter-briefing",
+      "app": "Notebooks",
+      "feature": "copilot-notebooks",
+      "situation": "A new teammate starts on Monday. Your notebook holds the project brief, two meeting recaps and the budget sheet.",
+      "options": [
+        { "text": "Tell me about the project.", "has": ["goal"], "why": "That's a very wide ask. Say who the answer is for and what they need to know." },
+        { "text": "Using the project brief, both meeting recaps and the budget sheet in this notebook, write a one-page welcome briefing for a new teammate. Cover the goal, the key decisions so far and who to ask about what, in a friendly tone and under 300 words.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names who the briefing is for, points at the notebook's sources and sets the length and tone." },
+        { "text": "Summarise this notebook.", "has": ["goal", "source"], "why": "A summary of everything isn't a welcome briefing. Say who it's for and which parts matter to them." },
+        { "text": "Write a welcome briefing for a new teammate.", "has": ["goal", "context"], "why": "Naming the reader is a good start. Now point Copilot at the notebook's sources and say how long it should be." }
+      ],
+      "tip": "Say who the briefing is for, and Copilot can pick out what matters from your sources."
+    },
+    {
+      "id": "notebook-returns-faq",
+      "app": "Notebooks",
+      "feature": "copilot-notebooks",
+      "situation": "Customers keep asking about the new returns policy. Your notebook has the policy, last year's FAQ and a few support emails.",
+      "options": [
+        { "text": "Make an FAQ.", "has": ["goal"], "why": "Copilot doesn't know who it's for or what to base it on. Point it at the notebook and say what the FAQ is about." },
+        { "text": "Using the policy, last year's FAQ and the support emails in this notebook, draft eight questions customers are most likely to ask about the new returns policy. Give each a two-sentence answer in plain language.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the sources and the audience, and the size and style of each answer, so the draft is nearly ready to publish." },
+        { "text": "Write FAQs about our returns policy.", "has": ["goal"], "why": "Without pointing at the notebook, Copilot may guess at your policy. Tell it to use the policy and the support emails in there." },
+        { "text": "Summarise the support emails.", "has": ["goal", "source"], "why": "That gives you a summary, not an FAQ. Ask for the questions customers ask, with short answers." }
+      ],
+      "tip": "Name your sources and the format, and the first draft is nearly ready to use."
+    },
+    {
+      "id": "notebook-compare-suppliers",
+      "app": "Notebooks",
+      "feature": "copilot-notebooks",
+      "situation": "You're choosing between two suppliers. Your notebook has both quotes, their security questionnaires and your notes from two calls.",
+      "options": [
+        { "text": "Which supplier is better?", "has": ["goal"], "why": "That asks for a verdict with nothing to judge it by. Say what matters to you, and what to look at." },
+        { "text": "I'm choosing a supplier for our IT support. Using the quotes, security questionnaires and call notes in this notebook, compare the two on price, security and support in a table. Then recommend one in two sentences and name the source behind each point.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It says why you're asking, sets what to compare and how to lay it out, and asks for the source behind each point so you can check it." },
+        { "text": "Compare the two quotes.", "has": ["goal", "source"], "why": "Price is only part of it. Add what else matters (security, support) and how you want the answer laid out." },
+        { "text": "Compare the two suppliers and tell me which one to pick.", "has": ["goal"], "why": "It doesn't say what to compare or where to look. Name the sources and the points that matter, and ask for a table." }
+      ],
+      "tip": "Give Copilot the points to compare, and ask it to name its sources so you can check the answer."
+    },
+    {
+      "id": "find-latest-proposal",
+      "app": "Search",
+      "feature": "copilot-search",
+      "situation": "You remember a pricing proposal for Fabrikam, but not where it lives.",
+      "options": [
+        { "text": "Pricing.", "has": [], "why": "One word gives search nothing to work with. Say what you're looking for and what you want to know about it." },
+        { "text": "Find the latest version of the Fabrikam pricing proposal and tell me who last edited it.", "has": ["goal", "expectations"], "best": true, "why": "It names the customer and the document, and asks for the version and the person you need." },
+        { "text": "Find all documents about pricing.", "has": ["goal"], "why": "You'd get a long list. Add the customer and ask for the latest version to narrow it down." },
+        { "text": "Do we have a pricing proposal somewhere?", "has": ["goal"], "why": "Copilot might just say yes or no. Name the proposal (Fabrikam pricing), ask for the latest version and who last edited it." }
+      ],
+      "tip": "Names, dates and 'latest version' turn a search into an answer."
+    },
+    {
+      "id": "channel-catch-up",
+      "app": "Teams",
+      "feature": "copilot-in-teams-chats-channels",
+      "situation": "You've been on leave for a week, and the project channel has hundreds of new messages.",
+      "options": [
+        { "text": "What happened?", "has": ["goal"], "why": "Tell Copilot where to look and what to look for." },
+        { "text": "Catch me up on the Project Falcon channel from the last week. List decisions made, anything assigned to me and any open questions, in short bullets.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names the channel and the time frame, and asks for just the three things you need." },
+        { "text": "Summarise every message in this channel.", "has": ["goal", "source"], "why": "That's a lot to read all over again. Ask for decisions, actions and questions instead." },
+        { "text": "Catch me up on Project Falcon.", "has": ["goal", "source"], "why": "Naming the channel helps, but a week of messages is a lot. Say how far back to go, what you need (decisions, tasks for you) and how short." }
+      ],
+      "tip": "Ask for decisions, actions and open questions to catch up fast."
+    },
+    {
+      "id": "joined-late",
+      "app": "Teams",
+      "feature": "copilot-in-teams-meetings",
+      "situation": "You joined a meeting ten minutes late, and the discussion has already moved on.",
+      "options": [
+        { "text": "What's going on?", "has": ["goal"], "why": "Copilot can see the conversation, but it needs to know what you want from it." },
+        { "text": "Summarise what I missed so far. Give me the decision points discussed and anything assigned to me, in three bullets I can read in 30 seconds.", "has": ["goal", "context", "expectations"], "best": true, "why": "It asks for exactly what helps you rejoin, in a short format you can read while the meeting carries on." },
+        { "text": "Write down everything everyone has said.", "has": ["goal"], "why": "A word-for-word dump is slow to read. You want the key points." },
+        { "text": "Summarise this meeting in a nice short way.", "has": ["goal", "expectations"], "why": "Short helps, but it will summarise the whole meeting, not what you missed. Say you want what's happened so far, the decisions and anything assigned to you." }
+      ],
+      "tip": "A tight format, like three bullets, makes the answer quick to use."
+    },
+    {
+      "id": "notes-to-actions",
+      "app": "OneNote",
+      "feature": "copilot-in-onenote",
+      "situation": "Your OneNote page has scribbled notes from three different calls.",
+      "options": [
+        { "text": "Tidy this up.", "has": ["goal", "source"], "why": "'Tidy' could mean anything from fixing spelling to restructuring the whole page." },
+        { "text": "Turn these call notes into a list of action items with an owner and a due date for each. Group them by call, and put anything unclear at the bottom as questions.", "has": ["goal", "source", "expectations"], "best": true, "why": "It says what to produce, how to organise it, and what to do with anything unclear." },
+        { "text": "Make my notes better.", "has": ["goal", "source"], "why": "Better how? Say what you want out of them: actions, a summary or a plan." },
+        { "text": "Add more detail to my notes so they're complete.", "has": ["goal", "source"], "why": "More detail isn't what you need, you want to know what to do next. Ask for action items with an owner and a due date for each." }
+      ],
+      "tip": "Decide what the notes should become, then say so."
+    },
+    {
+      "id": "name-the-tool",
+      "app": "Loop",
+      "feature": "copilot-in-loop",
+      "situation": "Your team is brainstorming names for a new internal expenses tool on a Loop page.",
+      "options": [
+        { "text": "Give me ideas.", "has": ["goal"], "why": "Ideas for what? Give Copilot something to build on." },
+        { "text": "Suggest 15 names for our new internal expenses tool. They should be short, friendly and easy to say out loud, and not sound like a bank. Group them by theme.", "has": ["goal", "context", "expectations"], "best": true, "why": "It names the thing, the tone to aim for and the shape of the list, so you get names worth discussing." },
+        { "text": "Suggest some cool names.", "has": ["goal"], "why": "'Cool' is subjective. A little context about the tool and the tone gets you names you'll actually consider." },
+        { "text": "Suggest 15 names.", "has": ["goal", "expectations"], "why": "A number helps, but names for what, and for whom? Say what the tool is, who will use it and the feel you want, like short, friendly and not like a bank." }
+      ],
+      "tip": "For brainstorming, give a number, a tone and a way to group the ideas."
+    },
+    {
+      "id": "training-feedback-form",
+      "app": "Forms",
+      "feature": "copilot-in-forms",
+      "situation": "You want feedback on yesterday's training session for new starters.",
+      "options": [
+        { "text": "Create a survey.", "has": ["goal"], "why": "You'd get a generic survey. Tell Copilot what you want to learn and who's answering." },
+        { "text": "Create a short feedback form for yesterday's Copilot training for new starters. Ask about content, pace and trainer with a 1 to 5 rating for each, plus one open question about what they'd change.", "has": ["goal", "context", "expectations"], "best": true, "why": "It names the session and the audience, and sets the questions and the rating scale." },
+        { "text": "Write 30 questions about our training.", "has": ["goal", "expectations"], "why": "Long surveys rarely get finished. Ask for a short one that targets what you want to learn." },
+        { "text": "Create a feedback form that people will actually want to fill in.", "has": ["goal"], "why": "Nice aim, but Copilot can't tell what that means. Say what to ask about, how many questions, and what kind, like a rating or open text." }
+      ],
+      "tip": "Short and specific beats long and general, for people answering too."
+    },
+    {
+      "id": "compare-contract-versions",
+      "app": "OneDrive",
+      "feature": "copilot-in-onedrive",
+      "situation": "You have two versions of a supplier contract and need to know what changed.",
+      "options": [
+        { "text": "Which one is better?", "has": ["goal"], "why": "'Better' depends on what you care about. Ask what changed first." },
+        { "text": "Compare the 2025 and 2026 versions of the supplier contract. List what changed in pricing, term and termination, and flag anything I should check with legal.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It names both files, the areas to compare and what to do with anything risky." },
+        { "text": "Compare these files.", "has": ["goal", "source"], "why": "Compare in what way? Name the sections you care about so the differences that matter stand out." },
+        { "text": "Tell me whether I should sign the new contract.", "has": ["goal", "source"], "why": "Copilot can show what changed, but the decision (and the legal check) is yours. Ask it to compare the two versions and flag anything to take to legal." }
+      ],
+      "tip": "Name the areas to compare, so the differences that matter stand out."
+    },
+    {
+      "id": "hr-agent-instructions",
+      "app": "Agent Builder",
+      "feature": "agent-builder",
+      "situation": "You're writing the instructions for a new HR policy agent in Agent Builder.",
+      "options": [
+        { "text": "Answer HR questions.", "has": ["goal"], "why": "Too thin for an agent that talks to colleagues all day. Say what it should use, how it should answer and what to do when it doesn't know." },
+        { "text": "You help employees find answers about leave, expenses and onboarding. Use only the HR policy documents provided. Keep answers short and friendly, link to the policy page, and say you're not sure and suggest contacting HR when the documents don't cover it.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It sets the topics, the sources, the tone and the safe fallback, which is what a good agent needs." },
+        { "text": "Be the best HR assistant ever and know everything about HR.", "has": ["goal"], "why": "Big promises don't guide behaviour. Name the topics, the sources and the tone." },
+        { "text": "You are an HR assistant. Answer questions about leave, expenses and onboarding.", "has": ["goal", "context"], "why": "That sets the job and the topics. It doesn't say where answers should come from, what tone to use, or what to do when the documents don't cover a question." }
+      ],
+      "tip": "Agent instructions are prompts that last. Say what to use and what to do when unsure."
+    },
+    {
+      "id": "build-or-buy",
+      "app": "Think Deeper",
+      "feature": "think-deeper",
+      "situation": "You're deciding whether to build a custom agent or buy a ready-made one for customer FAQs.",
+      "options": [
+        { "text": "Build or buy?", "has": ["goal"], "why": "Think Deeper can reason through a trade-off, but it needs your situation: your size, budget and skills." },
+        { "text": "We're a 200-person firm with two developers and a small budget. Compare building a custom agent with buying one for answering customer FAQs. Weigh cost, time to launch, maintenance and risk, then give me a recommendation with your reasoning.", "has": ["goal", "context", "expectations"], "best": true, "why": "It gives the real constraints and the factors to weigh, and asks for reasoning you can challenge." },
+        { "text": "Tell me which is better, quickly.", "has": ["goal", "expectations"], "why": "A quick answer to a complex choice is a guess. Share the details and ask for the reasoning." },
+        { "text": "Compare building and buying an agent. Give me a pros and cons list.", "has": ["goal", "expectations"], "why": "A list is a start, but it will be generic. Say your size, budget and what matters most, then ask for a recommendation with reasons." }
+      ],
+      "tip": "For tricky decisions, share your constraints and ask for the reasoning."
+    },
+    {
+      "id": "unusual-chart",
+      "app": "Vision",
+      "feature": "copilot-vision",
+      "situation": "You're sharing your weekly sales dashboard on screen and want a second pair of eyes.",
+      "options": [
+        { "text": "What's this?", "has": ["goal"], "why": "Vision can see what you share, but a vague question gets a vague description." },
+        { "text": "I'm sharing our weekly sales dashboard. Which chart shows something unusual, and what might explain it? Point me to the chart first, then give me two ideas to check.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It says what's on screen, what you're hunting for and how to answer, so the guidance is easy to follow." },
+        { "text": "Describe everything on my screen.", "has": ["goal", "source"], "why": "A full description is long and rarely useful. Ask about the thing you're trying to understand." },
+        { "text": "Look at my screen and tell me if my sales are good.", "has": ["goal", "source"], "why": "Good, compared with what? Say what you're checking (last week, or the target) and ask Copilot to point to the chart that looks unusual." }
+      ],
+      "tip": "Tell Copilot what you're looking for on the screen, not just that it's there."
+    },
+    {
+      "id": "compare-open-tabs",
+      "app": "Edge",
+      "feature": "copilot-in-edge",
+      "situation": "You have three tabs open with reviews of different laptops, and you travel a lot.",
+      "options": [
+        { "text": "Which laptop?", "has": ["goal"], "why": "Copilot can compare your tabs, but it needs your priorities." },
+        { "text": "Compare the laptops in my open tabs for someone who travels a lot. Put battery life, weight and price in a table, then tell me which one you'd choose and why.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It points at the tabs, says what matters to you and asks for a table and a clear recommendation." },
+        { "text": "Summarise each page.", "has": ["goal", "source"], "why": "Three summaries leave the comparing to you. Ask Copilot to compare on the things you care about." },
+        { "text": "Which of these laptops is cheapest?", "has": ["goal", "source"], "why": "Price is one thing, but you travel a lot. Tell Copilot what matters (battery, weight), ask for a comparison and ask which one it would choose." }
+      ],
+      "tip": "Say what matters to you, so Copilot can weigh the options your way."
+    },
+    {
+      "id": "fill-in-the-gallery-prompt",
+      "app": "Prompt Gallery",
+      "feature": "copilot-prompt-gallery",
+      "situation": "You've found a gallery prompt that says 'Summarize the key points from my last meeting with [person].' You want it for your team stand-up.",
+      "options": [
+        { "text": "Summarize the key points from my last meeting with [person].", "has": ["goal"], "why": "The brackets are still unfilled, so Copilot doesn't know who you mean. Swap in your own details." },
+        { "text": "Summarise the key points from my last team stand-up on Tuesday. List any blockers and who raised them, and keep it to five bullets.", "has": ["goal", "source", "expectations"], "best": true, "why": "The placeholder is replaced with the real meeting, and you've added what to include and how long to go." },
+        { "text": "Summarise my meetings.", "has": ["goal"], "why": "All of them? Pick the one you mean and say what you need from it." },
+        { "text": "Summarise my stand-ups for the whole year.", "has": ["goal", "source"], "why": "That's a big pile for one answer, and you only need Tuesday's. Name the meeting, ask for blockers and who raised them, and say how long." }
+      ],
+      "tip": "Gallery prompts are starting points. Replace the brackets and add your own details."
+    },
+    {
+      "id": "remember-my-summary-style",
+      "app": "Memory",
+      "feature": "copilot-memory",
+      "situation": "You always want summaries as short bullets with the decision first, and you're tired of repeating yourself.",
+      "options": [
+        { "text": "Always keep things short.", "has": ["expectations"], "why": "Short is a start, but Copilot can't tell what to put first or what format you like." },
+        { "text": "Remember that whenever I ask for a summary, I want a one-line decision at the top, then no more than five short bullets, in plain English.", "has": ["goal", "context", "expectations"], "best": true, "why": "It says when the preference applies and spells out the format, so Copilot can follow it every time." },
+        { "text": "Remember that I like good summaries.", "has": ["goal"], "why": "'Good' isn't something Copilot can act on. Spell out the format you want." },
+        { "text": "Remember everything I tell you from now on.", "has": ["goal"], "why": "Too broad to be useful. Tell Copilot exactly what to remember, like summaries with the decision first, then a few short bullets." }
+      ],
+      "tip": "When you want a habit remembered, say when it applies and what it looks like."
+    },
+    {
+      "id": "improve-the-first-draft",
+      "app": "Copilot Chat",
+      "feature": "copilot-chat",
+      "situation": "Copilot's first draft of your project update is close, but it's too long and a bit stiff.",
+      "options": [
+        { "text": "Try again.", "has": ["goal"], "why": "Copilot doesn't know what to change, so it might change everything." },
+        { "text": "Keep the structure, but cut it to 120 words and make the tone warmer. Lead with the one decision I need from the team.", "has": ["goal", "context", "expectations"], "best": true, "why": "It keeps what worked and says exactly what to change, so the next draft gets closer." },
+        { "text": "This isn't what I wanted. Write it again from scratch.", "has": ["goal"], "why": "Starting over throws away the parts that worked. Tell Copilot what to keep and what to change." },
+        { "text": "Make it shorter and warmer.", "has": ["goal", "expectations"], "why": "Heading the right way, but how short, and how warm? Give a word count, and say what to lead with so the structure stays." }
+      ],
+      "tip": "Prompting is a conversation. Build on what worked and say what to change."
+    },
+    {
+      "id": "my-tasks-from-the-call",
+      "app": "Teams",
+      "feature": "intelligent-recap",
+      "situation": "After a long planning call, you want to know exactly what's on your plate.",
+      "options": [
+        { "text": "What are my tasks?", "has": ["goal"], "why": "Tell Copilot which call to use, so it doesn't mix up your tasks with other work." },
+        { "text": "From the recap of this morning's planning call, list the tasks assigned to me with due dates, and note anything I agreed to out loud.", "has": ["goal", "source", "expectations"], "best": true, "why": "It names the call, asks for your tasks only and says what details to include." },
+        { "text": "Summarise the call.", "has": ["goal", "source"], "why": "A summary casts a wide net. Ask for your actions so you see what matters to you." },
+        { "text": "What did I agree to in the call?", "has": ["goal", "source"], "why": "That finds your promises but misses tasks other people gave you. Ask for both, with due dates, from the recap of this morning's call." }
+      ],
+      "tip": "Ask for the part that matters to you, not the whole thing."
+    },
+    {
+      "id": "keep-the-brainstorm-on-track",
+      "app": "Facilitator",
+      "feature": "facilitator",
+      "situation": "You're hosting a 45-minute brainstorm and want help keeping it on track.",
+      "options": [
+        { "text": "Help with my meeting.", "has": ["goal"], "why": "Tell Copilot the aim and the time, so it knows what 'on track' means." },
+        { "text": "Help us stay on track in this 45-minute brainstorm on next year's customer events. Suggest a simple agenda, keep live notes of the ideas and keep an eye on the time.", "has": ["goal", "context", "expectations"], "best": true, "why": "It sets the topic, the length and the jobs to do, which is what a facilitator needs." },
+        { "text": "Take notes.", "has": ["goal"], "why": "Notes are one part. A good facilitator also needs the goal, the timing and what to capture." },
+        { "text": "Run my brainstorm for me.", "has": ["goal"], "why": "Copilot can help with notes and time, but it needs the topic and the length. Say what the brainstorm is about, how long you have and what you want out of it." }
+      ],
+      "tip": "Give the topic and the time, then list the jobs you want done."
+    },
+    {
+      "id": "event-banner",
+      "app": "Create",
+      "feature": "copilot-create",
+      "situation": "You need a simple banner for an internal event.",
+      "options": [
+        { "text": "Make a banner.", "has": ["goal"], "why": "You'd get something generic. Say what the event is and what the banner needs to show." },
+        { "text": "Create a landscape banner for our internal Innovation Day on 12 March. Use our blue and yellow brand colours, include the date and the words 'Bring your ideas', and keep the design clean and modern.", "has": ["goal", "context", "expectations"], "best": true, "why": "It names the event, the format, the colours and the exact words, so there's very little to fix." },
+        { "text": "Make something creative for our event.", "has": ["goal"], "why": "'Creative' is open-ended. Without the colours, words and format, you'll go through lots of versions." },
+        { "text": "Make a banner with a really cool, modern design.", "has": ["goal", "expectations"], "why": "Style words mean different things to different people. Say what the event is, the date, the words to include and your brand colours." }
+      ],
+      "tip": "For images, say the format, the colours and any words that must appear."
+    },
+    {
+      "id": "office-opening-news",
+      "app": "SharePoint",
+      "feature": "copilot-in-sharepoint",
+      "situation": "You're writing an intranet news post about the new Brisbane office opening.",
+      "options": [
+        { "text": "Write a news post.", "has": ["goal"], "why": "Copilot doesn't know what the news is. Give it the facts." },
+        { "text": "Write a short intranet news post announcing our new Brisbane office, opening on 4 March. The audience is all staff, so keep it welcoming and mention parking and the opening-day morning tea. Under 150 words.", "has": ["goal", "context", "expectations"], "best": true, "why": "It supplies the facts, the audience and the length, so the post needs a light edit rather than a rewrite." },
+        { "text": "Write a really exciting announcement!!!", "has": ["goal", "expectations"], "why": "Excitement is a tone, not content. Give Copilot the facts: what, when, where and who it's for." },
+        { "text": "Announce the new Brisbane office to everyone.", "has": ["goal", "context"], "why": "It names the office and the audience, but not the opening date, what staff need to know, or how long it should be. Add those and a word limit." }
+      ],
+      "tip": "Supply the facts yourself. Copilot is best at shaping them."
+    },
+    {
+      "id": "customer-call-notes",
+      "app": "Teams Phone",
+      "feature": "copilot-in-teams-phone",
+      "situation": "You've just finished a call with a customer and need to log what was agreed.",
+      "options": [
+        { "text": "Summarise the call.", "has": ["goal", "source"], "why": "A fine start, but you'd still need a second prompt to get the agreed next steps." },
+        { "text": "Summarise the call with Fabrikam. List what we agreed, any pricing they mentioned, and the next steps with owners and dates, as short bullets I can paste into our CRM notes.", "has": ["goal", "context", "source", "expectations"], "best": true, "why": "It asks for the agreed points and next steps in a format that's ready to paste where you need it." },
+        { "text": "What did they say?", "has": ["goal"], "why": "That replays their words rather than what was agreed. Ask for decisions and next steps." },
+        { "text": "Summarise the Fabrikam call and send it to the customer.", "has": ["goal", "source"], "why": "Notes for your CRM aren't the same as a message for the customer. Ask for what was agreed and the next steps, then review it before anything is shared." }
+      ],
+      "tip": "Say where the answer is going, and Copilot can format it to fit."
+    },
+    {
+      "id": "monday-email-roundup",
+      "app": "Actions",
+      "feature": "copilot-actions",
+      "situation": "You want Copilot to run the same weekly roundup of unread customer emails every Monday morning.",
+      "options": [
+        { "text": "Send me my emails.", "has": ["goal"], "why": "A scheduled prompt needs to say what to gather, when to run and how to show it." },
+        { "text": "Every Monday at 8am, summarise the unread customer emails I received over the weekend, group them by urgency, and list the ones I need to reply to today.", "has": ["goal", "source", "expectations"], "best": true, "why": "It says when to run, which emails to look at and how to present the result." },
+        { "text": "Remind me about my emails.", "has": ["goal"], "why": "A reminder doesn't do the work. A scheduled prompt can gather and organise the emails for you." },
+        { "text": "Every Monday, send me a roundup of anything important.", "has": ["goal", "expectations"], "why": "Anything important leaves Copilot guessing. Say which emails (unread customer ones), how to group them, and which need a reply today." }
+      ],
+      "tip": "For a prompt that repeats, say what to gather, when to run it and how to show it."
+    },
+    {
+      "id": "onboarding-plan-questions",
+      "app": "Researcher",
+      "feature": "researcher",
+      "situation": "You need a plan for onboarding new enterprise customers, but you're not sure of every detail yet.",
+      "options": [
+        { "text": "Create an onboarding plan.", "has": ["goal"], "why": "It's a start, but Copilot would have to guess the length, the audience and what a good plan looks like." },
+        { "text": "Create a 30-day onboarding plan for new enterprise customers. Ask me up to three questions first if you need more detail, then give me a week-by-week table.", "has": ["goal", "context", "expectations"], "best": true, "why": "It invites questions before Copilot starts, and sets the length and the format of the answer." },
+        { "text": "Create an onboarding plan. Don't ask me anything, just guess.", "has": ["goal", "expectations"], "why": "Telling Copilot to guess means you'll be fixing the plan later. A few questions up front get you a plan that fits." },
+        { "text": "Create an onboarding plan. Ask me 20 questions first.", "has": ["goal", "expectations"], "why": "Questions help, but twenty is a lot before you've seen anything. Cap it at a few, then ask for a week-by-week table you can react to." }
+      ],
+      "tip": "Invite Copilot to ask clarifying questions when you're unsure of the details."
+    }
+  ]
+}
