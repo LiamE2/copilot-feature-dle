@@ -99,12 +99,13 @@
         <header class="stats-head card c-blue">
           ${FD.avatar(p.name, p.color, 72, rk.rank.id)}
           <div class="sh-main"><p class="eyebrow">Player stats${FD.account.tag()}</p><h1>${p.name}</h1>
-            <p class="sh-rank">${FD.icon('crown', { size: 20 })}<strong>${rk.rank.name}</strong><span>${p.xp} XP${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</span></p>
+            <p class="sh-rank"><strong>${rk.rank.name}</strong><span>${p.xp} XP${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</span></p>
             ${ui.bar(rk.pct, 'yellow', 'Progress to next rank')}</div>
         </header>
         ${FD.account.note('You\u2019re playing as a guest. Sign in to put your name on the leaderboard.')}
 
         <section class="num-grid" aria-label="Key numbers">
+          <div class="num num-total card" style="--n:${String(FD.scoring.totalScore(p)).length}"><strong>${FD.scoring.totalScore(p)}</strong><span>Total score</span></div>
           <div class="num card"><strong>${tot.puzzles}</strong><span>Puzzles played</span></div>
           <div class="num card num-streak heat-${heat}"><strong><span class="heat-ic" aria-hidden="true">${FD.icon('flame', { size: 24 })}</span>${streak}</strong><span>Daily streak${heat ? html`<span class="sr-only"> (${HEAT_WORD[heat]})</span>` : ''}</span></div>
           <div class="num card"><strong>${p.daily.max}</strong><span>Best daily streak</span></div>

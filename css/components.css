@@ -147,6 +147,12 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 .ring-label small { font-size: .72rem; color: var(--grey); }
 .bar { height: 12px; border-radius: var(--r-pill); background: var(--navy-10); overflow: hidden; }
 .bar > span { display: block; height: 100%; border-radius: var(--r-pill); background: var(--c); transition: width .6s ease; }
+/* Copilot Coach and Copilot Champion: the bar's colours slowly drift along it, through the same colours as the rank's border (navy, blue and purple; and the rainbow).
+   The gradient starts and ends on the same colour and is twice as wide as the bar, so sliding it by exactly that width loops without a jump. With motion reduced the slide
+   stops and the gradient just sits there. */
+.bar.bar-coach > span { background: linear-gradient(90deg, var(--navy), var(--blue), var(--purple), var(--blue), var(--navy)) 0 0 / 200% 100%; animation: barshift 12s linear infinite; }
+.bar.bar-champion > span { background: linear-gradient(90deg, #165AF1, #9C3DB3, #FA146E, #E7662E, #F3B029, #21C795, #165AF1) 0 0 / 200% 100%; animation: barshift 12s linear infinite; }
+@keyframes barshift { to { background-position: 200% 0; } }
 /* the two-fill bar of the Feature Tracker (ui.nbar): grey for every feature, diagonal stripes in the colour (with an outline) for the collected ones, and a solid fill for the
    mastered ones, over the start of the striped one. The stripes are anchored to the left of the bar, so they stay put as the fill grows. */
 .nbar { position: relative; display: block; height: 14px; border-radius: var(--r-pill); background: var(--navy-10); overflow: hidden; }
@@ -193,10 +199,13 @@ legend, .label, .field > label { display: block; padding: 0; font: 700 .9rem/1.3
 /* ---------- dialogs ---------- */
 dialog.dlg { border: 0; padding: 0; background: transparent; max-width: min(92vw, 580px); width: 100%; max-height: 92vh; overflow: visible; color: var(--navy); }
 dialog.dlg::backdrop { background: rgba(18, 19, 75, .6); backdrop-filter: blur(3px); }
-.dlg-card { background: #fff; border-radius: var(--r-lg); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; animation: dlgin .25s ease both; }
+.dlg-card { position: relative; background: #fff; border-radius: var(--r-lg); box-shadow: var(--shadow-lg); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; animation: dlgin .25s ease both; }
 @keyframes dlgin { from { transform: translateY(14px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 .dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.5rem .5rem; }
 .dlg-head h2 { margin: 0; font-size: clamp(1.3rem, 1rem + 1vw, 1.7rem); }
+/* a dialog that names itself inside its body (a player profile) keeps only the close button in the header, tucked into the corner */
+.dlg-head-bare { position: absolute; top: .75rem; right: .75rem; z-index: 1; padding: 0; }
+.dlg-head-bare + .dlg-body { padding-top: 1.75rem; }
 .dlg-body { padding: .5rem 1.5rem 1.25rem; overflow-y: auto; }
 .dlg-foot { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: .6rem; padding: 1rem 1.5rem 1.25rem; border-top: 2px solid var(--line); background: var(--blue-10); }
 dialog.dlg-wide { max-width: min(94vw, 900px); }
@@ -299,10 +308,12 @@ dialog.dlg-wide { max-width: min(94vw, 900px); }
 /* ---------- player profile ---------- */
 .dlg-profile { max-width: min(92vw, 540px); }
 .pf-head { display: flex; align-items: center; gap: 1.25rem; margin: .25rem 0 1rem; }
-.pf-who { flex: 1; min-width: 0; }
-.pf-who p { margin: 0 0 .3rem; }
-.pf-rank { display: flex; align-items: center; gap: .45rem; font: 700 1.2rem var(--font-head); color: var(--navy); }
-.pf-rank .ic { color: var(--orange); }
+/* the close button sits in the card's corner, so the right of the name keeps clear of it */
+.pf-who { flex: 1; min-width: 0; padding-right: 2.75rem; }
+.pf-who > * { margin: 0; }
+.pf-name { font-size: clamp(1.3rem, 1rem + 1vw, 1.7rem); line-height: 1.2; overflow-wrap: anywhere; }
+.pf-rank { margin-top: .5rem !important; font: 700 1.2rem var(--font-head); color: var(--navy); }
+.pf-who .chip { margin-top: .5rem; }
 .pf-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; margin: 1rem 0; }
 .pf-stat { display: flex; flex-direction: column; padding: .8rem 1rem; border-radius: var(--r-md); background: var(--blue-10); line-height: 1.25; }
 .pf-stat strong { font: 900 1.8rem/1.1 var(--font-head); color: var(--navy); font-variant-numeric: tabular-nums; }

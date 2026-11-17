@@ -36,14 +36,16 @@
     setTimeout(() => { t.classList.remove('in'); setTimeout(() => t.remove(), 350); }, o.ms || 3600);
   };
 
-  /* lock: a choice that has to be made. There is no close button, and Esc or a click outside does nothing, so the buttons are the only way out. */
-  ui.dialog = ({ title, body, actions = [], cls = '', onClose, lock = false }) => {
+  /* lock: a choice that has to be made. There is no close button, and Esc or a click outside does nothing, so the buttons are the only way out.
+     titleId: the caller puts the dialog's name inside the body itself (an element with this id), so the header holds only the close button (a player profile does this, to
+     show the name beside the player's icon). */
+  ui.dialog = ({ title, body, actions = [], cls = '', onClose, lock = false, titleId = '' }) => {
     const d = document.createElement('dialog');
     d.className = 'dlg ' + cls;
-    const id = 'dlg-' + Math.random().toString(36).slice(2, 7);
+    const id = titleId || 'dlg-' + Math.random().toString(36).slice(2, 7);
     d.setAttribute('aria-labelledby', id);
     d.innerHTML = flat(html`<div class="dlg-card">
-      <header class="dlg-head"><h2 id="${id}">${title}</h2>${lock ? '' : html`<button class="btn btn-icon btn-ghost" type="button" data-close aria-label="Close dialog">${FD.icon('x')}</button>`}</header>
+      <header class="dlg-head${titleId ? ' dlg-head-bare' : ''}">${titleId ? '' : html`<h2 id="${id}">${title}</h2>`}${lock ? '' : html`<button class="btn btn-icon btn-ghost" type="button" data-close aria-label="Close dialog">${FD.icon('x')}</button>`}</header>
       <div class="dlg-body">${body}</div>
       ${actions.length ? html`<footer class="dlg-foot">${actions.map((a) => html`<button class="btn ${a.cls || 'btn-ghost'}" type="button" data-dlg="${a.id}">${a.label}</button>`)}</footer>` : ''}
     </div>`);
@@ -250,7 +252,11 @@
       <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-hidden="true"><circle class="ring-track" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" fill="none"/><circle class="ring-arc" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-width="${stroke}" fill="none" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>
       <span class="ring-label"><strong>${label}</strong>${sub ? html`<small>${sub}</small>` : ''}</span></div>`;
   };
-  ui.bar = (pct, color = 'blue', label = '') => html`<div class="bar c-${color}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" ${FD.u.attrs({ 'aria-label': label })}><span style="width:${Math.max(0, Math.min(100, pct))}%"></span></div>`;
+  ui.bar = (pct, color = 'blue', label = '', cls = '') => html`<div class="bar c-${color}${cls ? ' ' + cls : ''}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" ${FD.u.attrs({ 'aria-label': label })}><span style="width:${Math.max(0, Math.min(100, pct))}%"></span></div>`;
+  /* A player's XP bar, in their rank's colour. Copilot Coach and Copilot Champion have borders made of several colours, so their bars slowly shift through those same colours
+     (the shift stops, leaving the gradient, when motion is reduced). */
+  const SHIFTING = { coach: 'bar-coach', champion: 'bar-champion' };
+  ui.rankBar = (rk, label = 'Progress to the next rank') => ui.bar(rk.pct, rk.rank.color, label, SHIFTING[rk.rank.id] || '');
 
   /* The round tracker: one line, the same in every game of rounds (Free Play, Feature Hunt, Scenario Match, Prompt Lab) and in Packs, and always in the same place, under the heading.
      It says which round you are on in plain words ("Round 2 of 5"; a pack counts puzzles, so it says "Puzzle 2 of 46") and, where a game keeps score, the points so far. Nothing else
@@ -417,13 +423,13 @@
 
   /* ---------- player profile (opened from the leaderboard) ---------- */
   ui.profileDialog = (pl) => {
-    /* a profile shows a player's rank and four numbers: no XP, so nobody can read off how close they are to the next rank */
-    const rk = FD.scoring.rank(pl.xp || 0);
+    /* a profile shows a player's rank and four numbers: no XP, so nobody can read off how close they are to the next rank. The name sits beside the icon, above the rank. */
+    const rk = FD.scoring.rank(pl.xp || 0), tid = 'pf-name-' + Math.random().toString(36).slice(2, 7);
     const stat = (label, value) => html`<div class="pf-stat"><strong>${value}</strong><span>${label}</span></div>`;
     return ui.dialog({
-      title: pl.name, cls: 'dlg-profile',
+      title: pl.name, titleId: tid, cls: 'dlg-profile',
       body: html`<div class="pf-head">${FD.avatar(pl.name, pl.color, 84, rk.rank.id)}
-          <div class="pf-who"><p class="pf-rank">${FD.icon('crown', { size: 18 })}<strong>${rk.rank.name}</strong></p>
+          <div class="pf-who"><h2 class="pf-name" id="${tid}">${pl.name}</h2><p class="pf-rank"><strong>${rk.rank.name}</strong></p>
             ${pl.you ? html`<span class="chip chip-solid c-blue">That\u2019s you</span>` : ''}</div></div>
         <div class="pf-grid">
           ${stat('Longest Daily streak', html`${pl.maxStreak || 0}<small> ${pl.maxStreak === 1 ? 'day' : 'days'}</small>`)}${stat('Total score', pl.totalScore || 0)}

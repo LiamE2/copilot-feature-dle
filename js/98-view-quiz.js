@@ -45,12 +45,15 @@
   })}</ul>`;
 
   /* ======================================================================== the question (shared) */
-  /* the blue box: it says it is the scenario. Prompt Lab names the Copilot feature it is about under the scenario; Scenario Match can't (the feature is the answer) */
-  const scenarioCard = (kind, scn) => html`<section class="card pl-scenario${kind === 'match' ? ' is-match' : ''}" aria-labelledby="pl-sit-h">
+  /* the blue box: it says it is the scenario. A Prompt Lab scenario starts by saying which Copilot feature it is about ("You're using Analyst."), with the feature's name in its own colour;
+     a Scenario Match scenario can't (the feature is the answer) */
+  const scenarioCard = (kind, scn) => {
+    const f = kind === 'prompt' ? featOf(scn) : null;
+    return html`<section class="card pl-scenario${kind === 'match' ? ' is-match' : ''}" aria-labelledby="pl-sit-h">
         <div class="pl-scn-top"><h2 id="pl-sit-h" class="pl-scn-label">Scenario</h2></div>
-        <p class="pl-sit">${scn.situation}</p>
-        ${kind === 'prompt' ? html`<p class="pl-app"><span class="pl-app-label">Feature</span>${featTag(scn)}</p>` : ''}
+        <p class="pl-sit">${kind === 'prompt' ? html`<span class="pl-using">You\u2019re using <strong class="pl-using-feat">${f ? f.name : scn.app}</strong>.</span> ` : ''}${scn.situation}</p>
       </section>`;
+  };
   const optionBody = (kind, scn, oi, pos) => {
     const o = scn.options[oi];
     if (kind === 'match') return html`<span class="pl-text"><span class="sr-only">Feature ${LETTERS[pos]}: </span>${featChip(FD.lib.byId[o.feature], o.feature)}</span>`;
@@ -407,10 +410,10 @@
       <div class="ss-top">${FD.pip(out.perfect ? 'cheer' : 'hello', { size: 130 })}<div><p class="eyebrow">${[K().name + ' complete', focus, plural(items.length, 'round')].filter(Boolean).join(' \u00B7 ')}</p><h1 id="pl-done">${title}</h1><p class="lede">${lede}</p></div></div>
       <div class="ss-stats"><div><strong>${out.points}</strong><span>points</span></div><div><strong>${out.firstTry}/${items.length}</strong><span>first-${isPrompt ? 'try' : 'pick'} ${isPrompt ? 'picks' : 'matches'}</span></div><div><strong>+${xp}</strong><span>XP earned</span></div><div><strong>${st.bestRun}</strong><span>best game${out.best ? ' (new!)' : ''}</span></div></div>
       ${out.bonusXp ? html`<div class="xp-row"><span class="chip">Perfect game bonus +${out.bonusXp} XP</span></div>` : ''}
-      <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}</div>
+      <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.rankBar(rk)}</div>
       <section class="pl-recap" aria-labelledby="pl-recap-h">
         <h2 id="pl-recap-h">${K().recapTitle}</h2>
-        <p class="met-help">${FD.icon('info', { size: 18 })}${isPrompt ? 'Here\u2019s the strongest prompt from each round. Copy one and try it in Copilot with your own details.' : 'Here\u2019s the feature that fitted each scenario, and how it helps. Tap About to read everything on it in the Feature Book.'}</p>
+        <p class="met-help">${FD.icon('info', { size: 18 })}${isPrompt ? 'Here\u2019s the strongest prompt from each round. Copy one and try it in Copilot with your own details.' : 'Here\u2019s the feature that best matched each scenario and how it helps. Select About to learn more in the Feature Book.'}</p>
         <ol class="pl-recap-list">${items.map(recapItem)}</ol>
       </section>
       ${isPrompt && P.learn ? html`<p class="pl-learn"><a class="btn btn-link" href="${P.learn.url}" target="_blank" rel="noopener noreferrer" data-action="doc-open" data-native>${P.learn.label}${FD.icon('external', { size: 16 })}<span class="sr-only"> (opens in a new tab)</span></a></p>` : ''}

@@ -669,7 +669,7 @@
   ok(!q('.num-note') && !/Weekends won\u2019t reset it/.test(q('#main').textContent), 'weekend: the stats page no longer calls out "Weekends won\u2019t reset it" against the Daily streak');
   ok(!!q('.ladder') && !/Each rank has its own border|Copilot Champion glows/.test(q('#main').textContent) && !q('.ladder').parentElement.querySelector('p'), 'stats: the sentence under "The road to Copilot Champion" is gone, so the ranks stand on their own');
   const numLabels = () => qa('.num-grid .num').map((n) => n.querySelector(':scope > span').firstChild.textContent.trim()).join(',');
-  ok(numLabels() === 'Puzzles played,Daily streak,Best daily streak,Features mastered', 'stats: the four key numbers are Puzzles played, Daily streak, Best daily streak and Features mastered (Puzzles solved, Win rate, Avg hints and Best score are gone)', numLabels());
+  ok(numLabels() === 'Total score,Puzzles played,Daily streak,Best daily streak,Features mastered', 'stats: the five key numbers are Total score, Puzzles played, Daily streak, Best daily streak and Features mastered (Puzzles solved, Win rate, Avg hints and Best score are gone)', numLabels());
   FD.store.profile().daily = { streak: 3, max: 3, last: '2026-11-13', results: {} };
   FD.store.saveNow();
   await boot('#/', { today: '2026-11-14' });                       /* Saturday */
@@ -1086,7 +1086,7 @@
       if (!firstOfKind[act.kind]) {
         firstOfKind[act.kind] = true;
         const st = (p) => (act.kind === 'match' ? p.match : p.prompts);
-        let ok1 = q('#pl-h').textContent === FD.quizUI.QUESTIONS[act.kind] && q('.pl-scn-label').textContent === 'Scenario' && qa('.pl-opt').length === 4 && !!q('.pl-feat-name') && !q('#pl-next');
+        let ok1 = q('#pl-h').textContent === FD.quizUI.QUESTIONS[act.kind] && q('.pl-scn-label').textContent === 'Scenario' && qa('.pl-opt').length === 4 && !!q(act.kind === 'prompt' ? '.pl-using-feat' : '.pl-feat-name') && !q('#pl-next');
         let why = act.kind + ': ' + q('#pl-h').textContent + ' | ' + q('.pl-scn-label').textContent;
         const xpBefore = FD.store.profile().xp, qBefore = st(FD.store.profile()).questions, hBefore = FD.store.profile().history.length;
         const w = [0, 1, 2, 3].find((x) => x !== scn.bestIndex);
@@ -1536,8 +1536,9 @@
     const xp0 = xpNow();
     q('#pl-form').requestSubmit(); await sleep(500);
     ok(run().ids.length === 4 && FD.store.state.meta.promptLab.rounds === 4, 'prompt lab: the game has the four rounds you chose, and your choice is remembered', run().ids.length + ' / ' + JSON.stringify(FD.store.state.meta.promptLab));
-    ok(!/Round/i.test(q('.pl-head .eyebrow').textContent) && trk() && trk().n === 'Round 1 of 4' && trk().pts === '0 points' && !q('.pl-dots, .pl-meter') && qa('.pl-opt').length === 4 && qa('.pl-opt').every((b) => b.tagName === 'BUTTON') && q('.pl-sit').textContent === scn().situation, 'prompt lab: a round shows the scenario and four prompts as real buttons, with the round tracker "Round 1 of 4" under the heading (the small heading line no longer repeats the round, and there are no dots)', q('.pl-head .eyebrow').textContent + ' | ' + JSON.stringify(trk()));
-    ok(q('.pl-feat-name').textContent === featName() && !!q('.pl-scenario .pl-feat .pl-feat-ic svg') && !q('.pl-app .chip') && !q('.pl-scn-top .pl-feat') && q('.pl-app').previousElementSibling === q('.pl-sit') && q('.pl-app-label').textContent === 'Feature' && q('.pl-feat').getBoundingClientRect().top >= q('.pl-sit').getBoundingClientRect().bottom, 'prompt lab: the scenario box names the full Copilot feature (' + featName() + ') with its icon on a line of its own under the scenario text, not beside the Scenario label', q('.pl-feat-name').textContent);
+    ok(!/Round/i.test(q('.pl-head .eyebrow').textContent) && trk() && trk().n === 'Round 1 of 4' && trk().pts === '0 points' && !q('.pl-dots, .pl-meter') && qa('.pl-opt').length === 4 && qa('.pl-opt').every((b) => b.tagName === 'BUTTON') && norm(q('.pl-sit').textContent).endsWith(norm(scn().situation)), 'prompt lab: a round shows the scenario and four prompts as real buttons, with the round tracker "Round 1 of 4" under the heading (the small heading line no longer repeats the round, and there are no dots)', q('.pl-head .eyebrow').textContent + ' | ' + JSON.stringify(trk()));
+    ok(!q('.pl-app') && !q('.pl-scenario .pl-feat') && !q('.pl-scenario .pl-feat-ic') && q('.pl-using-feat').textContent === featName() && norm(q('.pl-sit').textContent) === 'You\u2019re using ' + featName() + '. ' + norm(scn().situation) && q('.pl-sit').firstElementChild.classList.contains('pl-using'), 'prompt lab: the scenario starts with the feature it is about ("You\u2019re using ' + featName() + '." and then the situation), and the Feature call-out under the text is gone', norm(q('.pl-sit').textContent));
+    ok(cs(q('.pl-using-feat')).color !== cs(q('.pl-sit')).color && ratio(cs(q('.pl-using-feat')).color, cs(q('.pl-scenario')).backgroundColor) >= 4.5 && +cs(q('.pl-using-feat')).fontWeight >= 700, 'prompt lab: the feature\u2019s name is a different colour from the rest of the scenario (and still easy to read on its box, 4.5:1 or better)', cs(q('.pl-using-feat')).color + ' on ' + cs(q('.pl-scenario')).backgroundColor);
     ok(qa('.pl-letter').map((e) => e.textContent).join('') === 'ABCD' && qa('.pl-letter').every((e) => e.getAttribute('aria-hidden') === 'true') && qa('.pl-text > .sr-only').map((e) => e.textContent).join('') === 'Prompt A: Prompt B: Prompt C: Prompt D: ', 'prompt lab: the prompts are lettered A, B, C and D, and screen readers hear "Prompt A: ..." first', qa('.pl-text > .sr-only').map((e) => e.textContent).join('|'));
     ok(!!run() && run().i === 0 && run().points === 0, 'prompt lab: the game is saved from the first round');
     const s0 = scn(), wrong0 = [0, 1, 2, 3].find((i) => i !== s0.bestIndex);
@@ -1629,15 +1630,17 @@
       ok(ppS.runs === 3 && ppS.questions === 10 && ppS.bestRun === 200 && ppS.firstTry === 8 && ppS.correct === 10, 'prompt lab: three games are saved as 3 games, 10 rounds, a best game of 200 points and 8 first-try picks', JSON.stringify(ppS).slice(0, 200));
     }
 
-    /* the feature tag matches the Feature Book: the full feature name and the same coloured icon tile */
+    /* the feature's name is the full one ("Copilot in Word"), and its tag (still used in the results) has the same coloured icon as the Feature Book */
     {
       const word = P.byId['rewrite-for-executives'], fw = FD.lib.byId[word.feature];
       const base = P.newRun(FD.store.profile(), 3);
       const ids = [word.id].concat(base.ids.filter((id) => id !== word.id)).slice(0, 3);
       FD.store.setActive('prompt', Object.assign(base, { ids, orders: ids.map(() => [0, 1, 2, 3]) }));
       await go('#/prompts'); await sleep(400); q('[data-action="pl-resume"]').click(); await sleep(500);
-      const tile = q('.pl-feat-ic'), tag = { bg: cs(tile).backgroundColor, ink: cs(tile).color, svg: tile.querySelector('svg').innerHTML };
-      ok(word.app === 'Word' && q('.pl-feat-name').textContent === 'Copilot in Word', 'prompt lab: a scenario about Word says "Copilot in Word", the feature\u2019s full name, not just "Word"', q('.pl-feat-name').textContent);
+      ok(word.app === 'Word' && q('.pl-using-feat').textContent === 'Copilot in Word' && norm(q('.pl-sit').textContent).startsWith('You\u2019re using Copilot in Word. '), 'prompt lab: a scenario about Word says "You\u2019re using Copilot in Word.", the feature\u2019s full name, not just "Word"', norm(q('.pl-sit').textContent).slice(0, 60));
+      const probe = D().createElement('div'); probe.innerHTML = String(FD.quizUI.featTag(word)); D().body.appendChild(probe);
+      const tile = probe.querySelector('.pl-feat-ic'), tag = { bg: cs(tile).backgroundColor, ink: cs(tile).color, svg: tile.querySelector('svg').innerHTML };
+      probe.remove();
       FD.store.profile().collection[fw.id] = { solved: 1, seen: 0, bestHints: 2, first: Date.now() };
       await go('#/book'); await sleep(450);
       const bt = q('.fcard[data-fid="' + fw.id + '"] .fcard-ic');
@@ -1696,7 +1699,7 @@
       q('#pl-form').requestSubmit(); await sleep(500);
       const ids0 = run().ids.slice();
       ok(ids0.length === Math.min(5, nbN) && new Set(ids0).size === ids0.length && ids0.every((id) => P.byId[id].feature === 'copilot-notebooks') && JSON.stringify(run().focus) === '{"category":["Copilot Chat"],"feature":["copilot-notebooks"]}', 'prompt lab: the game plays only Copilot Notebooks scenarios, each once', ids0.join(','));
-      ok(q('.pl-head .eyebrow').textContent === 'Prompt Lab \u00B7 Copilot Notebooks' && trk() && trk().n === 'Round 1 of ' + ids0.length && qa('.pl-feat-name').every((e) => e.textContent === 'Copilot Notebooks') && q('#pl-h').textContent === 'Which prompt will get the best result?', 'prompt lab: the heading says what the game is about ("Prompt Lab \u00B7 Copilot Notebooks") and the round tracker says "Round 1 of ' + ids0.length + '"', q('.pl-head .eyebrow').textContent);
+      ok(q('.pl-head .eyebrow').textContent === 'Prompt Lab \u00B7 Copilot Notebooks' && trk() && trk().n === 'Round 1 of ' + ids0.length && qa('.pl-using-feat').length === 1 && qa('.pl-using-feat').every((e) => e.textContent === 'Copilot Notebooks') && q('#pl-h').textContent === 'Which prompt will get the best result?', 'prompt lab: the heading says what the game is about ("Prompt Lab \u00B7 Copilot Notebooks") and the round tracker says "Round 1 of ' + ids0.length + '"', q('.pl-head .eyebrow').textContent);
       await go('#/'); await sleep(300); await go('#/prompts'); await sleep(400);
       ok(/Round 1 of \d+ \u00B7 Copilot Notebooks \u00B7 0 points so far/.test(q('.in-progress').textContent.replace(/\s+/g, ' ')), 'prompt lab: Resume game names the feature the game is about', q('.in-progress').textContent.replace(/\s+/g, ' '));
       ok(mv('pl-cat').join() === CC && mv('pl-feat').join() === 'copilot-notebooks' && mtext('pl-feat') === 'Copilot Notebooks' && count() === nbN + ' scenarios match right now.', 'prompt lab: the setup remembers the category and feature you chose');
@@ -2271,8 +2274,7 @@
     ok(S.pool({ category: [CC, MA] }).length === inCat(CC).length + inCat(MA).length && S.pool({ category: [CC, MA, TM], difficulty: 'Easy' }).every((s) => [CC, MA, TM].includes(FD.lib.byId[s.feature].category) && FD.lib.byId[s.feature].difficulty === 'Easy') && S.pool({ category: [] }).length === S.scenarios.length && S.pool({ category: 'all' }).length === S.scenarios.length && S.pool({}).length === S.scenarios.length, 'match: and from several categories at once (with a level too): the scenarios about any of them. No category, or "all", is everything');
     const cf = (v) => JSON.stringify(S.cleanFilter(v));
     ok(S.difficulties().includes('Hard') && cf({ category: 'Nope', difficulty: 'Weird' }) === '{"category":[],"difficulty":"all"}' && cf() === '{"category":[],"difficulty":"all"}' && cf({ category: CC, difficulty: 'Hard' }) === '{"category":["Copilot Chat"],"difficulty":"Hard"}' && cf({ category: [MA, 'Nope', CC, MA] }) === JSON.stringify({ category: inOrder([MA, CC]), difficulty: 'all' }) && cf({ category: 'all' }) === '{"category":[],"difficulty":"all"}', 'match: a nonsense saved filter falls back to everything, a category saved as text becomes a list, and unknown or repeated categories are dropped (the rest come back in the library\u2019s order)', cf({ category: [MA, 'Nope', CC, MA] }));
-    ok(S.focusName({ category: [CC], difficulty: 'Hard' }) === 'Copilot Chat \u00B7 Hard' && S.focusName({ category: [CC, MA] }) === inOrder([CC, MA]).join(', ') && S.focusName({ category: [CC, MA], difficulty: 'Easy' }) === inOrder([CC, MA]).join(', ') + ' \u00B7 Easy' && S.focusName({ category: [CC, MA, TM] }) === '3 categories' && S.focusName({ difficulty: 'Medium' }) === 'Medium' && S.focusName({}) === '' && S.focusName({ category: 'Copilot Chat' }) === 'Copilot Chat', 'match: a game is named after its categories and level: one or two categories by name, more of them counted ("3 categories"), joined to the level with a dot');
-    ok(S.maxRounds({ category: [CC] }) === Math.min(10, inCat(CC).length) && S.maxRounds({}) === 10 && S.maxRounds({ category: [CC], difficulty: 'Expert' }) >= 1, 'match: a game cannot have more rounds than there are scenarios to draw from, and has at least one');
+    ok(S.focusName({ category: [CC], difficulty: 'Hard' }) === 'Copilot Chat' && S.focusName({ category: [CC, MA] }) === inOrder([CC, MA]).join(', ') && S.focusName({ category: [CC, MA], difficulty: 'Easy' }) === inOrder([CC, MA]).join(', ') && S.focusName({ category: [CC, MA, TM] }) === '3 categories' && S.focusName({ difficulty: 'Medium' }) === '' && S.focusName({ difficulty: 'Easy' }) === '' && S.focusName({}) === '' && S.focusName({ category: 'Copilot Chat' }) === 'Copilot Chat', 'match: a game is named after its categories only: one or two by name, more of them counted ("3 categories"), and the difficulty is never in the name');    ok(S.maxRounds({ category: [CC] }) === Math.min(10, inCat(CC).length) && S.maxRounds({}) === 10 && S.maxRounds({ category: [CC], difficulty: 'Expert' }) >= 1, 'match: a game cannot have more rounds than there are scenarios to draw from, and has at least one');
 
     /* the setup screen */
     await go('#/match'); await sleep(400);
@@ -2498,6 +2500,78 @@
     ok(looks.every((l) => l.under), 'tracker: it is always the line directly under the heading', looks.map((l) => l.what + ': ' + l.under).join(' | '));
     ok(looks.every((l) => !l.dots && !l.eyebrowRound), 'tracker: the round is said once, in the tracker: no dots, and no "Round N" or "N of M" in the small blue line above the heading', looks.map((l) => l.what + ': dots=' + l.dots + ' eyebrow=' + l.eyebrowRound).join(' | '));
     ok(games.every((l) => /^Round \d of 3$/.test(l.text) && l.pts === '0 points') && /^Puzzle 1 of \d+$/.test(pack.text) && pack.pts === null, 'tracker: a game of rounds says "Round N of M" with the points so far, and a pack counts puzzles ("Puzzle N of M")', looks.map((l) => l.what + ': ' + l.text + ' / ' + l.pts).join(' | '));
+    FD.store.resetAll(); FD.store.setOnboarded();
+  }
+
+  /* =============================================================== Scenario Match heading and recap, rank bars, profile and Stats header */
+  section('Scenario Match heading and recap, shifting rank bars, the profile popup and the Stats header');
+  {
+    const bestPick = async () => { const act = FD.quizUI.active; q('.pl-opt[data-oi="' + act.scn.bestIndex + '"]').click(); await sleep(300); };
+    /* Scenario Match never names its difficulty in the small line above the heading (the other game modes don't either) */
+    FD.store.resetAll(); FD.store.setOnboarded(); FD.store.profile().xp = 8200;
+    await go('#/match', 300); q('#pl-form input[name="difficulty"][value="Easy"]').click(); await sleep(150); setRounds('pl', 2); await sleep(100);
+    q('#pl-form').requestSubmit(); await sleep(600);
+    const mrun = FD.store.getActive('match');
+    ok(norm(q('.pl-head .eyebrow').textContent) === 'Scenario Match' && !/Easy|Medium|Hard|Expert/.test(q('.pl-head .eyebrow').textContent) && !!mrun.focus && mrun.focus.difficulty === 'Easy' && mrun.ids.every((id) => FD.lib.byId[FD.scenarios.byId[id].feature].difficulty === 'Easy'), 'match: with Easy chosen the small line above the heading just says "Scenario Match" (no difficulty), though the game still only draws Easy scenarios', q('.pl-head .eyebrow').textContent);
+    await go('#/', 200); await go('#/match', 400);
+    ok(!!q('.in-progress') && !/Easy/.test(q('.in-progress').textContent), 'match: and the game waiting to be resumed does not name the difficulty either', norm(q('.in-progress').textContent));
+    q('[data-action="pl-resume"]').click(); await sleep(500);
+    await bestPick(); q('#pl-next').click(); await sleep(400); await bestPick(); q('#pl-next').click(); await sleep(700); await closeDialogs();
+    ok(!!q('#pl-done') && norm(q('.speed-summary .eyebrow').textContent) === 'Scenario Match complete \u00B7 2 rounds', 'match: the results heading names the game and its rounds, never the difficulty', q('.speed-summary .eyebrow').textContent);
+    ok(norm(q('.met-help').textContent) === 'Here\u2019s the feature that best matched each scenario and how it helps. Select About to learn more in the Feature Book.' && /^The features worth remembering$/.test(q('#pl-recap-h').textContent.trim()), 'match: under "The features worth remembering" the help text reads "Here\u2019s the feature that best matched each scenario and how it helps. Select About to learn more in the Feature Book."', norm(q('.met-help').textContent));
+    const rbar = q('.rank-row .bar');
+    ok(!!rbar && rbar.classList.contains('bar-coach') && !rbar.classList.contains('bar-champion') && FD.scoring.rank(FD.store.profile().xp).rank.id === 'coach', 'match: a Copilot Coach player\u2019s XP bar on the results is the shifting Coach bar', rbar && rbar.className);
+    FD.store.clearActive('match'); FD.store.state.meta.scenarioMatch = {};
+
+    /* the XP bar of Copilot Coach and Copilot Champion drifts slowly through the same colours as the rank's border; every other rank keeps one solid colour */
+    {
+      const tail = (css) => (String(css).match(/rgb\([^)]*\)/g) || []).map((c) => c.replace(/\s+/g, ''));
+      const hosts = [];
+      const draw = (id) => { const r = FD.config.ranks.find((x) => x.id === id), host = D().createElement('div'); D().body.appendChild(host); hosts.push(host); host.innerHTML = String(FD.ui.rankBar({ pct: 50, rank: r })) + String(FD.avatar('Test User', 'blue', 48, id)); return { bar: host.querySelector('.bar'), span: host.querySelector('.bar > span'), ring: host.querySelector('.rank-ring') }; };
+      const plain = FD.config.ranks.filter((r) => r.id !== 'coach' && r.id !== 'champion').map((r) => draw(r.id));
+      ok(plain.length === 6 && plain.every((b) => !/bar-coach|bar-champion/.test(b.bar.className) && cs(b.span).animationName === 'none' && cs(b.span).backgroundImage === 'none'), 'rank bars: the six other ranks keep one solid colour, with no movement', plain.map((b) => b.bar.className + ':' + cs(b.span).animationName).join(' | '));
+      const coach = draw('coach'), champ = draw('champion');
+      const cb = tail(cs(coach.span).backgroundImage), cr = tail(cs(coach.ring, '::before').backgroundImage), hb = tail(cs(champ.span).backgroundImage), hr = tail(cs(champ.ring, '::before').backgroundImage);
+      ok(coach.bar.classList.contains('bar-coach') && /linear-gradient/.test(cs(coach.span).backgroundImage) && cb.length >= 3 && cb[0] === cb[cb.length - 1] && new Set(cb).size === new Set(cr).size && cb.every((c) => cr.includes(c)), 'rank bars: the Copilot Coach bar is a gradient through the colours of its border (navy, blue and purple) that ends on the colour it starts on, so it can drift round without a jump', cb.join(' ') + ' vs ' + cr.join(' '));
+      ok(champ.bar.classList.contains('bar-champion') && /linear-gradient/.test(cs(champ.span).backgroundImage) && hb.length >= 7 && hb[0] === hb[hb.length - 1] && new Set(hb).size === new Set(hr).size && hb.every((c) => hr.includes(c)), 'rank bars: the Copilot Champion bar runs through the same rainbow as its border, ending on the colour it starts on', hb.join(' ') + ' vs ' + hr.join(' '));
+      const motionNow = D().documentElement.dataset.motion, motionSet = FD.store.settings().motion;
+      if (motionNow === 'full') ok(/barshift/.test(cs(coach.span).animationName) && /barshift/.test(cs(champ.span).animationName) && parseFloat(cs(coach.span).animationDuration) >= 8 && cs(coach.span).animationIterationCount === 'infinite', 'rank bars: the colours move slowly (a loop of 8 seconds or more, never a flash)', cs(coach.span).animationName + ' ' + cs(coach.span).animationDuration);
+      FD.store.setSetting('motion', 'reduce'); await sleep(150);
+      ok(cs(coach.span).animationIterationCount === '1' && cs(champ.span).animationIterationCount === '1' && /linear-gradient/.test(cs(coach.span).backgroundImage), 'rank bars: with Reduce motion on, the movement stops and the gradient just sits there', cs(coach.span).animationIterationCount);
+      FD.store.setSetting('motion', motionSet); await sleep(100);
+      hosts.forEach((h) => h.remove());
+    }
+
+    /* the profile popup: the name beside the icon, above the rank, no crown */
+    FD.store.resetAll(); FD.store.setOnboarded();
+    await go('#/leaderboard', 400);
+    const pfRow = qa('.lb-row').find((r) => /Tariq/.test(r.textContent)) || qa('.lb-row')[1];
+    pfRow.click(); await sleep(400);
+    {
+      const dlg = D().querySelector('dialog[open].dlg-profile'), av = dlg.querySelector('.pf-head .rank-ring'), nm = dlg.querySelector('.pf-head h2.pf-name'), rkEl = dlg.querySelector('.pf-rank');
+      const ab = av.getBoundingClientRect(), nb = nm.getBoundingClientRect(), rb = rkEl.getBoundingClientRect(), xb = dlg.querySelector('[data-close]').getBoundingClientRect();
+      ok(!!nm && nm.textContent.trim().length > 0 && nb.left >= ab.right - 1 && Math.abs(rb.left - nb.left) < 1 && rb.top >= nb.bottom - 1 && Math.abs((nb.top + rb.bottom) / 2 - (ab.top + ab.bottom) / 2) < ab.height / 2 && !dlg.querySelector('.dlg-head h2'), 'profile: the player\u2019s name sits beside their icon with the rank under it (the rank moved down a little), and the name is not repeated in the header', Math.round(ab.right) + ' / ' + Math.round(nb.left) + ' / ' + Math.round(rb.top));
+      ok(!dlg.querySelector('.ic-crown') && !dlg.querySelector('.pf-rank svg') && dlg.getAttribute('aria-labelledby') === nm.id && dlg.querySelector('.dlg-head').children.length === 1 && !!dlg.querySelector('.dlg-head [data-close]'), 'profile: there is no crown beside the rank, the popup is still named by the player\u2019s name for screen readers, and the header holds only the close button', dlg.getAttribute('aria-labelledby') + ' / ' + nm.id);
+      ok(xb.right <= dlg.querySelector('.dlg-card').getBoundingClientRect().right && nb.right <= xb.left + 1, 'profile: the name column stops before the close button', Math.round(nb.right) + ' vs ' + Math.round(xb.left));
+      dlg.querySelector('[data-close]').click(); await sleep(250);
+      ok(!D().querySelector('dialog[open]'), 'profile: the close button still closes it');
+    }
+    {
+      FD.store.profile().name = 'Wolfeschlegelsteinhausen-Bartholomew'; FD.store.saveNow(); await go('#/leaderboard', 400);
+      const mine = (() => { const s = q('#lb-q'); s.value = 'Wolfeschlegel'; s.dispatchEvent(new Event('input', { bubbles: true })); return null; })() || qa('.lb-row').find((r) => /Wolfeschlegel/.test(r.textContent));
+      if (mine) { mine.click(); await sleep(400); const dlg = D().querySelector('dialog[open].dlg-profile'), nm = dlg.querySelector('.pf-name').getBoundingClientRect(), xb = dlg.querySelector('[data-close]').getBoundingClientRect(); ok(nm.right <= xb.left + 1 && nm.height > 0, 'profile: a very long name wraps inside its column, clear of the close button', Math.round(nm.right) + ' vs ' + Math.round(xb.left)); dlg.querySelector('[data-close]').click(); await sleep(200); } else ok(false, 'profile: your own entry is on the board (needed to check a very long name)');
+    }
+
+    /* the Stats header: no crown, and every rank's border has a white halo so it shows against the blue banner */
+    FD.store.resetAll(); FD.store.setOnboarded();
+    const haloBad = [];
+    for (const r of FD.config.ranks) {
+      FD.store.profile().xp = r.xp; await go('#/stats', 350);
+      const ring = q('.stats-head .rank-ring'), sh = cs(ring).boxShadow, bg = cs(q('.stats-head')).backgroundColor;
+      if (!ring || !/rgb\(255, 255, 255\)/.test(sh) || !/ 5px/.test(sh) || ratio('rgb(255, 255, 255)', bg) < 3 || ring.dataset.rank !== r.id) haloBad.push(r.id + ': ' + sh);
+    }
+    ok(haloBad.length === 0, 'stats: all eight ranks\u2019 borders have a white halo around them on the blue banner (white against the banner is over 3:1), so no border blends into it', haloBad.join(' | '));
+    ok(!q('.stats-head .ic-crown') && !q('.sh-rank svg') && q('.sh-rank strong').textContent === FD.config.ranks[FD.config.ranks.length - 1].name && cs(q('.stats-head')).backgroundColor === tok('--blue', 'backgroundColor'), 'stats: no crown beside the rank in the header, and the banner is still the same blue', q('.sh-rank').textContent);
     FD.store.resetAll(); FD.store.setOnboarded();
   }
 
@@ -3213,7 +3287,7 @@
 
     /* a new player: everything starts at nothing */
     await go('#/stats'); await sleep(400);
-    ok(qa('.num-grid .num').map(strong).join() === '0,0,0,0' && qa('.mode-stats dd').map((d) => norm(d.textContent)).join('|') === '0|0 of ' + lib.features.length + '|0|0 of ' + FD.scenarios.scenarios.length + '|0|0 of ' + FD.prompts.scenarios.length, 'stats: a new player starts on nothing: every number is 0, and the modes count what there is to find (' + lib.features.length + ' features, ' + FD.scenarios.scenarios.length + ' scenarios, ' + FD.prompts.scenarios.length + ' prompts)', qa('.mode-stats dd').map((d) => norm(d.textContent)).join('|'));
+    ok(qa('.num-grid .num').map(strong).join() === '0,0,0,0,0' && qa('.mode-stats dd').map((d) => norm(d.textContent)).join('|') === '0|0 of ' + lib.features.length + '|0|0 of ' + FD.scenarios.scenarios.length + '|0|0 of ' + FD.prompts.scenarios.length, 'stats: a new player starts on nothing: every number is 0, and the modes count what there is to find (' + lib.features.length + ' features, ' + FD.scenarios.scenarios.length + ' scenarios, ' + FD.prompts.scenarios.length + ' prompts)', qa('.mode-stats dd').map((d) => norm(d.textContent)).join('|'));
     ok(qa('.road-card .ladder > li').length === ranks.length && qa('.road-card .ladder > li.is-here').length === 1 && qa('.road-card .ladder > li')[0].classList.contains('is-here') && qa('.road-card .ladder > li.is-done').length === 0, 'stats: a new player is on the first rung of the road, with none of it behind them');
 
     /* play something in every game mode */
@@ -3239,10 +3313,11 @@
     ok(qa('#main h2').map((h) => norm(h.textContent)).join('|') === 'Daily Challenge|The road to Copilot Champion|Game modes|Achievement badges ' + earnedN + ' of ' + FD.badges.all(lib).length && qa('#main h1').length === 1 && q('#main h1').textContent === P.name, 'stats: the headings are Daily Challenge, The road to Copilot Champion, Game modes and Achievement badges', qa('#main h2').map((h) => norm(h.textContent)).join('|'));
     ok(norm(head.querySelector('.eyebrow').textContent).startsWith('Player stats') && head.querySelector('.sh-rank strong').textContent === rk.rank.name && head.querySelector('.sh-rank').textContent.includes(P.xp + ' XP') && head.querySelector('.sh-rank').textContent.includes(rk.toNext + ' XP to ' + rk.next.name) && !!head.querySelector('.rank-ring[data-rank="' + rk.rank.id + '"]'), 'stats: the header shows your name, your rank, your XP and the XP to go to the next one (with XP written next to that number)', norm(head.textContent));
 
-    /* four key numbers */
+    /* five key numbers */
     const nums = qa('.num-grid .num'), numLabel = (e) => e.querySelector(':scope > span').firstChild.textContent.trim();
-    ok(nums.length === 4 && nums.map(numLabel).join('|') === 'Puzzles played|Daily streak|Best daily streak|Features mastered' && nums.map(strong).join() === [tot.puzzles, 3, 5, 1].join() && tot.puzzles === 5, 'stats: four key numbers: Puzzles played (Feature Hunt, Scenario Match and Prompt Lab together), Daily streak, Best daily streak and Features mastered', nums.map((e) => numLabel(e) + '=' + strong(e)).join('; '));
-    ok(!/Puzzles solved|Win rate|Avg|Average|Total score|Best score/i.test(numGrid.textContent), 'stats: the win rate, the average hints and the other old numbers are gone', norm(numGrid.textContent));
+    ok(nums.length === 5 && nums.map(numLabel).join('|') === 'Total score|Puzzles played|Daily streak|Best daily streak|Features mastered' && nums.map(strong).join() === [160, tot.puzzles, 3, 5, 1].join() && tot.puzzles === 5, 'stats: five key numbers: Total score (the 80 points of the Feature Hunt, the 50 of the Scenario Match and the 30 of the Prompt Lab together), Puzzles played, Daily streak, Best daily streak and Features mastered', nums.map((e) => numLabel(e) + '=' + strong(e)).join('; '));
+    ok(FD.scoring.totalScore(P) === 160 && FD.board.local().players.find((x) => x.you).totalScore === 160, 'stats: Total score is the same sum the leaderboard and a player\u2019s profile use (every point scored in all three game modes)', String(FD.scoring.totalScore(P)));
+    ok(!/Puzzles solved|Win rate|Avg|Average|Best score/i.test(numGrid.textContent), 'stats: the win rate, the average hints and the other old numbers are gone', norm(numGrid.textContent));
 
     /* the Daily Challenge calendar and the road side by side, the same size */
     const cal = q('.cal-card'), road = q('.road-card');
@@ -3765,7 +3840,7 @@
   const cd = D().querySelector('dialog[open].dlg-changelog');
   ok(!!cd, 'What\u2019s new: opens by itself the first time a new version is loaded');
   ok(FD.changelog.data.game.every((g) => cd.textContent.includes(g.title)) && /Game updates/.test(cd.textContent) && /Microsoft/.test(cd.textContent), 'What\u2019s new: shows the game updates and the Microsoft updates from data/changelog.json');
-  ok(FD.config.version === '1.6.0' && FD.changelog.data.game.length === 10 && FD.changelog.data.game.map((g) => g.title).join('|') === 'A calmer Feature Hunt|A cleaner finish|One round tracker everywhere|A Speed Bonus that counts down|A bigger streak bonus|Tidier menus and wording|A clearer About page|A clearer Stats page and Leaderboard|More control in Settings|Tidier puzzle endings' && qa('dialog[open].dlg-changelog #cl-game + .cl-list > li').length === 10 && norm(cd.querySelector('.cl-ver .chip').textContent) === 'Version 1.6.0' && /calmer Feature Hunt/.test(cd.querySelector('.cl-intro').textContent) && FD.changelog.data.history[0].version === '1.5.1' && FD.changelog.data.history[1].version === '1.5.0' && FD.changelog.data.history[2].version === '1.4.0', 'What\u2019s new: version 1.6.0 lists all of its game updates on the one entry (a calmer Feature Hunt, a cleaner finish, one round tracker everywhere, a Speed Bonus that counts down, a bigger streak bonus, tidier menus, a clearer About page, a clearer Stats page and Leaderboard, more control in Settings, tidier puzzle endings), and 1.5.1 has moved into the history', FD.changelog.data.game.map((g) => g.title).join('|'));
+  ok(FD.config.version === '1.6.0' && FD.changelog.data.game.length === 11 && FD.changelog.data.game.map((g) => g.title).join('|') === 'A calmer Feature Hunt|A cleaner finish|One round tracker everywhere|A Speed Bonus that counts down|A bigger streak bonus|Tidier menus and wording|A clearer About page|A clearer Stats page and Leaderboard|More control in Settings|Tidier puzzle endings|Rank bars and Prompt Lab polish' && qa('dialog[open].dlg-changelog #cl-game + .cl-list > li').length === 11 && norm(cd.querySelector('.cl-ver .chip').textContent) === 'Version 1.6.0' && /calmer Feature Hunt/.test(cd.querySelector('.cl-intro').textContent) && FD.changelog.data.history[0].version === '1.5.1' && FD.changelog.data.history[1].version === '1.5.0' && FD.changelog.data.history[2].version === '1.4.0', 'What\u2019s new: version 1.6.0 lists all of its game updates on the one entry (a calmer Feature Hunt, a cleaner finish, one round tracker everywhere, a Speed Bonus that counts down, a bigger streak bonus, tidier menus, a clearer About page, a clearer Stats page and Leaderboard, more control in Settings, tidier puzzle endings, rank bars and Prompt Lab polish), and 1.5.1 has moved into the history', FD.changelog.data.game.map((g) => g.title).join('|'));
   cd.querySelector('[data-dlg="ok"]').click(); await sleep(300);
   ok(FD.store.changelogSeen() === FD.changelog.token(), 'What\u2019s new: dismissing it remembers that this person has seen it');
   await boot('#/', { welcome: true }); await sleep(700);
@@ -4048,7 +4123,7 @@
     await boot('#/'); FD.store.resetAll(); FD.store.setOnboarded();
   }
 
-  /* Stats on a phone: the four number boxes sit two to a row, the calendar, the road and the game mode cards stack, and all of them stay on screen, even with larger text */
+  /* Stats on a phone: Total score has a row of its own and the other four number boxes sit two to a row, the calendar, the road and the game mode cards stack, and all of them stay on screen, even with larger text */
   {
     const sp = [];
     for (const width of [320, 390]) {
@@ -4060,7 +4135,7 @@
       const inside = (el, c) => { const b = box(el); return b.left >= c.left - 1 && b.right <= c.right + 1; };
       const nums = qa('.num-grid .num').map(box);
       sp.push([width + ' sideways ' + de(), de() <= 1]);
-      sp.push([width + ' number boxes: four, two to a row', nums.length === 4 && Math.abs(nums[0].top - nums[1].top) < 2 && Math.abs(nums[2].top - nums[3].top) < 2 && nums[2].top > nums[0].top + 10 && Math.abs(nums[0].width - nums[1].width) < 2 && Math.abs(nums[2].width - nums[3].width) < 2]);
+      sp.push([width + ' number boxes: Total score across the top, then four two to a row', nums.length === 5 && nums[1].top > nums[0].top + 10 && nums[0].width > nums[1].width * 1.8 && Math.abs(nums[1].top - nums[2].top) < 2 && Math.abs(nums[3].top - nums[4].top) < 2 && nums[3].top > nums[1].top + 10 && Math.abs(nums[1].width - nums[2].width) < 2 && Math.abs(nums[3].width - nums[4].width) < 2]);
       const cal = box(q('.cal-card')), road = box(q('.road-card')), days = qa('#cal-host .day').map(box);
       sp.push([width + ' calendar inside its card with day boxes wide enough to read', days.every((d) => d.left >= cal.left && d.right <= cal.right + 1 && d.width >= 26)]);
       sp.push([width + ' month arrows and title in one row', Math.abs(box(q('.cal-btn[data-dir="-1"]')).top - box(q('.cal-btn[data-dir="1"]')).top) < 2 && box(q('#cal-month')).left >= box(q('.cal-btn[data-dir="-1"]')).right - 1]);
@@ -4079,6 +4154,21 @@
       D().documentElement.style.fontSize = '';
     }
     ok(sp.every((x) => x[1]), 'layout: Stats (number boxes, flame, calendar, month arrows, the road, the game mode cards and badge filter) fits a phone at 320 and 390px wide, even with larger text', sp.filter((x) => !x[1]).map((x) => x[0]).join('; '));
+    await boot('#/'); FD.store.resetAll(); FD.store.setOnboarded();
+  }
+
+  /* Stats on a wide screen: the five key numbers share one row, and a seven-digit Total score at the largest Text size still fits its box just above the point where the row folds (1100px) */
+  {
+    await boot('#/'); FD.store.resetAll(); FD.store.setOnboarded();
+    await go('#/stats', 400);
+    const wide = qa('.num-grid .num').map((n) => n.getBoundingClientRect());
+    ok(wide.length === 5 && wide.every((b) => Math.abs(b.top - wide[0].top) < 2 && Math.abs(b.width - wide[0].width) < 2) && wide.every((b, i) => i === 0 || b.left > wide[i - 1].left), 'layout: Stats at 1280px wide: the five key numbers share one row, all the same width, Total score first', wide.map((b) => Math.round(b.left) + 'x' + Math.round(b.width)).join(' '));
+    await boot('#/', { width: 1120 }); FD.store.resetAll(); FD.store.setOnboarded();
+    FD.store.profile().stats.totalScore = 1234567; FD.store.setSetting('textScale', 1.25);
+    await go('#/stats', 400);
+    const big = qa('.num-grid .num'), r0 = big[0].getBoundingClientRect(), de2 = D().documentElement;
+    ok(big.length === 5 && big.every((n) => Math.abs(n.getBoundingClientRect().top - r0.top) < 2) && big.every((n) => n.scrollWidth <= n.clientWidth + 1 && n.querySelector('strong').scrollWidth <= n.querySelector('strong').clientWidth + 1) && de2.scrollWidth <= de2.clientWidth + 1 && big[0].querySelector('strong').textContent.trim() === '1234567', 'layout: Stats at 1120px wide with the largest Text size: a seven-digit Total score fits its box, the five boxes are still in one row and nothing scrolls sideways', big.map((n) => n.scrollWidth + '/' + n.clientWidth).join(' '));
+    FD.store.setSetting('textScale', 1);
     await boot('#/'); FD.store.resetAll(); FD.store.setOnboarded();
   }
 

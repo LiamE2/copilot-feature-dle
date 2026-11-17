@@ -162,13 +162,13 @@
       return { category, feature: selList(o.feature).filter((id) => allowed.includes(id)) };
     };
     q.isFiltered = (filter) => { const f = q.cleanFilter(filter); return f.category.length > 0 || (prompt ? f.feature.length > 0 : f.difficulty !== 'all'); };
-    /* what to call a filter on screen: Prompt Lab names the feature(s) (or the categories), Scenario Match the categories and the level.
-       One or two are named; more are counted ("3 categories"). */
+    /* what to call a filter on screen: Prompt Lab names the feature(s) (or the categories), Scenario Match the categories. One or two are named; more are counted ("3 categories").
+       The difficulty is never named (no game mode names it in its heading, and the setup screen already showed it). */
     q.focusName = function (filter) {
       const f = q.cleanFilter(filter);
       const some = (list, noun, name) => (list.length <= 2 ? list.map(name).join(', ') : `${list.length} ${noun}`);
       if (prompt) return f.feature.length ? some(f.feature, 'features', (id) => FD.lib.byId[id].name) : f.category.length ? some(f.category, 'categories', (c) => c) : '';
-      return [f.category.length ? some(f.category, 'categories', (c) => c) : '', f.difficulty !== 'all' ? f.difficulty : ''].filter(Boolean).join(' \u00B7 ');
+      return f.category.length ? some(f.category, 'categories', (c) => c) : '';
     };
 
     /* ---------- choosing a round: what you haven't met first, then what you met least and longest ago, a mix of apps (or of features) ---------- */

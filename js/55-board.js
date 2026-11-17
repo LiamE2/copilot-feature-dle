@@ -48,7 +48,7 @@
       const t = p.daily.results[today], s = FD.scoring.summary(p, FD.lib), tot = FD.scoring.totals(p);
       return {
         id: p.id, sample: false, you: p.id === me, name: p.name, color: p.color, played: tot.puzzles,
-        maxStreak: p.daily.max, bestScore: p.stats.bestScore, totalScore: p.stats.totalScore + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0),
+        maxStreak: p.daily.max, bestScore: p.stats.bestScore, totalScore: FD.scoring.totalScore(p),
         xp: p.xp, collected: s.collected, collectedTotal: s.collectedTotal, mastered: FD.scoring.masteredCount(p, FD.lib), achievements: s.achievements, achievementsTotal: s.achievementsTotal,
         today: t ? { score: t.score, hints: t.hints, timeMs: t.timeMs, won: t.won, kind: t.kind || 'hunt' } : null
       };
@@ -103,7 +103,7 @@
     const body = {
       date: r.dateKey, playerId: p.id, name: p.name, color: p.color,
       today: { score: out.breakdown ? out.breakdown.total : 0, hints: r.hintsUsed, timeMs: r.timeMs, won: !!r.won },
-      maxStreak: p.daily.max, totalScore: p.stats.totalScore + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0), bestScore: p.stats.bestScore, played: tot.puzzles,
+      maxStreak: p.daily.max, totalScore: FD.scoring.totalScore(p), bestScore: p.stats.bestScore, played: tot.puzzles,
       xp: p.xp, collected: sm.collected, mastered: FD.scoring.masteredCount(p, FD.lib), achievements: sm.achievements
     };
     try { fetch(lb().endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {}); } catch (e) { /* ignore */ }

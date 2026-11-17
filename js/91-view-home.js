@@ -126,7 +126,7 @@
           <section class="section peek" aria-labelledby="peek-h">
             <div class="section-head"><h2 id="peek-h">Your journey</h2><a class="btn btn-link" href="#/stats">All stats ${FD.icon('right', { size: 18 })}</a></div>
             <div class="peek-grid">
-              <div class="card peek-card"><p class="peek-label">Rank</p><p class="peek-big">${rk.rank.name}</p>${ui.bar(rk.pct, rk.rank.color, 'Progress to next rank')}<p class="muted small">${p.xp} XP${rk.next ? html` \u00B7 ${rk.toNext} to ${rk.next.name}` : ' \u00B7 top rank!'}</p></div>
+              <div class="card peek-card"><p class="peek-label">Rank</p><p class="peek-big">${rk.rank.name}</p>${ui.rankBar(rk, 'Progress to next rank')}<p class="muted small">${p.xp} XP${rk.next ? html` \u00B7 ${rk.toNext} to ${rk.next.name}` : ' \u00B7 top rank!'}</p></div>
               <div class="card peek-card peek-ring">${ui.ring(lib.features.length ? (have / lib.features.length) * 100 : 0, { color: 'green', label: `${have}`, sub: `of ${lib.features.length}` })}<div><p class="peek-label">Collection</p><p class="muted small">Features in your Feature Book</p></div></div>
               <div class="card peek-card"><p class="peek-label">Puzzles solved</p><p class="peek-big">${tot.solved}</p><p class="muted small">Across Feature Hunt, Scenario Match and Prompt Lab</p></div>
               <div class="card peek-card"><p class="peek-label">Badges</p><p class="peek-big">${earned}<small> / ${badgeDefs.length}</small></p><p class="muted small">Unlock more by exploring every corner</p></div>

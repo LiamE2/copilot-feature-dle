@@ -217,6 +217,9 @@
     return { rows, mastered: rows.filter((r) => r.master).length, total: rows.length };
   }
 
+  /* a player's total score: every point scored in Feature Hunt, Scenario Match and Prompt Lab. The Stats page, the leaderboard, a player's profile and the shared board all use this one sum. */
+  const totalScore = (p) => (p.stats.totalScore || 0) + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0);
+
   /* a player's headline numbers, used by the leaderboard profile and the stats page */
   function summary(p, lib) {
     const badgeDefs = all(lib);
@@ -228,6 +231,6 @@
     };
   }
 
-  FD.scoring = { base, speed, speedWindowMs, speedApplies, compute, computeQuiz, potential, streakXpPct, rank, known, collected, bookState, solvedIn, solvedCount, summary, needsLook, lookList, lookItems, modesTried, layers, masteredCount, tripleCount, totals };
+  FD.scoring = { base, speed, speedWindowMs, speedApplies, compute, computeQuiz, potential, streakXpPct, rank, known, collected, bookState, solvedIn, solvedCount, summary, needsLook, lookList, lookItems, modesTried, layers, masteredCount, tripleCount, totals, totalScore };
   FD.badges = { all, evaluate, masterStatus };
 })();

@@ -121,7 +121,7 @@
                 ${b.speed ? html`<div><dt>Speed bonus <small>(${FD.u.fmtSeconds(d.timeMs)})</small></dt><dd>+${b.speed}</dd></div>` : ''}
               </dl>` : html`<p class="muted rs-none">${d.revisit ? 'No points for this one.' : html`No points this time, but you still earned a little XP${FD.scoring.bookState(FD.store.profile(), f) === 'spotted' ? html` and the feature is now in your Feature Book as <strong>spotted</strong>` : ''}.`}</p>`}
             ${d.xp ? html`<div class="xp-row"><span class="xp-pill">${FD.icon('bolt', { size: 18 })}+${d.xp} XP</span>${(d.bonusXp || []).map(([l, v]) => html`<span class="chip">${l} +${v}</span>`)}</div>` : ''}
-            <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}</div>
+            <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.rankBar(rk)}</div>
           </div>
           ${notes.length ? html`<div class="result-notes">${notes}</div>` : ''}
         </div>
@@ -162,7 +162,7 @@
                 ${b.speed ? html`<div><dt>Speed bonus <small>(${FD.u.fmtSeconds(d.timeMs)})</small></dt><dd>+${b.speed}</dd></div>` : ''}
               </dl>` : html`<p class="muted rs-none">${d.revisit ? 'No points for this one.' : 'No points this time, but you still earned a little XP.'}</p>`}
             ${d.xp ? html`<div class="xp-row"><span class="xp-pill">${FD.icon('bolt', { size: 18 })}+${d.xp} XP</span>${(d.bonusXp || []).map(([l, v]) => html`<span class="chip">${l} +${v}</span>`)}</div>` : ''}
-            <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}</div>
+            <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.rankBar(rk)}</div>
           </div>
           <div class="result-notes">${notes}</div>
         </div>

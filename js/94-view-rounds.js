@@ -218,7 +218,7 @@
       <div class="ss-top">${FD.pip(out.solved ? 'cheer' : 'hello', { size: 130 })}<div><p class="eyebrow">${[M.name + ' complete', plural(n, 'round')].join(' \u00B7 ')}</p><h1 id="ss-h">${title}</h1>
         <p class="lede">${lede}${missed ? ` The ${missed === 1 ? 'one' : 'ones'} you missed ${missed === 1 ? 'is' : 'are'} waiting in Needs Another Look.` : ''}</p></div></div>
       <div class="ss-stats"><div><strong>${out.points}</strong><span>points</span></div><div><strong>${out.solved}/${n}</strong><span>solved</span></div><div><strong>+${xp}</strong><span>XP earned</span></div><div><strong>${p.roundsBest || 0}</strong><span>best game${out.best ? ' (new!)' : ''}</span></div></div>
-      <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}</div>
+      <div class="rank-row"><div><strong>${rk.rank.name}</strong><small class="muted">${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</small></div>${ui.rankBar(rk)}</div>
       ${r.mode === 'free' && kinds.length > 1 ? html`<div class="chips ss-kinds" role="list" aria-label="Solved in each game mode">${kinds.map((k) => { const m = FD.puzzles.META[k]; return html`<span class="chip c-${m.color}" role="listitem">${FD.icon(m.icon, { size: 14 })}${m.name}: ${items.filter((it) => it.kind === k && it.won).length} solved</span>`; })}</div>` : ''}
       <section class="met" aria-labelledby="met-h">
         <h2 id="met-h">Puzzles you played</h2>
