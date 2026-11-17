@@ -99,7 +99,7 @@
         <header class="stats-head card c-blue">
           ${FD.avatar(p.name, p.color, 72, rk.rank.id)}
           <div class="sh-main"><p class="eyebrow">Player stats${FD.account.tag()}</p><h1>${p.name}</h1>
-            <p class="sh-rank">${FD.icon('crown', { size: 20 })}<strong>${rk.rank.name}</strong><span>${p.xp} XP${rk.next ? ` \u00B7 ${rk.toNext} to ${rk.next.name}` : ' \u00B7 top rank!'}</span></p>
+            <p class="sh-rank">${FD.icon('crown', { size: 20 })}<strong>${rk.rank.name}</strong><span>${p.xp} XP${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</span></p>
             ${ui.bar(rk.pct, 'yellow', 'Progress to next rank')}</div>
         </header>
         ${FD.account.note('You\u2019re playing as a guest. Sign in to put your name on the leaderboard.')}
@@ -124,7 +124,12 @@
           </section>
           <section class="card road-card" aria-labelledby="rank-h">
             <h2 id="rank-h">The road to Copilot Champion</h2>
-            <ol class="ladder">${cfg.ranks.map((r, i) => html`<li class="c-${r.color} ${i === rk.index ? 'is-here' : i < rk.index ? 'is-done' : ''}"><span class="l-ring">${FD.avatar(p.name, p.color, 30, r.id)}</span><strong>${r.name}</strong><small>${r.xp} XP</small>${i === rk.index ? html`<span class="chip chip-solid c-blue">You are here</span>` : i < rk.index ? html`<span class="sr-only">Reached</span>` : ''}</li>`)}</ol>
+            <ol class="ladder">${cfg.ranks.map((r, i) => {
+              /* your icon sits on the rank you are on; a rank you have passed is a solid circle with a tick, and one still to come shows its own border with a lock in the middle */
+              const here = i === rk.index, done = i < rk.index;
+              const mark = here ? FD.avatar(p.name, p.color, 30, r.id) : done ? html`<span class="l-done">${FD.icon('check', { size: 18 })}</span>` : FD.rankLock(r.id, 30);
+              return html`<li class="c-${r.color} ${here ? 'is-here' : done ? 'is-done' : 'is-ahead'}"><span class="l-ring" aria-hidden="true">${mark}</span><strong>${r.name}</strong><small>${here ? p.xp : r.xp} XP</small>${here ? html`<span class="chip chip-solid c-blue">You are here</span>` : done ? html`<span class="sr-only">Reached</span>` : html`<span class="sr-only">Not reached yet</span>`}</li>`;
+            })}</ol>
           </section>
         </div>
 

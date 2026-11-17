@@ -10,7 +10,7 @@
   const KEY = 'copilot-feature-dle.v1' + (ns ? '.' + ns : '');
   const bus = FD.u.emitter();
 
-  const defaultSettings = () => ({ sound: false, motion: 'system', contrast: false, textScale: 1, sampleBoard: true, confetti: true, haptics: true });
+  const defaultSettings = () => ({ sound: false, motion: 'system', contrast: false, textScale: 1, hideFromBoard: false, confetti: true, haptics: true });
   const COLORS = ['blue', 'red', 'purple', 'orange', 'green', 'pink', 'yellow', 'navy'];
   /* what each question-and-answer game mode (Prompt Lab, Scenario Match) remembers: rounds answered, first-pick answers, points, games and best game, and which scenarios have been met.
      A scenario that has been met is { n: times played, firstTry, last: when, won: times solved, miss: 1 while the latest try was a miss (it is in Needs Another Look) }. */
@@ -94,9 +94,10 @@
     try { const raw = storage.get(KEY); state = raw ? JSON.parse(raw) : fresh(); } catch (e) { state = fresh(); }
     if (!state || typeof state !== 'object') state = fresh();
     state.settings = Object.assign(defaultSettings(), state.settings || {});
-    ['relaxed', 'unlockAll'].forEach((k) => { delete state.settings[k]; }); /* settings from older versions that no longer exist */
+    ['relaxed', 'unlockAll', 'sampleBoard'].forEach((k) => { delete state.settings[k]; }); /* settings from older versions that no longer exist */
     delete state.community; /* community packs were retired */
     state.meta = state.meta || {};
+    delete state.meta.event; /* the live event code was retired */
     if (!state.profiles || !Object.keys(state.profiles).length) { const f = fresh(); state.profiles = f.profiles; state.activeProfile = f.activeProfile; }
     Object.values(state.profiles).forEach(ensureProfile);
     if (!state.profiles[state.activeProfile]) state.activeProfile = Object.keys(state.profiles)[0];
@@ -380,7 +381,7 @@
     if (after.index > rankBefore) out.levelUp = after.rank;
     p.history.unshift({ t: Date.now(), mode: 'daily', kind, id: f.id, name: f.name, won, hints: r.tries, tries: r.tries, score: out.breakdown ? out.breakdown.total : 0, timeMs: r.timeMs, sid: r.scn.id });
     if (p.history.length > 60) p.history.length = 60;
-    out.newBadges = FD.badges.evaluate(p, { event: kind + 'Daily' }, FD.lib);
+    out.newBadges = FD.badges.evaluate(p, { event: kind + 'Daily', won, timeMs: r.timeMs, mode: 'daily' }, FD.lib);
     changed();
     if (FD.board && FD.board.submit) FD.board.submit({ mode: 'daily', dateKey: r.dateKey, hintsUsed: r.tries, timeMs: r.timeMs, won }, out);
     return out;
@@ -436,9 +437,6 @@
     return { ok: true };
   }
   function resetAll() { state = fresh(); applySettings(); saveNow(); bus.emit('change'); }
-  function resetProfile() {
-    const old = profile(); const p = newProfile(old.name, old.color); p.id = old.id; if (old.account) p.account = old.account; state.profiles[old.id] = p; changed();
-  }
 
   /* ---------- first run + changelog ---------- */
   function onboarded() { return !!state.meta.onboarded; }
@@ -451,7 +449,7 @@
     key: KEY,
     get state() { return state; },
     profile, settings, setSetting, applySettings, profiles: () => Object.values(state.profiles),
-    renameProfile, resetProfile, resetAll,
+    renameProfile, resetAll,
     getActive, setActive, clearActive, dailyStreak, dailyResult, recordGame, expireDailies, bump,
     packProgress, packMarkDone, packRestart, reviewStart, recordQuizRound, recordQuizGame, recordRoundsGame, recordDailyQuiz, recordPromptRound, recordPromptGame,
     account: () => profile().account || null, signIn, signOut, hasProgress, guestProfile,

@@ -13,7 +13,7 @@
   const ING = ['goal', 'context', 'source', 'expectations'];
   const ING_DEFAULT = {
     goal: { name: 'Goal', color: 'blue', text: 'What you want Copilot to do.', example: 'Summarise the decisions from Tuesday\'s project review.' },
-    context: { name: 'Context', color: 'purple', text: 'Why you need it, and who it is for.', example: 'It\'s for my manager, who missed the meeting.' },
+    context: { name: 'Context', color: 'purple', text: 'Why you need it, and who it is for.', example: 'It\'s for my manager who missed the meeting.' },
     source: { name: 'Source', color: 'green', text: 'The files, meetings, emails or sites to use.', example: 'Use the meeting transcript and my notes.' },
     expectations: { name: 'Expectations', color: 'orange', text: 'The format, length and tone you want back.', example: 'Give me five friendly bullets, under 100 words.' }
   };

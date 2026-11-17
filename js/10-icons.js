@@ -167,6 +167,12 @@
   }
   FD.avatar = avatar;
 
+  /* a rank's border with a lock where the icon would be: it previews what a rank that is still ahead looks like, without putting anyone's icon on it */
+  function rankLock(rankId, size = 40) {
+    return html`<span class="rank-ring" data-rank="${rankId}" style="--sz:${size}px" aria-hidden="true"><span class="rank-lock">${icon('lock', { size: Math.round(size * .5) })}</span></span>`;
+  }
+  FD.rankLock = rankLock;
+
   /* The Microsoft logo (four squares) for the "Sign in with Microsoft" button. Microsoft's own colours: they are not ours to change. */
   FD.msLogo = (size = 21) => raw(`<svg class="ms-logo" viewBox="0 0 23 23" width="${size}" height="${size}" aria-hidden="true" focusable="false"><path fill="#F25022" d="M1 1h10v10H1z"/><path fill="#7FBA00" d="M12 1h10v10H12z"/><path fill="#00A4EF" d="M1 12h10v10H1z"/><path fill="#FFB900" d="M12 12h10v10H12z"/></svg>`);
 })();

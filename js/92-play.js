@@ -1,4 +1,4 @@
-/* Copilot Feature-dle · the play screen (hint card, hint-o-meter, Pip's extras, guess box with autocomplete, guess history, results) */
+/* Copilot Feature-dle · the play screen (the hint card with its guesses left, Pip's extras, guess box with autocomplete, guess history, results) */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
@@ -23,8 +23,7 @@
    *   opts.number          daily challenge number (shown in the answer block's heading line)
    *   opts.finished        stored summary for an already-finished daily
    *   opts.onGuess/onFinish callbacks
-   *   opts.actions         buttons under the learning cards: an array, or (game, data) => array
-   *   opts.next            a button for the top of the answer block, so the next round of a game of rounds is one click away: { label, action, icon }, or (game, data) => that
+   *   opts.actions         the buttons at the bottom of the finished screen (the About button is added to them): an array, or (game, data) => array
    *   opts.headExtra       extra html under the header (a game of rounds puts its round meter here)
    *   opts.persistKey      keep the running game in storage under this key, so it can be picked up again (Daily Challenge, Packs)
    *   opts.realtime        true = the clock is real elapsed time and never pauses when the player leaves (the Daily Challenge)
@@ -51,6 +50,7 @@
         </header>
         ${opts.headExtra || ''}
         <div class="result-host" id="result-host" tabindex="-1"></div>
+        <div class="recap-host" id="recap-host"></div>
         <div class="play-grid" id="play-grid">
           <div class="play-main">
             <section class="hint-card" id="hint-card" aria-label="Current hint"></section>
@@ -66,17 +66,12 @@
               </div>
               <p id="guess-help" class="help">Typos are fine, and you can skip the word \u201CCopilot\u201D if you like.</p>
               <p id="guess-msg" class="guess-msg" role="status" aria-live="polite"></p>
-              <div class="guess-actions">
-                <button type="button" class="btn btn-ghost btn-sm" data-act="nudge">${FD.icon('bulb', { size: 18 })}Need a nudge? <small>(uses a guess)</small></button>
-                <button type="button" class="btn btn-link btn-sm" data-act="giveup">I give up</button>
-              </div>
+              <div class="guess-actions" id="guess-actions"></div>
             </form>
             <section class="history" id="history" aria-labelledby="hist-h"></section>
           </div>
-          <aside class="play-side" id="play-side" aria-label="Progress and extras">
-            <section class="card meter-card" id="meter"></section>
+          <aside class="play-side" id="play-side" aria-label="Pip's extras">
             <section class="card extras" id="extras" aria-labelledby="extras-h"></section>
-            <section class="card score-panel" id="scorep"></section>
           </aside>
         </div>
         <div class="learn-host" id="learn-host"></div>
@@ -86,16 +81,16 @@
     const input = q('#guess-input'), list = q('#suggest'), msgEl = q('#guess-msg'), form = q('#guess-form');
 
     /* ---------- pieces ---------- */
+    /* top right: only the Daily Challenge has anything here, the Speed Bonus countdown (the difficulty and category are not shown: the category is one of Pip's extras) */
     function chipsHtml() {
-      const lvl = FD.hints.level(game.over ? 5 : game.hintsShown);
-      const timer = showClock && !game.over ? html`<span class="chip timer-chip" title="Time on the clock (it sets your Speed Bonus, and it keeps ticking if you leave the game)">${FD.icon('timer', { size: 16 })}<span class="sr-only">Time on the clock: </span><span id="play-timer">${FD.u.fmtClock(game.activeMs)}</span></span>` : '';
-      return html`${ui.diffChip(f.difficulty)}${lvl.category ? ui.catChip(f.category) : html`<span class="chip chip-locked">${FD.icon('lock', { size: 14 })}Category at hint 3</span>`}${timer}`;
+      return showClock && !game.over ? ui.bonusChip(game.startedAt, game.pausedMs) : '';
     }
+    /* "Hint 2 of 5" and how many guesses are left (the last one says Final guess) in the same line, in the same type */
     function hintCardHtml(isNew) {
-      const n = game.hintsShown, c = hintColor(n);
+      const n = game.hintsShown, c = hintColor(n), left = game.attemptsLeft;
       return html`<div class="hint-pip">${FD.pip(n === 1 ? 'hello' : 'think', { size: 96 })}</div>
         <div class="hint-bubble c-${c} ${isNew ? 'is-new' : ''}">
-          <p class="hint-label"><span class="hint-n">Hint ${n} of ${cfg.maxAttempts}</span></p>
+          <p class="hint-label"><span class="hint-n">Hint ${n} of ${cfg.maxAttempts}</span>${left === 1 ? html`<span class="hint-left is-final">${FD.icon('flame', { size: 14 })}Final guess</span>` : html`<span class="hint-left">${left} guesses left</span>`}</p>
           <p class="hint-text">${game.hints[n - 1]}</p>
         </div>`;
     }
@@ -105,29 +100,7 @@
       return html`<h2 class="mini-h">Earlier hints</h2><ol class="earlier-list">${game.hints.slice(0, n - 1).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="sr-only">Hint ${i + 1}: </span><span class="e-t">${h}</span></li>`).reverse()}</ol>`;
     }
     function allHintsHtml() {
-      return html`<h2 class="mini-h">The hints</h2><ol class="earlier-list">${game.hints.slice(0, game.won ? game.hintsUsed : cfg.maxAttempts).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="sr-only">Hint ${i + 1}: </span><span class="e-t">${h}</span></li>`)}</ol>`;
-    }
-    function meterHtml() {
-      const n = game.hintsShown, over = game.over;
-      return html`<h2 class="mini-h" id="meter-h">Hint-o-meter</h2>
-        <ol class="meter" aria-labelledby="meter-h">${cfg.points.map((p, i) => {
-          const k = i + 1, state = over ? (k <= (game.won ? game.hintsUsed : cfg.maxAttempts) ? 'used' : 'locked') : k < n ? 'used' : k === n ? 'current' : 'locked';
-          return html`<li class="meter-step is-${state} c-${hintColor(k)}" aria-label="Hint ${k}, ${p} points, ${state === 'used' ? 'unlocked' : state === 'current' ? 'current' : 'locked'}"><span class="meter-n" aria-hidden="true">${state === 'locked' ? FD.icon('lock', { size: 14 }) : k}</span><span class="meter-pts" aria-hidden="true">${p}</span></li>`;
-        })}</ol>
-        <p class="attempts"><span class="dotrow" aria-hidden="true">${Array.from({ length: cfg.maxAttempts }, (_, i) => html`<i class="${i < game.guesses.length ? 'used' : ''}"></i>`)}</span>${over ? html`<strong>${game.won ? `Solved on guess ${game.guesses.length}` : 'Answer revealed'}</strong>` : html`<strong>${game.attemptsLeft}</strong> ${game.attemptsLeft === 1 ? 'guess' : 'guesses'} left`}</p>`;
-    }
-    /* the Speed Bonus line only exists on the Daily Challenge: every other way to play scores the hint alone */
-    function scoreHtml() {
-      const daily = FD.scoring.speedApplies(opts.mode), p = FD.scoring.potential(game.hintsShown, game.activeMs, opts.mode);
-      let speedNote = '';
-      const t = daily ? cfg.speedBonus.find((s) => game.activeMs <= s.maxMs) : null;
-      if (t) speedNote = html`<small>${FD.u.fmtSeconds(Math.max(1000, t.maxMs - game.activeMs))} left for this bonus</small>`;
-      return html`<h2 class="mini-h">Score</h2>
-        <p class="score-now"><span class="score-num" id="score-num">${p.total}</span><small>points if you nail it now</small></p>
-        <ul class="score-lines">
-          <li><span>Hint ${game.hintsShown} of ${cfg.maxAttempts}</span><b>${p.base}</b></li>
-          ${daily ? html`<li><span>Speed bonus</span><b id="score-speed">+${p.speed}</b>${speedNote}</li>` : ''}
-        </ul>`;
+      return html`<h3 class="mini-h">The hints</h3><ol class="earlier-list">${game.hints.slice(0, game.won ? game.hintsUsed : cfg.maxAttempts).map((h, i) => html`<li class="c-${hintColor(i + 1)}"><span class="e-n" aria-hidden="true">${i + 1}</span><span class="sr-only">Hint ${i + 1}: </span><span class="e-t">${h}</span></li>`)}</ol>`;
     }
     /* Pip's extras: three unlocks (category, name shape, first letters), each with a clear locked state.
        The first letters are shown on the name-shape tiles, so once unlocked their row is just a tick and its label. */
@@ -144,14 +117,32 @@
           ${row(lvl.first, 5, 'First letters', 'unlock', '')}
         </ul>`;
     }
+    /* one button for the way out: a nudge (reveal the next hint for a guess) until the last hint, where a nudge would only end the round anyway, so it says so */
+    function wayOutHtml() {
+      return game.attemptsLeft === 1
+        ? html`<button type="button" class="btn btn-ghost btn-sm" data-act="giveup">${FD.icon('x', { size: 18 })}I give up <small>(ends round)</small></button>`
+        : html`<button type="button" class="btn btn-ghost btn-sm" data-act="nudge">${FD.icon('bulb', { size: 18 })}Need a nudge? <small>(uses a guess)</small></button>`;
+    }
     function historyHtml() {
       return html`<h2 class="mini-h" id="hist-h">Your guesses</h2>
-        ${game.guesses.length ? html`<ol class="guess-list">${game.guesses.map((g, i) => g.k === 's'
-          ? html`<li class="guess is-skip"><span class="g-n">${i + 1}</span><span class="g-name">Nudge used</span><span class="g-chips">${ui.tempChip('skip')}<span class="chip">Next hint revealed</span></span></li>`
-          : html`<li class="guess is-${g.temp}"><span class="g-n">${i + 1}</span><span class="g-name">${g.name}</span><span class="g-chips">${ui.tempChip(g.temp)}
-              ${g.temp === 'correct' ? '' : html`${ui.defChip(g.sameCat ? 'check' : 'x', g.sameCat ? 'Same category' : 'Different category', 'category')}
-              ${ui.defChip(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same difficulty', 'level')}`}</span></li>`)}</ol>`
+        ${game.guesses.length ? html`<ol class="guess-list">${guessItems()}</ol>`
           : html`<p class="muted empty">No guesses yet. Each wrong guess gets a hot or cold clue, then unlocks the next hint.</p>`}`;
+    }
+    const guessItems = () => game.guesses.map((g, i) => g.k === 's'
+      ? html`<li class="guess is-skip"><span class="g-n">${i + 1}</span><span class="g-name">Nudge used</span><span class="g-chips">${ui.tempChip('skip')}<span class="chip">Next hint revealed</span></span></li>`
+      : html`<li class="guess is-${g.temp}"><span class="g-n">${i + 1}</span><span class="g-name">${g.name}</span><span class="g-chips">${ui.tempChip(g.temp)}
+          ${g.temp === 'correct' ? '' : html`${ui.defChip(g.sameCat ? 'check' : 'x', g.sameCat ? 'Same category' : 'Different category', 'category')}
+          ${ui.defChip(g.dir === 'up' ? 'up' : g.dir === 'down' ? 'down' : 'equals', g.dir === 'up' ? 'Answer is harder' : g.dir === 'down' ? 'Answer is easier' : 'Same difficulty', 'level')}`}</span></li>`);
+    /* after the round: the hints and guesses wait behind one click, so the answer and the way on are what you see first. Hint N and guess N share a row, so the two lists line up. */
+    function recapHtml() {
+      const hints = game.won ? game.hintsUsed : cfg.maxAttempts, rows = 1 + Math.max(hints, game.guesses.length), g = game.guesses.length;
+      return html`<details class="recap">
+        <summary class="recap-sum"><span class="recap-ic" aria-hidden="true">${FD.icon('list', { size: 20 })}</span><span class="recap-t"><strong>Your hints and guesses</strong><small>${hints} ${hints === 1 ? 'hint' : 'hints'} \u00B7 ${g} ${g === 1 ? 'guess' : 'guesses'}</small></span><span class="recap-state" aria-hidden="true"></span><span class="recap-chev" aria-hidden="true">${FD.icon('chevdown', { size: 20 })}</span></summary>
+        <div class="recap-body"${FD.u.attrs({ style: '--recap-rows:' + rows })}>
+          <section class="recap-col recap-hints" aria-label="The hints">${allHintsHtml()}</section>
+          <section class="recap-col recap-guesses" aria-label="Your guesses"><h3 class="mini-h">Your guesses</h3>${g ? html`<ol class="guess-list">${guessItems()}</ol>` : html`<p class="muted empty">No guesses. You gave up on the first hint.</p>`}</section>
+        </div>
+      </details>`;
     }
     function drawAll(isNew) {
       const over = game.over;
@@ -159,27 +150,18 @@
       if (!over) {
         mount(q('#hint-card'), hintCardHtml(isNew));
         mount(q('#earlier'), earlierHtml());
-        mount(q('#meter'), meterHtml());
         mount(q('#extras'), extrasHtml(isNew));
-        mount(q('#scorep'), scoreHtml());
+        mount(q('#guess-actions'), wayOutHtml());
+        mount(q('#history'), historyHtml());
+        mount(q('#recap-host'), '');
       } else {
-        /* finished, solved or not: the hint-o-meter and Pip's extras have done their job, so they are put away and the hints and guesses are all that is left */
-        mount(q('#earlier'), allHintsHtml());
+        /* finished, solved or not: the play screen is put away, and the hints and guesses are one click away under the answer */
+        ['#hint-card', '#earlier', '#extras', '#guess-actions', '#history'].forEach((s) => mount(q(s), ''));
+        mount(q('#recap-host'), recapHtml());
       }
-      mount(q('#history'), historyHtml());
       form.hidden = over;
-      q('#hint-card').hidden = over;
-      q('#scorep').hidden = over;
-      q('#meter').hidden = over;
-      q('#extras').hidden = over;
-      q('#play-side').hidden = over;
+      q('#play-grid').hidden = over;
       q('#play-head').hidden = over; /* the answer block takes over the top of the page */
-      const grid = q('#play-grid');
-      grid.classList.toggle('is-over', over);
-      grid.classList.toggle('is-solved', over);
-      /* post-game, hint N and guess N share one row so the two lists always line up in height */
-      if (over) grid.style.setProperty('--recap-rows', String(1 + Math.max(game.won ? game.hintsUsed : cfg.maxAttempts, game.guesses.length)));
-      else grid.style.removeProperty('--recap-rows');
     }
 
     /* ---------- suggestions (ARIA combobox) ---------- */
@@ -263,9 +245,6 @@
     function tick() {
       if (destroyed || game.over || game.pausedAt) return;
       if (opts.mode === 'daily' && opts.dateKey && FD.u.dateKey() !== opts.dateKey) { game.expire(); persist(); finish(); return; }
-      if (!showClock) return;
-      const t = q('#play-timer'); if (t) t.textContent = FD.u.fmtClock(game.activeMs);
-      if (q('#score-num')) mount(q('#scorep'), scoreHtml());
     }
     if (!isFinishedView && !game.over) timerId = setInterval(tick, 1000);
 
@@ -297,9 +276,8 @@
       showResult(data, out);
     }
     function actionsFor(data) { return typeof opts.actions === 'function' ? opts.actions(game, data) : opts.actions; }
-    const nextFor = (data) => (typeof opts.next === 'function' ? opts.next(game, data) : opts.next) || null;
     function showResult(data, out) {
-      FD.result.render(q('#result-host'), data, { actions: actionsFor(data), learnHost: q('#learn-host'), eyebrow: opts.title, next: nextFor(data) });
+      FD.result.render(q('#result-host'), data, { actions: actionsFor(data), learnHost: q('#learn-host'), eyebrow: opts.title });
       if (out) ui.celebrate(out);
       const host = q('#result-host');
       setTimeout(() => { host.scrollIntoView({ behavior: FD.u.reduceMotion() ? 'auto' : 'smooth', block: 'start' }); host.focus({ preventScroll: true }); }, 450);

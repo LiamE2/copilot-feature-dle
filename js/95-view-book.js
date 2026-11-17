@@ -83,12 +83,12 @@
       main.innerHTML = flat(html`<div class="container hub">
         <header class="hub-head book-head">
           <div><p class="eyebrow">Your collection</p><h1>Feature Book</h1>
-            <p class="lede">Every Copilot feature lives here. Tap any one to Know it, Use it and Prompt it. Solve a puzzle to collect it, and finish them all to master it.</p></div>
+            <p class="lede">${ui.MODE_TEXT.book}</p></div>
           <div class="book-ring">${ui.ring(lib.features.length ? (have / lib.features.length) * 100 : 0, { size: 112, stroke: 12, color: 'green', label: `${have}/${lib.features.length}`, sub: 'collected' })}</div>
         </header>
         <section class="card master-card tracker" aria-labelledby="trk-h">
           <h2 id="trk-h">Feature Tracker</h2>
-          <p class="muted">Collect a feature with any puzzle, and master it by finishing them all. Tap a category to see how far you are in each game mode.</p>
+          <p class="muted">Collect a feature with any puzzle, and master it by finishing them all. Select a category to view your progress across each game mode.</p>
           <h3 class="mini-h">Features by difficulty</h3>
           <div class="coll-bars trk-levels">${cfg.difficulties.map((d) => { const fs = lib.features.filter((x) => x.difficulty === d), h = fs.filter(isHave).length, m = fs.filter((x) => states[x.id] === 'mastered').length; return html`<div class="cb"><span class="cb-label">${ui.diffChip(d)}</span>${ui.nbar(h, m, fs.length, ui.DIFF_COLOR[d])}<span class="cb-nums">${nums(h, fs.length, m)}</span></div>`; })}</div>
           <h3 class="mini-h" id="mast-h">Features by category</h3>

@@ -5,33 +5,27 @@
   const FD = (window.FD = window.FD || {});
 
   FD.config = {
-    version: '1.5.1',
+    version: '1.6.0',
     appName: 'Copilot Feature-dle',
 
     /* one guess per hint: hint 1 is free, every miss unlocks the next one */
     maxAttempts: 5,
     points: [100, 80, 60, 40, 20],
 
-    /* The Speed Bonus: extra points for a fast answer, in the Daily Challenge only (whichever game mode the day is). It is worth up to 30, which makes a real difference but
-       is still less than a first-hint answer (100) or a first-pick answer (50), and it drops in steps of 5. The Daily Challenge clock runs in real time, so it keeps ticking
-       if you leave the game. */
-    speedBonus: [
-      { maxMs: 15000, pts: 30 },
-      { maxMs: 30000, pts: 25 },
-      { maxMs: 45000, pts: 20 },
-      { maxMs: 60000, pts: 15 },
-      { maxMs: 90000, pts: 10 },
-      { maxMs: 120000, pts: 5 }
-    ],
-
+    /* The Speed Bonus: extra points for a fast answer, in the Daily Challenge only (whichever game mode the day is). It starts at `max` points for an instant answer and
+       loses 1 point every `secondsPerPoint` seconds, so it reaches 0 after max x secondsPerPoint seconds (2 minutes). The Daily Challenge clock runs in real time, so it
+       keeps ticking if you leave the game. */
+    speedBonus: { max: 40, secondsPerPoint: 3 },
+    /* the Perfect Score badge: a Daily Feature Hunt solved on hint 1 in under this many milliseconds */
+    perfectScoreMs: 15000,
     /* XP (drives ranks). Points are never multiplied, so scores stay fair for everyone. */
     difficultyXp: { Easy: 0, Medium: 10, Hard: 25, Expert: 50 },
     dailyBonusXp: 25,
     newFeatureXp: 15,
     lossXp: 5,
-    /* a live Daily Challenge streak adds bonus XP to every correct answer: +1% per streak day, up to +50% */
-    streakXpPerDay: 0.01,
-    streakXpMax: 0.5,
+    /* a live Daily Challenge streak adds bonus XP to every correct answer: +5% per streak day, up to +100% */
+    streakXpPerDay: 0.05,
+    streakXpMax: 1,
     /* the flame on the Stats page gets hotter with the Daily streak: warm from day 1, hot from this many days, blazing from this many */
     streakHeat: { hot: 7, blazing: 14 },
 
@@ -54,7 +48,7 @@
       Easy: 'Common features most people have met',
       Medium: 'Newer features worth knowing',
       Hard: 'Niche or recently released functionality',
-      Expert: 'Features known mostly by consultants and champions'
+      Expert: 'Advanced and technical features known mostly by champions and IT teams'
     },
 
     /* Daily Challenge: weekdays only. The difficulty of each weekday is random, but every block of 20 weekdays
@@ -80,8 +74,8 @@
        options on the 1st, 2nd and 3rd pick (maxTries picks, then the answer is shown and the puzzle goes to Needs Another Look), and a bonus for a perfect
        game (every pick right first time, with at least perfectMinRounds rounds). Every point is XP, one for one, like every other mode. The points are
        kept small because a round here is much quicker than a Feature Hunt puzzle. */
-    promptLab: { rounds: { min: 1, max: 10, defaultRounds: 5 }, points: [50, 30, 10], maxTries: 3, perfectMinRounds: 3, perfectBonusPerRound: 3 },
-    scenarioMatch: { rounds: { min: 1, max: 10, defaultRounds: 5 }, points: [50, 30, 10], maxTries: 3, perfectMinRounds: 3, perfectBonusPerRound: 3 },
+    promptLab: { rounds: { min: 1, max: 10, defaultRounds: 5 }, points: [50, 30, 10], maxTries: 3, perfectMinRounds: 3, perfectBonusPerRound: 10 },
+    scenarioMatch: { rounds: { min: 1, max: 10, defaultRounds: 5 }, points: [50, 30, 10], maxTries: 3, perfectMinRounds: 3, perfectBonusPerRound: 10 },
 
     /* Microsoft sign-in (see the README, "Microsoft sign-in"). Everything needed is public, so it is safe to keep here.
        Leave clientId empty and the game is guest-only, exactly as before. */
@@ -101,7 +95,7 @@
       nameStyle: 'short'
     },
 
-    /* Optional event leaderboard (see README). Leave endpoint empty for a device-only leaderboard. */
-    leaderboard: { endpoint: '', eventCode: '' }
+    /* Optional shared leaderboard (see README). Leave endpoint empty for a device-only leaderboard. */
+    leaderboard: { endpoint: '' }
   };
 })();

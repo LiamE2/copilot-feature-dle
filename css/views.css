@@ -100,21 +100,15 @@
 .play-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.5rem; align-items: start; }
 .play-main { display: grid; gap: 1.25rem; min-width: 0; }
 .play-side { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; position: sticky; top: calc(var(--header-h) + 1rem); min-width: 0; }
-.play-grid.is-solved { grid-template-columns: minmax(0, 1fr); }
-/* post-game: hint N and guess N share one row, so the hints and the guesses always line up in height */
-.play-grid.is-over .play-main { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: .5rem 1.5rem; }
-.play-grid.is-over .earlier, .play-grid.is-over .history { grid-row: 1 / span var(--recap-rows, 6); display: grid; grid-template-rows: subgrid; }
-.play-grid.is-over .earlier > .mini-h, .play-grid.is-over .history > .mini-h { margin-bottom: .15rem; }
-.play-grid.is-over .earlier-list, .play-grid.is-over .guess-list { grid-row: 2 / -1; grid-template-rows: subgrid; }
-.play-grid.is-over .earlier-list li { align-items: center; }
-.play-grid.is-over .guess { align-content: center; }
-.play-grid.is-over .history > .empty { grid-row: 2; }
-
+/* the countdown to the end of the Daily Speed Bonus (top right of the Daily Challenge) */
+.timer-chip .bonus-live { font-variant-numeric: tabular-nums; }
 .hint-card { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 1.1rem; align-items: end; }
 .hint-pip { margin-bottom: -.1rem; }
 .hint-bubble { position: relative; background: var(--c); color: var(--c-ink); border-radius: 30px 30px 30px 8px; padding: 1.35rem 1.75rem 1.6rem; }
 .hint-bubble::before { content: ""; position: absolute; left: -13px; bottom: 26px; border: 14px solid transparent; border-left: 0; border-right-color: var(--c); }
 .hint-label { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem; margin: 0 0 .7rem; font: 700 .78rem var(--font-head); text-transform: uppercase; letter-spacing: .09em; }
+.hint-left { display: inline-flex; align-items: center; gap: .35rem; }
+.hint-left.is-final { padding: .3rem .85rem; border-radius: var(--r-pill); background: var(--navy); color: #fff; box-shadow: 0 0 0 2px rgba(255, 255, 255, .85); }
 .hint-text { margin: 0; font: 500 clamp(1.25rem, 1rem + 1.3vw, 1.85rem)/1.35 var(--font-body); }
 .hint-bubble.is-new { animation: popin .5s cubic-bezier(.2, 1.3, .3, 1) both; }
 @keyframes popin { from { transform: scale(.94) translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -155,21 +149,7 @@
 .g-chips { grid-column: 2; display: flex; flex-wrap: wrap; gap: .4rem; }
 .empty { margin: 0; }
 
-.meter { list-style: none; margin: .25rem 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .4rem; }
-.meter-step { display: flex; flex-direction: column; align-items: center; gap: .3rem; padding: .6rem .2rem; border-radius: 16px; border: 2px solid var(--navy-10); background: #fff; color: var(--grey); font: 700 .8rem var(--font-head); transition: transform .2s; }
-.meter-n { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: .95rem; }
-.meter-pts { font-size: .78rem; }
-.meter-step.is-used { background: var(--c); color: var(--c-ink); border-color: var(--c); }
-.meter-step.is-current { background: var(--c); color: var(--c-ink); border-color: var(--navy); box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--c); transform: translateY(-3px); }
-.meter-step.is-locked { border-style: dashed; }
-.attempts { display: flex; align-items: center; gap: .65rem; margin: 0; font-weight: 500; }
-.score-now { display: flex; align-items: baseline; flex-wrap: wrap; gap: .5rem; margin: 0 0 .7rem; }
-.score-num { font: 900 2.7rem/1 var(--font-head); color: var(--blue); font-variant-numeric: tabular-nums; }
-.score-now small { color: var(--grey); }
-.score-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; font-size: .92rem; }
-.score-lines li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .1rem .5rem; }
-.score-lines small { flex-basis: 100%; color: var(--grey); }
-/* Pip's extras: a plain white card like the hint-o-meter and score, holding three callouts with a clear locked state each */
+/* Pip's extras: a plain white card holding three callouts with a clear locked state each */
 .extras-h { display: flex; align-items: center; flex-wrap: wrap; gap: .35rem .5rem; margin: 0 0 .8rem; font: 900 1.05rem var(--font-head); text-transform: none; letter-spacing: -.01em; color: var(--navy); }
 .extras-h .ic { color: var(--orange); }
 .x-count { margin-left: auto; padding: .18rem .7rem; border-radius: var(--r-pill); background: var(--navy); color: #fff; font: 700 .74rem var(--font-head); letter-spacing: 0; text-transform: none; }
@@ -190,12 +170,6 @@
   .x-row .name-word { flex-wrap: wrap; row-gap: .25rem; }
 }
 .extras small { color: var(--grey); }
-/* the same goes for the answer: a long word shrinks its tiles so it never pushes a narrow screen sideways, and wraps only as a last resort */
-@supports (width: 1cqw) {
-  .answer { container-type: inline-size; }
-  .answer .name-tiles { --tw: max(1.1rem, min(clamp(1.7rem, 6vw, 2.6rem), calc((100cqw - (var(--ml, 1) - 1) * .25rem) / var(--ml, 1)))); }
-  .answer .name-word { flex-wrap: wrap; row-gap: .25rem; }
-}
 .result-host { margin: 1.5rem 0; scroll-margin-top: calc(var(--header-h) + .5rem); }
 .result-host:empty { display: none; }
 @keyframes pulse { 50% { transform: scale(1.08); } }
@@ -213,6 +187,14 @@
 .result-notes .next-daily { background: #fff; }
 .result-title { font-size: clamp(2rem, 1.3rem + 3vw, 3.3rem); margin: 0 0 .3rem; }
 .result-sub { margin: 0 0 .5rem; font-size: 1.1rem; }
+/* the answer, written out plainly */
+.result-answer { display: grid; gap: .1rem; margin: .85rem 0 .5rem; }
+.ra-label { font: 700 .78rem var(--font-head); text-transform: uppercase; letter-spacing: .09em; color: var(--grey); }
+.ra-name { font: 900 clamp(1.5rem, 1.1rem + 1.8vw, 2.3rem)/1.15 var(--font-head); color: var(--navy); overflow-wrap: anywhere; }
+/* the Daily Challenge stands out with a yellow tab and outline, in the same shapes as every other answer block */
+.daily-tab { display: flex; align-items: center; flex-wrap: wrap; gap: .25rem .65rem; width: fit-content; max-width: 100%; margin: 0 0 -2px 3rem; padding: .55rem 1.3rem .6rem; border-radius: 22px 22px 0 0; background: var(--yellow); color: var(--navy); font: 700 .95rem var(--font-head); }
+.daily-tab span { font-weight: 500; }
+.result.is-daily .result-hero { box-shadow: inset 0 0 0 3px var(--yellow); }
 .rs-total { display: flex; align-items: baseline; gap: .5rem; margin: 0 0 .5rem; }
 .rs-total strong { font: 900 2.8rem/1 var(--font-head); color: var(--blue); font-variant-numeric: tabular-nums; }
 .rs-total span { color: var(--grey); font-weight: 500; }
@@ -244,6 +226,30 @@
 .learn-link { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
 .learn-link h3, .learn-link h4, .learn-link p { margin-bottom: .2rem; }
 .result-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.result-end { margin: 1.5rem 0 1rem; }
+.result-end .result-actions { margin-top: 0; }
+/* the hints and guesses after a round: one card that opens on click */
+.recap-host:empty { display: none; }
+.recap { margin: 1.25rem 0; border: 2px solid var(--navy-10); border-radius: var(--r-lg); background: #fff; }
+.recap-sum { display: flex; align-items: center; gap: .9rem; padding: .9rem 1.25rem; border-radius: var(--r-lg); cursor: pointer; list-style: none; }
+.recap-sum::-webkit-details-marker { display: none; }
+.recap-sum:hover { background: var(--blue-10); }
+.recap-ic { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 14px 14px 14px 4px; background: var(--blue); color: #fff; }
+.recap-t { display: grid; gap: .1rem; flex: 1; min-width: 0; }
+.recap-t strong { font: 700 1.05rem var(--font-head); }
+.recap-t small { color: var(--grey); }
+.recap-state::before { content: "Show"; font: 700 .85rem var(--font-head); color: var(--blue); }
+.recap[open] .recap-state::before { content: "Hide"; }
+.recap-chev { display: inline-flex; color: var(--blue); transition: transform .2s; }
+.recap[open] .recap-chev { transform: rotate(180deg); }
+.recap-body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem 1.5rem; align-items: stretch; padding: .5rem 1.25rem 1.25rem; }
+/* hint N and guess N share a row, so the two lists always line up in height */
+.recap-col { grid-row: 1 / span var(--recap-rows, 6); display: grid; grid-template-rows: subgrid; min-width: 0; }
+.recap-col > .mini-h { margin-bottom: .15rem; }
+.recap-col .earlier-list, .recap-col .guess-list { grid-row: 2 / -1; grid-template-rows: subgrid; }
+.recap-col .earlier-list li { align-items: center; }
+.recap-col .guess { align-content: center; }
+.recap-col > .empty { grid-row: 2; }
 
 
 /* ======================================================= RESPONSIVE */
@@ -259,10 +265,11 @@
   .play-side { order: 3; }
   .earlier { order: 4; }
   .history { order: 5; }
-  .play-grid.is-over .play-side { order: 6; }
-  .play-grid.is-over .earlier, .play-grid.is-over .history { grid-row: auto; display: block; }
-  .play-grid.is-over .earlier > .mini-h, .play-grid.is-over .history > .mini-h { margin-bottom: .65rem; }
-  .play-grid.is-over .earlier-list, .play-grid.is-over .guess-list { grid-row: auto; grid-template-rows: none; }
+  .recap-body { grid-template-columns: minmax(0, 1fr); }
+  .recap-col { grid-row: auto; display: block; }
+  .recap-col > .mini-h { margin-bottom: .65rem; }
+  .recap-col .earlier-list, .recap-col .guess-list { grid-row: auto; grid-template-rows: none; }
+  .recap-col + .recap-col { margin-top: 1rem; }
   .learn-grid { grid-template-columns: minmax(0, 1fr); }
   .usecases { grid-template-columns: minmax(0, 1fr); }
   .result-hero { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "pip main" "score score" "notes notes"; }
@@ -278,6 +285,7 @@
   .spot-art { display: none; }
   .result-hero { grid-template-columns: minmax(0, 1fr); grid-template-areas: "pip" "main" "score" "notes"; border-radius: 36px; }
   .result-pip { display: flex; justify-content: center; }
+  .daily-tab { margin-left: 2rem; }
 }
 @media (max-width: 560px) {
   .hint-card { grid-template-columns: 1fr; margin-top: 2.4rem; }
@@ -290,6 +298,5 @@
   /* phones: as many equal columns as fit (two from about 360px wide, one below that or at a larger Text size), so a card is never wider than the screen */
   .peek-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); }
   .peek-ring { flex-direction: column; align-items: flex-start; }
-  .meter { gap: .3rem; }
   .guess-form { padding: 1rem; }
 }

@@ -65,10 +65,10 @@
         chips = html`${kindChip}${ui.diffChip(info.difficulty)}<span class="chip chip-solid c-blue">In progress</span>`;
         if (act.fid) {
           const g = FD.Game.restore(act, { realtime: true });
-          dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>You\u2019re on <strong>hint ${Math.min(act.guesses.length + 1, FD.config.maxAttempts)} of ${FD.config.maxAttempts}</strong>. The clock keeps running while you\u2019re away: <strong class="clock-val live-clock" data-clock="${g ? g.startedAt : ''}" data-paused="${g ? g.pausedMs : 0}">${g ? FD.u.fmtClock(g.activeMs) : '0:00'}</strong> so far.</span></p>`;
+          dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>You\u2019re on <strong>hint ${Math.min(act.guesses.length + 1, FD.config.maxAttempts)} of ${FD.config.maxAttempts}</strong>. The clock keeps running while you\u2019re away: <strong class="bonus-live" data-clock="${g ? g.startedAt : ''}" data-paused="${g ? g.pausedMs : 0}">${ui.bonusText(g ? g.activeMs : 0)}</strong>.</span></p>`;
         } else {
           const wrong = Array.isArray(act.wrong) ? act.wrong.length : 0;
-          dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>${wrong ? `${FD.u.plural(wrong, 'weaker pick')} so far. ` : 'You\u2019ve opened today\u2019s question. '}The clock keeps running while you\u2019re away: <strong class="clock-val live-clock" data-clock="${act.startedAt || ''}" data-paused="0">${FD.u.fmtClock(Date.now() - (act.startedAt || Date.now()))}</strong> so far.</span></p>`;
+          dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>${wrong ? `${FD.u.plural(wrong, 'weaker pick')} so far. ` : 'You\u2019ve opened today\u2019s question. '}The clock keeps running while you\u2019re away: <strong class="bonus-live" data-clock="${act.startedAt || ''}" data-paused="0">${ui.bonusText(Date.now() - (act.startedAt || Date.now()))}</strong>.</span></p>`;
         }
         dailyCta = html`<a class="btn btn-primary btn-lg" href="#/daily">Continue today\u2019s challenge</a>`;
       } else {
@@ -114,12 +114,12 @@
           <section class="section" aria-labelledby="modes-h">
             <div class="section-head"><h2 id="modes-h">Ways to play</h2></div>
             <div class="mode-grid">
-              <a class="mode-card c-blue" href="#/hunt"><span class="mode-ic">${FD.icon('search', { size: 30 })}</span><h3>Feature Hunt</h3><p>Know it: five sneaky hints, one Copilot feature.</p></a>
-              <a class="mode-card c-purple" href="#/match"><span class="mode-ic">${FD.icon('puzzle', { size: 30 })}</span><h3>Scenario Match</h3><p>Use it: match a real work scenario to the feature that fits.</p></a>
-              <a class="mode-card c-blue-50" href="#/prompts"><span class="mode-ic">${FD.icon('flask', { size: 30 })}</span><h3>Prompt Lab</h3><p>Prompt it: pick the prompt that gets the best result.</p></a>
-              <a class="mode-card c-orange" href="#/free"><span class="mode-ic">${FD.icon('shuffle', { size: 30 })}</span><h3>Free Play</h3><p>Mix puzzles from every game mode and play as many rounds as you like, at your own pace.</p></a>
-              <a class="mode-card c-red" href="#/packs"><span class="mode-ic">${FD.icon('package', { size: 30 })}</span><h3>Packs</h3><p>Explore official packs and monthly spotlights.</p></a>
-              <a class="mode-card c-green" href="#/book"><span class="mode-ic">${FD.icon('book', { size: 30 })}</span><h3>Feature Book</h3><p>${have} of ${lib.features.length} features collected. Explore the Feature Book to learn about them all.</p></a>
+              <a class="mode-card c-blue" href="#/hunt"><span class="mode-ic">${FD.icon('search', { size: 30 })}</span><h3>Feature Hunt</h3><p>${ui.MODE_TEXT.hunt}</p></a>
+              <a class="mode-card c-purple" href="#/match"><span class="mode-ic">${FD.icon('puzzle', { size: 30 })}</span><h3>Scenario Match</h3><p>${ui.MODE_TEXT.match}</p></a>
+              <a class="mode-card c-blue-50" href="#/prompts"><span class="mode-ic">${FD.icon('flask', { size: 30 })}</span><h3>Prompt Lab</h3><p>${ui.MODE_TEXT.prompts}</p></a>
+              <a class="mode-card c-orange" href="#/free"><span class="mode-ic">${FD.icon('shuffle', { size: 30 })}</span><h3>Free Play</h3><p>${ui.MODE_TEXT.free}</p></a>
+              <a class="mode-card c-red" href="#/packs"><span class="mode-ic">${FD.icon('package', { size: 30 })}</span><h3>Packs</h3><p>${ui.MODE_TEXT.packs}</p></a>
+              <a class="mode-card c-green" href="#/book"><span class="mode-ic">${FD.icon('book', { size: 30 })}</span><h3>Feature Book</h3><p>${ui.MODE_TEXT.book}</p></a>
             </div>
           </section>
 
@@ -167,7 +167,7 @@
       FD.store.setActive(key, { kind, id: scn.id, ...st });
     }
     main.innerHTML = flat(html`<div class="container play-wrap pl-wrap" id="daily-q">
-      ${FD.quizUI.head(kind, [dailyTitle(today), FD.puzzles.name(kind)], html`<div class="play-chips">${ui.diffChip(f.difficulty)}</div>`)}
+      ${FD.quizUI.head(kind, [dailyTitle(today), FD.puzzles.name(kind)], html`<div class="play-chips">${ui.diffChip(f.difficulty)}${res ? '' : ui.bonusChip(st.startedAt)}</div>`)}
       <div id="pl-body"></div>
       <div class="result-host" id="result-host" tabindex="-1"></div>
       <div id="learn-host"></div></div>`);

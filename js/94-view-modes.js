@@ -21,11 +21,11 @@
   /* The header above the mode selector. All five headers sit in one grid cell and only the active one is visible,
      so the header is always as tall as the tallest and the mode selector never moves when you switch modes. */
   const MODE_HEADS = {
-    free: ['Mix it up', 'Free Play', 'Unlimited puzzles from any game mode. Choose how many rounds and play at your own pace.'],
-    hunt: ['Know it', 'Feature Hunt', 'Read the hints and guess the Copilot feature being referenced.'],
-    match: ['Use it', 'Scenario Match', 'Read a real work scenario and match it to the Copilot feature that fits best.'],
-    prompts: ['Prompt it', 'Prompt Lab', 'Read the scenario, pick the strongest prompt and build the habits behind great answers.'],
-    packs: ['Themed sets of puzzles', 'Packs', 'Curated bundles that mix all three game modes together.']
+    free: ['Mix it up', 'Free Play', ui.MODE_TEXT.free],
+    hunt: ['Know it', 'Feature Hunt', ui.MODE_TEXT.hunt],
+    match: ['Use it', 'Scenario Match', ui.MODE_TEXT.match],
+    prompts: ['Prompt it', 'Prompt Lab', ui.MODE_TEXT.prompts],
+    packs: ['Go deeper', 'Packs', ui.MODE_TEXT.packs]
   };
   ui.modeHead = (active) => html`<header class="hub-head mode-head">${Object.keys(MODE_HEADS).map((k) => {
     const [eyebrow, title, lede] = MODE_HEADS[k], on = k === active;

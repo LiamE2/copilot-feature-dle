@@ -1,6 +1,7 @@
 /* Copilot Feature-dle · leaderboards
-   Default = everyone who has played on THIS device (great for a shared laptop at a workshop) plus clearly-labelled sample players.
-   Optional = a shared event board via a tiny HTTP endpoint (config.leaderboard.endpoint, see README). */
+   Default = everyone who has played on THIS device plus a few sample players (delete SAMPLE below once real players fill the board).
+   Optional = a shared organisation board via a tiny HTTP endpoint (config.leaderboard.endpoint, see README).
+   A player can hide their own profile in Settings (settings.hideFromBoard): they leave the board and nothing of theirs is sent to a shared one. */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
@@ -36,7 +37,7 @@
         maxStreak: champ ? 36 : 2 + Math.floor(r() * 24), bestScore: champ ? 120 : 120 + Math.floor(r() * 110), totalScore,
         xp: champ ? topXp + 1480 : Math.min(topXp - 1, Math.round(totalScore * (0.9 + r() * 0.4))), collected, collectedTotal: totalFeatures, mastered,
         achievements: champ ? Math.round(totalBadges * 0.8) : Math.min(totalBadges, 2 + Math.round(collected / 5 + r() * 3)), achievementsTotal: totalBadges,
-        today: playedToday ? { score: (qcfg ? qcfg.points[tries - 1] : FD.config.points[hints - 1]) + (rd() < 0.5 ? FD.config.speedBonus[Math.floor(rd() * FD.config.speedBonus.length)].pts : 0), hints: tries, timeMs: 9000 + Math.floor(rd() * 70000), won: true, kind: dayKind } : null
+        today: playedToday ? { score: (qcfg ? qcfg.points[tries - 1] : FD.config.points[hints - 1]) + (rd() < 0.5 ? Math.floor(rd() * FD.config.speedBonus.max) : 0), hints: tries, timeMs: 9000 + Math.floor(rd() * 70000), won: true, kind: dayKind } : null
       };
     });
   }
@@ -65,19 +66,19 @@
       players
     };
   }
+  const hidden = () => !!FD.store.settings().hideFromBoard;
   function local() {
     const today = dateKey();
-    const players = localPlayers(today).concat(FD.store.settings().sampleBoard ? samplePlayers(today) : []);
+    const players = localPlayers(today).filter((p) => !(p.you && hidden())).concat(samplePlayers(today));
     return rank(players);
   }
 
-  /* ---------- optional shared event board ---------- */
+  /* ---------- optional shared board ---------- */
   const lb = () => FD.config.leaderboard || {};
   const remoteEnabled = () => !!lb().endpoint;
 
   async function fetchRemote() {
     const u = new URL(lb().endpoint, location.href);
-    u.searchParams.set('eventCode', lb().eventCode || '');
     u.searchParams.set('date', dateKey());
     const r = await fetch(u.toString(), { cache: 'no-store' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -86,7 +87,7 @@
     const BRAND = ['blue', 'red', 'purple', 'orange', 'green', 'pink', 'yellow', 'navy'];
     const int = (v, max) => Math.min(max, Math.max(0, Math.round(+v || 0)));
     const dayKind = dayKindOf(dateKey());
-    const players = (Array.isArray(j.players) ? j.players : []).filter((p) => p && typeof p === 'object').slice(0, 500).map((p) => ({
+    const players = (Array.isArray(j.players) ? j.players : []).filter((p) => p && typeof p === 'object').slice(0, 500).filter((p) => !(hidden() && String(p.playerId || '') === me)).map((p) => ({
       id: String(p.playerId || p.name || ''), sample: false, live: true, you: String(p.playerId || '') === me, name: String(p.name || 'Player').slice(0, 24), color: BRAND.includes(p.color) ? p.color : 'blue',
       played: +p.played || 0, maxStreak: +p.maxStreak || 0, bestScore: +p.bestScore || 0, totalScore: +p.totalScore || 0,
       xp: int(p.xp, 1e7), collected: int(p.collected, 1000), collectedTotal: FD.lib.features.length, mastered: int(p.mastered, 1000), achievements: int(p.achievements, 200), achievementsTotal: FD.badges.all(FD.lib).length,
@@ -97,10 +98,10 @@
 
   /* fire-and-forget: never block or break gameplay if the endpoint is down */
   function submit(r, out) {
-    if (!remoteEnabled() || r.mode !== 'daily') return;
+    if (!remoteEnabled() || r.mode !== 'daily' || hidden()) return;
     const p = FD.store.profile(), sm = FD.scoring.summary(p, FD.lib), tot = FD.scoring.totals(p);
     const body = {
-      eventCode: lb().eventCode || '', date: r.dateKey, playerId: p.id, name: p.name, color: p.color,
+      date: r.dateKey, playerId: p.id, name: p.name, color: p.color,
       today: { score: out.breakdown ? out.breakdown.total : 0, hints: r.hintsUsed, timeMs: r.timeMs, won: !!r.won },
       maxStreak: p.daily.max, totalScore: p.stats.totalScore + ((p.match && p.match.points) || 0) + ((p.prompts && p.prompts.points) || 0), bestScore: p.stats.bestScore, played: tot.puzzles,
       xp: p.xp, collected: sm.collected, mastered: FD.scoring.masteredCount(p, FD.lib), achievements: sm.achievements
@@ -108,5 +109,5 @@
     try { fetch(lb().endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).catch(() => {}); } catch (e) { /* ignore */ }
   }
 
-  FD.board = { local, fetchRemote, remoteEnabled, submit };
+  FD.board = { local, fetchRemote, remoteEnabled, submit, hidden };
 })();

@@ -7,10 +7,11 @@
 
   /* ---------- points (never multiplied: everyone plays on the same scale) ---------- */
   const base = (hints) => cfg.points[Math.min(cfg.points.length, Math.max(1, hints)) - 1];
+  /* the Speed Bonus starts at 40 for an instant answer and drops 1 point every 3 seconds, so it is 0 from 2 minutes on */
+  const speedWindowMs = cfg.speedBonus.max * cfg.speedBonus.secondsPerPoint * 1000;
   function speed(ms) {
     if (ms == null) return 0;
-    for (const t of cfg.speedBonus) if (ms <= t.maxMs) return t.pts;
-    return 0;
+    return Math.max(0, cfg.speedBonus.max - Math.floor(Math.max(0, ms) / (cfg.speedBonus.secondsPerPoint * 1000)));
   }
   /* the Speed Bonus belongs to the Daily Challenge (whichever game mode the day is); every other way to play scores the answer alone */
   const speedApplies = (mode) => mode === 'daily';
@@ -132,7 +133,7 @@
   const STATIC = [
     { id: 'first-spark', name: 'First Spark', desc: 'Solve your very first feature.', color: 'yellow', icon: 'sparkle', check: (p) => p.stats.won >= 1 },
     { id: 'one-hint', name: 'One-Hint Wonder', desc: 'Guess a feature from the very first hint.', color: 'pink', icon: 'bulb', check: (p, c) => c.won && c.hintsUsed === 1 },
-    { id: 'quick-draw', name: 'Quick Draw', desc: 'Solve a feature in under 20 seconds.', color: 'green', icon: 'bolt', check: (p, c) => c.won && c.timeMs != null && c.timeMs < 20000 },
+    { id: 'quick-draw', name: 'Quick Draw', desc: 'Solve a Daily Challenge in under 20 seconds, in any game mode.', color: 'green', icon: 'bolt', check: (p, c) => c.won && c.mode === 'daily' && c.timeMs != null && c.timeMs < 20000 },
     { id: 'comeback', name: 'Comeback Kid', desc: 'Solve a feature on your very last hint.', color: 'blue', icon: 'refresh', check: (p, c) => c.won && c.hintsUsed === FD.config.maxAttempts },
     { id: 'typo-ninja', name: 'Typo? No problem!', desc: 'Win even though you made a typo.', color: 'purple', icon: 'pencil', check: (p, c) => c.won && c.typo },
     { id: 'daily-3', name: 'Daily Devotee', desc: 'Win 3 Daily Challenges in a row.', color: 'blue', icon: 'calendar', check: (p) => p.daily.max >= 3 },
@@ -157,7 +158,7 @@
     { id: 'daily-14', name: 'Fortnight Flame', desc: 'Win 14 Daily Challenges in a row. Your flame is blazing.', color: 'red', icon: 'flame', check: (p) => p.daily.max >= 14 },
     { id: 'daily-flawless', name: 'Flawless Daily', desc: 'Solve a Daily Challenge from the very first hint.', color: 'pink', icon: 'target', check: (p) => dailyWins(p).some((r) => r.hints === 1) },
     { id: 'daily-perfect-week', name: 'Perfect Week', desc: 'Win all five Daily Challenges in one week, Monday to Friday.', color: 'green', icon: 'calendar', check: (p) => perfectWeek(p) },
-    { id: 'perfect-score', name: 'Perfect Score', desc: 'Solve a Daily Challenge Feature Hunt from the first hint in under 15 seconds, for the most points a feature can earn.', color: 'yellow', icon: 'star', check: (p, c) => c.won && c.mode === 'daily' && c.hintsUsed === 1 && c.timeMs != null && c.timeMs < cfg.speedBonus[0].maxMs },
+    { id: 'perfect-score', name: 'Perfect Score', desc: 'Solve a Daily Challenge Feature Hunt from the first hint in under 15 seconds, for the most points a feature can earn.', color: 'yellow', icon: 'star', check: (p, c) => c.won && c.mode === 'daily' && c.hintsUsed === 1 && c.timeMs != null && c.timeMs < cfg.perfectScoreMs },
     { id: 'level-climber', name: 'Difficulty Climber', desc: 'Solve at least one feature at every difficulty.', color: 'blue', icon: 'up', check: (p, c, lib) => cfg.difficulties.every((d) => solvedCount(p, lib, (f) => f.difficulty === d) >= 1) },
     { id: 'collector-50', name: 'Bookworm', desc: 'Collect 50 features in your Feature Book.', color: 'green', icon: 'book', check: (p, c, lib) => solvedCount(p, lib) >= 50 },
     { id: 'expert-10', name: 'Expert Hunter', desc: 'Collect 10 Expert features.', color: 'navy', icon: 'medal', check: (p, c, lib) => solvedCount(p, lib, (f) => f.difficulty === 'Expert') >= 10 },
@@ -227,6 +228,6 @@
     };
   }
 
-  FD.scoring = { base, speed, speedApplies, compute, computeQuiz, potential, streakXpPct, rank, known, collected, bookState, solvedIn, solvedCount, summary, needsLook, lookList, lookItems, modesTried, layers, masteredCount, tripleCount, totals };
+  FD.scoring = { base, speed, speedWindowMs, speedApplies, compute, computeQuiz, potential, streakXpPct, rank, known, collected, bookState, solvedIn, solvedCount, summary, needsLook, lookList, lookItems, modesTried, layers, masteredCount, tripleCount, totals };
   FD.badges = { all, evaluate, masterStatus };
 })();

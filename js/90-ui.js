@@ -16,6 +16,14 @@
     fn(el, e);
   });
 
+  /* Clicking the tab you are already on always takes you to that tab's own landing screen, even from the middle of a game or its results (the address does not change, so the
+     router would never hear about it): Play goes back to the game mode selector, and a game that was left half-played waits there to be resumed. */
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest && e.target.closest('a.nav-link, a.bn-item, a.brand');
+    if (!a || e.defaultPrevented || e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (a.getAttribute('href') === location.hash) { e.preventDefault(); ui.render(); }
+  });
+
   /* ---------- toasts + dialogs ---------- */
   ui.toast = (msg, o = {}) => {
     const host = $('#toasts');
@@ -68,6 +76,13 @@
     const n = { Easy: 1, Medium: 2, Hard: 3, Expert: 4 }[d] || 2;
     return html`<span class="chip chip-solid c-${DIFF_COLOR[d] || 'yellow'}" title="Difficulty: ${d}"><span class="dots" aria-hidden="true">${[1, 2, 3, 4].map((i) => html`<i class="${i <= n ? 'on' : ''}"></i>`)}</span>${d}</span>`;
   };
+  /* The Daily Challenge Speed Bonus clock counts DOWN from 2 minutes: "Speed bonus ends in 85s", then "Speed bonus ended". Anything with the .bonus-live class is kept fresh
+     once a second by the page-wide ticker (it reads data-clock, the moment the puzzle was opened, and data-paused, any time the clock was stopped). */
+  ui.bonusText = (ms) => {
+    const left = FD.scoring.speedWindowMs - Math.max(0, ms);
+    return left > 0 ? `Speed bonus ends in ${Math.ceil(left / 1000)}s` : 'Speed bonus ended';
+  };
+  ui.bonusChip = (startedAt, pausedMs = 0) => html`<span class="chip timer-chip">${FD.icon('timer', { size: 16 })}<span class="bonus-live" data-clock="${startedAt}" data-paused="${pausedMs || 0}">${ui.bonusText(Date.now() - startedAt - (pausedMs || 0))}</span></span>`;
   ui.catChip = (name) => html`<span class="chip c-${FD.data.catColor(name)}"><span class="dot" aria-hidden="true"></span>${name}</span>`;
 
   /* How the Feature Book describes a feature: Not collected, Spotted, Collected or Mastered (see FD.scoring.bookState). One look for all four, wherever it is shown. */
@@ -236,6 +251,13 @@
       <span class="ring-label"><strong>${label}</strong>${sub ? html`<small>${sub}</small>` : ''}</span></div>`;
   };
   ui.bar = (pct, color = 'blue', label = '') => html`<div class="bar c-${color}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" ${FD.u.attrs({ 'aria-label': label })}><span style="width:${Math.max(0, Math.min(100, pct))}%"></span></div>`;
+
+  /* The round tracker: one line, the same in every game of rounds (Free Play, Feature Hunt, Scenario Match, Prompt Lab) and in Packs, and always in the same place, under the heading.
+     It says which round you are on in plain words ("Round 2 of 5"; a pack counts puzzles, so it says "Puzzle 2 of 46") and, where a game keeps score, the points so far. Nothing else
+     in the heading says the round. o = { noun, n, total, points } (leave points out when there is no running score). */
+  const trackPoints = (p) => html`<strong>${p}</strong> ${p === 1 ? 'point' : 'points'}`;
+  ui.roundTracker = (o) => html`<div class="round-track" id="round-track"><p class="rt-n">${o.noun || 'Round'} ${o.n} of ${o.total}</p>${o.points == null ? '' : html`<p class="rt-pts">${trackPoints(o.points)}</p>`}</div>`;
+  ui.setRoundPoints = (root, p) => { const el = root && root.querySelector('#round-track .rt-pts'); if (el) el.innerHTML = flat(trackPoints(p)); };
   /* A bar with two fills, for features. The grey track is every feature, the striped fill the ones collected (at least one puzzle done) and the solid fill the ones mastered (every
      puzzle done). Mastered is part of collected, so the solid fill sits over the start of the striped one and is never added to it. The bar is only a picture: the numbers beside it
      say the same in words, so it is hidden from screen readers. */
@@ -323,12 +345,8 @@
     { href: '#/leaderboard', label: 'Leaderboard', icon: 'trophy', re: /^\/leaderboard/ },
     { href: '#/about', label: 'About', icon: 'info', re: /^\/about/ }
   ];
-  /* the phone's "More" sheet: the bottom bar has Home, Daily, Play (Free Play) and Feature Book, so the other game modes and the rest are here */
+  /* the phone's "More" sheet: the bottom bar has Home, Daily, Play and Feature Book (every game mode is on the Play tab), so only the rest is here */
   const MORE = [
-    { href: '#/hunt', label: 'Feature Hunt', icon: 'search' },
-    { href: '#/match', label: 'Scenario Match', icon: 'puzzle' },
-    { href: '#/prompts', label: 'Prompt Lab', icon: 'flask' },
-    { href: '#/packs', label: 'Packs', icon: 'package' },
     { href: '#/stats', label: 'Stats & badges', icon: 'chart' },
     { href: '#/leaderboard', label: 'Leaderboard', icon: 'trophy' },
     { href: '#/settings', label: 'Settings', icon: 'sliders' },
@@ -373,7 +391,7 @@
     </nav>`);
     mount($('#site-footer'), html`<div class="container footer-inner">
       <div class="footer-brand">${FD.logo({ width: 170 })}<p>${FD.tagline()}</p></div>
-      <p class="footer-note"><strong>Copilot Feature-dle</strong> is an independent, community-style learning game from Engage Squared. It isn't affiliated with or endorsed by Microsoft. Microsoft, Microsoft 365, Copilot, Teams, Word, Excel, PowerPoint, Outlook, OneNote, SharePoint and other product names are trademarks of the Microsoft group of companies. Your progress lives only on this device.</p>
+      <p class="footer-note"><strong>Copilot Feature-dle</strong> is an independent, community-style learning game from Engage Squared. It isn't affiliated with or endorsed by Microsoft. Microsoft, Microsoft 365, Copilot, Teams, Word, Excel, PowerPoint, Outlook, OneNote, SharePoint and other product names are trademarks of the Microsoft group of companies.</p>
       <nav class="footer-links" aria-label="Footer"><a href="#/about">About</a><button class="link-btn" type="button" data-action="changelog">What\u2019s new</button><a href="#/settings">Settings</a></nav>
     </div>`);
     ui.renderTools();
@@ -399,35 +417,40 @@
 
   /* ---------- player profile (opened from the leaderboard) ---------- */
   ui.profileDialog = (pl) => {
-    const rk = FD.scoring.rank(pl.xp || 0), has = (v) => v != null && v !== undefined;
-    const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
-    const stat = (label, value, sub) => html`<div class="pf-stat"><strong>${value}</strong><span>${label}</span>${sub ? html`<small>${sub}</small>` : ''}</div>`;
+    /* a profile shows a player's rank and four numbers: no XP, so nobody can read off how close they are to the next rank */
+    const rk = FD.scoring.rank(pl.xp || 0);
+    const stat = (label, value) => html`<div class="pf-stat"><strong>${value}</strong><span>${label}</span></div>`;
     return ui.dialog({
       title: pl.name, cls: 'dlg-profile',
       body: html`<div class="pf-head">${FD.avatar(pl.name, pl.color, 84, rk.rank.id)}
           <div class="pf-who"><p class="pf-rank">${FD.icon('crown', { size: 18 })}<strong>${rk.rank.name}</strong></p>
-            <p class="muted">${pl.xp || 0} XP${rk.next ? html` \u00B7 <strong>${rk.toNext} XP</strong> to ${rk.next.name}` : ' \u00B7 the top rank!'}</p>
-            ${ui.bar(rk.pct, rk.rank.color, 'Progress to the next rank')}
-            ${pl.you ? html`<span class="chip chip-solid c-blue">That\u2019s you</span>` : ''}${pl.sample ? html`<span class="chip">Sample player</span>` : ''}</div></div>
+            ${pl.you ? html`<span class="chip chip-solid c-blue">That\u2019s you</span>` : ''}</div></div>
         <div class="pf-grid">
-          ${stat('Puzzles played', pl.played)}${has(pl.mastered) ? stat('Features mastered', pl.mastered) : ''}
-          ${stat('Longest Daily streak', html`${pl.maxStreak}<small> ${pl.maxStreak === 1 ? 'day' : 'days'}</small>`)}
-        </div>
-        <div class="pf-coll"><div class="pf-coll-top"><strong>Collection progress</strong><span>${has(pl.collected) ? `${pl.collected} of ${pl.collectedTotal} features` : 'Not shared'}</span></div>
-          ${has(pl.collected) ? ui.bar(pct(pl.collected, pl.collectedTotal), 'green', 'Collection progress') : ''}</div>
-        ${pl.sample ? html`<p class="muted small">Sample players have made-up numbers so the board never looks empty. You can switch them off in Settings.</p>` : ''}`
+          ${stat('Longest Daily streak', html`${pl.maxStreak || 0}<small> ${pl.maxStreak === 1 ? 'day' : 'days'}</small>`)}${stat('Total score', pl.totalScore || 0)}
+          ${stat('Puzzles played', pl.played || 0)}${stat('Features mastered', pl.mastered || 0)}
+        </div>`
     });
+  };
+
+  /* what each way to play says about itself: the Play tab headers, the Home tiles and Pip's welcome all read these, so they never drift apart */
+  ui.MODE_TEXT = {
+    free: 'Mix and match game modes and play your way.',
+    hunt: 'Read the hints and guess which Copilot feature they describe.',
+    match: 'Read a work scenario and choose the Copilot feature that fits best',
+    prompts: 'Read the scenario and choose the strongest prompt for the job.',
+    packs: 'Curated bundles that mix all three game modes together.',
+    book: 'Explore every Copilot feature and learn what it is, when to use it and how.'
   };
 
   /* ---------- welcome: the first time someone opens the game (no name to type: the player is "Player" until sign-in arrives) ---------- */
   const WELCOME_ITEMS = [
-    ['calendar', 'Daily Challenge', 'A new puzzle every weekday, the same for everyone. Keep your streak glowing.', 'yellow'],
-    ['shuffle', 'Free Play', 'Unlimited puzzles from any game mode. Choose how many rounds and play at your own pace.', 'orange'],
-    ['search', 'Feature Hunt', 'Know it: five sneaky hints, one Copilot feature.', 'blue'],
-    ['puzzle', 'Scenario Match', 'Use it: match a work scenario to the feature that fits.', 'purple'],
-    ['flask', 'Prompt Lab', 'Prompt it: pick the prompt that gets the best result.', 'blue-50'],
-    ['package', 'Packs', 'Themed sets that mix all three game modes, plus monthly spotlights.', 'red'],
-    ['book', 'Feature Book', 'Everything about each feature in one place: Know it, Use it and Prompt it.', 'green']
+    ['calendar', 'Daily Challenge', 'A new puzzle every weekday, with the same challenge for everyone', 'yellow'],
+    ['shuffle', 'Free Play', ui.MODE_TEXT.free, 'orange'],
+    ['search', 'Feature Hunt', ui.MODE_TEXT.hunt, 'blue'],
+    ['puzzle', 'Scenario Match', ui.MODE_TEXT.match, 'purple'],
+    ['flask', 'Prompt Lab', ui.MODE_TEXT.prompts, 'blue-50'],
+    ['package', 'Packs', ui.MODE_TEXT.packs, 'red'],
+    ['book', 'Feature Book', ui.MODE_TEXT.book, 'green']
   ];
   ui.welcome = (o = {}) => {
     /* only a brand-new player has nothing to catch up on in What's new: someone who clicks Pip to hear it again still gets their update popup */

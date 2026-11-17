@@ -11,7 +11,6 @@
   const { html, flat, $, plural, announce, attrs } = FD.u;
   const ui = FD.ui;
   const LETTERS = ['A', 'B', 'C', 'D'];
-  const PICK_NAMES = ['first', 'second', 'third'];
 
   /* everything that differs between the two game modes */
   const KIND = {
@@ -46,10 +45,11 @@
   })}</ul>`;
 
   /* ======================================================================== the question (shared) */
-  /* the blue box: it says it is the scenario. Prompt Lab says which Copilot feature it is about; Scenario Match can't (the feature is the answer) */
+  /* the blue box: it says it is the scenario. Prompt Lab names the Copilot feature it is about under the scenario; Scenario Match can't (the feature is the answer) */
   const scenarioCard = (kind, scn) => html`<section class="card pl-scenario${kind === 'match' ? ' is-match' : ''}" aria-labelledby="pl-sit-h">
-        <div class="pl-scn-top"><h2 id="pl-sit-h" class="pl-scn-label">Scenario</h2>${kind === 'prompt' ? html`<p class="pl-app">${featTag(scn)}</p>` : ''}</div>
+        <div class="pl-scn-top"><h2 id="pl-sit-h" class="pl-scn-label">Scenario</h2></div>
         <p class="pl-sit">${scn.situation}</p>
+        ${kind === 'prompt' ? html`<p class="pl-app"><span class="pl-app-label">Feature</span>${featTag(scn)}</p>` : ''}
       </section>`;
   const optionBody = (kind, scn, oi, pos) => {
     const o = scn.options[oi];
@@ -329,16 +329,9 @@
     setup(lab.main); focusHead(lab.main);
   };
 
-  const dots = (run) => run.ids.map((id, i) => {
-    const it = run.items[i], state = it ? (it.solved === false ? 'is-done miss' : 'is-done t' + it.tries) : i === run.i ? 'is-now' : '';
-    return html`<li class="${state}"></li>`;
-  });
-  const meterLabel = (run) => `Round ${run.i + 1} of ${run.ids.length}. ${plural(run.points, 'point')} so far.`;
-  const updateMeter = (run) => {
-    const meter = $('#pl-meter', lab.main); if (!meter) return;
-    meter.setAttribute('aria-label', meterLabel(run));
-    meter.querySelector('.pl-dots').innerHTML = flat(dots(run)); meter.querySelector('.pl-score strong').textContent = run.points;
-  };
+  /* the round tracker (the same one every game of rounds and every pack shows): which round, and the points so far. A game of one round is a single puzzle, so it has none. */
+  const tracker = (run) => (run.ids.length > 1 ? ui.roundTracker({ n: run.i + 1, total: run.ids.length, points: run.points }) : '');
+  const updateMeter = (run) => ui.setRoundPoints(lab.main, run.points);
 
   /* a round */
   function show() {
@@ -346,15 +339,16 @@
     lab.scn = scn;
     ui.holdRankUp(true); /* a rank-up waits until the game is over, or until you leave it */
     lab.main.innerHTML = flat(html`<div class="container play-wrap pl-wrap">
-      ${head(kind, [K().name, focusOf(kind, run), `Round ${run.i + 1} of ${run.ids.length}`], html`<div class="pl-meter" role="group" aria-label="${meterLabel(run)}" id="pl-meter"><ol class="pl-dots" aria-hidden="true">${dots(run)}</ol><p class="pl-score" aria-hidden="true"><strong>${run.points}</strong> points</p></div>`)}
+      ${head(kind, [K().name, focusOf(kind, run)])}${tracker(run)}
       <div id="pl-body"></div>
     </div>`);
     const last = run.i >= run.ids.length - 1;
+    if (run.ids.length > 1) announce(`Round ${run.i + 1} of ${run.ids.length}.`);
     const solved = run.done ? { tries: run.items[run.i].tries, points: run.items[run.i].points, solved: run.items[run.i].solved !== false } : null;
     if (lab.ctl) lab.ctl.destroy();
     lab.ctl = mount($('#pl-body', lab.main), {
       kind, scn, order, wrong: run.wrong, solved,
-      onWrong: (oi) => { run.wrong.push(oi); persist(); const meter = $('#pl-meter', lab.main); if (meter) meter.setAttribute('aria-label', meterLabel(run)); },
+      onWrong: (oi) => { run.wrong.push(oi); persist(); },
       record: ({ tries, points, solved: ok }) => {
         /* the round counts the moment it is answered: points, XP and a line in your play history. A missed one earns nothing and goes to Needs Another Look. */
         const won = ok !== false, item = { id: scn.id, tries, points: won ? points : 0, solved: won, xp: 0 }; /* the XP is kept for the results, never shown during a round */
@@ -390,23 +384,22 @@
     FD.fx.play('win'); FD.fx.confetti({ count: out.perfect ? 220 : 120 });
     ui.celebrate(out);
     const isPrompt = kind === 'prompt';
-    const [title, lede] = out.perfect ? [isPrompt ? 'Prompt pro!' : 'Perfect match!', isPrompt ? `All ${items.length} on the first try. Copilot would love your prompts.` : `All ${items.length} on the first try. You know exactly when to reach for each feature.`]
+    /* every pick right first time is a perfect run of picks, even in a game too short for the perfect-game bonus */
+    const allFirst = out.perfect || (out.missed === 0 && out.firstTry === items.length), firstWords = items.length === 1 ? 'Right on the first try.' : `All ${items.length} on the first try.`;
+    const [title, lede] = allFirst ? [isPrompt ? 'Prompt pro!' : 'Perfect match!', isPrompt ? `${firstWords} Copilot would love your prompts.` : `${firstWords} You know exactly when to reach for each feature.`]
       : out.missed ? ['Good effort!', `${plural(out.missed, 'puzzle')} went to Needs Another Look, so you can try ${out.missed === 1 ? 'it' : 'them'} again from Packs whenever you like.`]
         : out.points >= P.maxPoints(items.length) * 0.6 ? ['Nicely done!', isPrompt ? 'Strong prompts. Look at the ingredients you skipped and you\u2019ll be unstoppable.' : 'Great instincts. Check the scenarios you needed a second look at and you\u2019ll be unstoppable.']
           : ['Good start!', isPrompt ? 'You found every best prompt, and now you know what to add next time: a goal, context, a source and expectations.' : 'You found every best fit, and you now know what a few more Copilot features are really for.'];
     const p = FD.store.profile(), rk = FD.scoring.rank(p.xp), st = isPrompt ? p.prompts : p.match;
-    const pickChip = (it) => (it.solved === false
-      ? html`<span class="chip chip-solid c-orange">Missed</span>`
-      : html`<span class="chip ${it.tries === 1 ? 'chip-solid c-green' : ''}">${it.tries === 1 ? 'First try' : PICK_NAMES[it.tries - 1].replace(/^./, (c) => c.toUpperCase()) + ' pick'} +${it.points}</span>`);
     const recapItem = (it) => {
       const scn = P.byId[it.id]; if (!scn) return '';
-      const f = featOf(scn), cat = catOf(f), chip = pickChip(it);
-      if (!isPrompt) return html`<li class="pl-recap-item c-${cat.color}"><div class="pl-recap-top">${featChip(f, scn.title)}${chip}</div>
+      const f = featOf(scn), cat = catOf(f);
+      if (!isPrompt) return html`<li class="pl-recap-item c-${cat.color}"><div class="pl-recap-top">${featChip(f, scn.title)}</div>
             <p class="pl-recap-sit">${scn.need}</p>
             <p class="pl-recap-how">${scn.text}</p>
             <div class="pl-recap-foot"><button class="btn btn-ghost btn-sm" type="button" data-action="met-open" data-id="${f.id}">${FD.icon('book', { size: 16 })}About ${f.name}</button></div></li>`;
       const best = scn.options[scn.bestIndex];
-      return html`<li class="pl-recap-item c-${cat.color}"><div class="pl-recap-top"><span class="pl-recap-tags">${featTag(scn)}${chip}</span><button class="btn btn-ghost btn-sm pl-recap-copy" type="button" data-action="copy-prompt" data-copy="${best.text}">${FD.icon('copy', { size: 16 })}Copy prompt</button></div>
+      return html`<li class="pl-recap-item c-${cat.color}"><div class="pl-recap-top"><span class="pl-recap-tags">${featTag(scn)}</span><button class="btn btn-ghost btn-sm pl-recap-copy" type="button" data-action="copy-prompt" data-copy="${best.text}">${FD.icon('copy', { size: 16 })}Copy prompt</button></div>
             <p class="pl-recap-sit">${scn.situation}</p>
             <blockquote class="pl-recap-q">${best.text}</blockquote></li>`;
     };
@@ -421,12 +414,13 @@
         <ol class="pl-recap-list">${items.map(recapItem)}</ol>
       </section>
       ${isPrompt && P.learn ? html`<p class="pl-learn"><a class="btn btn-link" href="${P.learn.url}" target="_blank" rel="noopener noreferrer" data-action="doc-open" data-native>${P.learn.label}${FD.icon('external', { size: 16 })}<span class="sr-only"> (opens in a new tab)</span></a></p>` : ''}
-      <div class="btn-row"><button class="btn btn-primary" type="button" data-action="pl-again">${FD.icon('refresh', { size: 20 })}Play again</button><a class="btn btn-ghost" href="#/free">${FD.icon('shuffle', { size: 20 })}Free Play</a><a class="btn btn-ghost" href="#/stats">${FD.icon('chart', { size: 20 })}Your Stats</a></div>
+      <div class="btn-row"><button class="btn btn-primary" type="button" data-action="pl-again">${FD.icon('refresh', { size: 20 })}Play again</button><button class="btn btn-ghost" type="button" data-action="pl-setup">${FD.icon('sliders', { size: 20 })}Change settings</button><a class="btn btn-ghost" href="#/stats">${FD.icon('chart', { size: 20 })}Your Stats</a></div>
     </section></div>`);
     ui.scrollTop(); focusHead(lab.main);
     ui.holdRankUp(false); /* the game is over: a rank-up can pop up now */
   }
   ui.actions['pl-again'] = () => start(prefRounds(lab.kind), lab.focus, { prioritise: lab.pri });
+  ui.actions['pl-setup'] = () => { setup(lab.main); ui.scrollTop(); };
 
   /* the two screens */
   const view = (kind, title) => ({

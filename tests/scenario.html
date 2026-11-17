@@ -31,6 +31,8 @@
     feats.slice(0, n).forEach((ft, i) => FD.store.recordGame({ mode: i % 3 === 0 ? 'daily' : 'free', dateKey: FD.u.addDays(FD.u.dateKey(), -(n - i)), feature: ft, won: i % 5 !== 4, hintsUsed: 1 + (i % 4), timeMs: 15000 + i * 7000, grid: ['cold', 'warm', 'correct'], guesses: [], typo: false }));
   };
 
+  /* giving up is only offered on the last hint, so take the nudges first */
+  const giveUpNow = async () => { for (let i = 0; i < 5 && !q('[data-act="giveup"]') && q('[data-act="nudge"]'); i++) { q('[data-act="nudge"]').click(); await sleep(150); } q('[data-act="giveup"]').click(); };
   if (what === 'welcome') { FD.store.resetAll(); FD.ui.welcome(); await sleep(400); }
   if (what === 'mid' || what === 'win' || what === 'lose' || what === 'nudge') {
     FD.store.resetAll(); FD.store.setOnboarded(); if (what === 'win') seed(6);
@@ -44,7 +46,7 @@
     }
     if (what === 'mid') { typeInto(p.get('type') || 'cop'); await sleep(200); }
     if (what === 'win') { typeInto(dailyF.name); submit(); await sleep(1500); }
-    if (what === 'lose') { q('[data-act="giveup"]').click(); await sleep(300); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(1500); }
+    if (what === 'lose') { await giveUpNow(); await sleep(300); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(1500); }
   }
   if (what === 'book') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); }
   if (what === 'bookdetail') { FD.store.resetAll(); FD.store.setOnboarded(); seed(10); await go('#/book'); await sleep(400); q('.fcard.is-collected').click(); await sleep(400); }
@@ -64,7 +66,7 @@
       const yes = D().querySelector('dialog[open] [data-dlg="yes"]'), next = q('[data-action="rounds-next"]'), act = FD.quizUI.active;
       if (yes) { yes.click(); await sleep(900); }
       else if (next) { next.click(); await sleep(600); }
-      else if (q('#guess-form') && !q('#guess-form').hidden) { q('[data-act="giveup"]').click(); await sleep(400); }
+      else if (q('#guess-form') && !q('#guess-form').hidden) { await giveUpNow(); await sleep(400); }
       else if (act && act.scn && !act.state.done) { const b = q('.pl-opt[data-oi="' + act.scn.bestIndex + '"]'); if (b) { b.click(); await sleep(500); } }
     }
   }
@@ -83,7 +85,7 @@
   }
   if (what === 'more') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); q('[data-action="more"]').click(); await sleep(300); }
   if (what === 'profile') { FD.store.resetAll(); FD.store.setOnboarded(); seed(4); await go('#/leaderboard'); await sleep(400); q('.lb-row').click(); await sleep(400); }
-  if (what === 'packs') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/pack/wave-3'); await sleep(400); q('[data-act="giveup"]').click(); await sleep(250); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(700); await go('#/packs'); await sleep(400); }
+  if (what === 'packs') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/pack/wave-3'); await sleep(400); await giveUpNow(); await sleep(250); D().querySelector('dialog [data-dlg="yes"]').click(); await sleep(700); await go('#/packs'); await sleep(400); }
   if (what === 'rankup') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); FD.ui.queueRankUp(FD.config.ranks[7]); await sleep(1200); }
   if (what === 'changelog') { FD.store.resetAll(); FD.store.setOnboarded(); await go('#/'); await sleep(300); FD.ui.changelog(); await sleep(400); }
   /* the "Sam" profile behind the README screenshots: scenario.html?w=1280&h=1100&do=sam&hash=/free  (&meta={"free":{"rounds":3}} presets a screen's remembered choices) */

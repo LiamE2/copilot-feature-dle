@@ -7,8 +7,8 @@
     powershell -ExecutionPolicy Bypass -File tools\serve.ps1 -Lan           # let phones on your Wi-Fi join (run as administrator)
 
   Serving over http(s) switches on the PWA features (offline play, install-to-home-screen).
-  It also exposes a small shared leaderboard at /api/leaderboard so a room full of phones can compete live:
-  set  leaderboard: { endpoint: 'api/leaderboard', eventCode: 'MYEVENT' }  in js/05-config.js.
+  It also exposes a small shared leaderboard at /api/leaderboard (one board for everyone who uses this server) so a room full of phones can compete:
+  set  leaderboard: { endpoint: 'api/leaderboard' }  in js/05-config.js.
 
   -MockAuth switches on a pretend Microsoft identity provider at /mock-idp, so you can try (and test) the whole "Sign in with Microsoft" flow
   without registering an app. In js/05-config.js (or in the browser console) set  auth: { clientId: 'test', authority: 'http://localhost:8080/mock-idp/organizations' }.
@@ -42,7 +42,7 @@ $mime = @{
   '.png' = 'image/png'; '.svg' = 'image/svg+xml'; '.woff2' = 'font/woff2'; '.ico' = 'image/x-icon'; '.txt' = 'text/plain; charset=utf-8'
 }
 
-# ---- tiny event leaderboard store (kept in memory, saved next to this script) ----
+# ---- tiny leaderboard store (kept in memory, saved next to this script) ----
 $boardFile = Join-Path $PSScriptRoot 'leaderboard-data.json'
 $board = @{}
 if (Test-Path -LiteralPath $boardFile) {
@@ -153,9 +153,9 @@ try {
           $reader = New-Object System.IO.StreamReader($req.InputStream, [Text.Encoding]::UTF8)
           $b = $null
           try { $b = $reader.ReadToEnd() | ConvertFrom-Json } catch { }
-          $code = if ($b) { Clean-Id ([string]$b.eventCode) 40 } else { '' }
+          $code = 'org'
           $playerId = if ($b) { Clean-Id ([string]$b.playerId) 64 } else { '' }
-          if (-not $code -or -not $playerId) { Send-Text $res 400 'Bad request'; continue }
+          if (-not $playerId) { Send-Text $res 400 'Bad request'; continue }
           if (-not $board.ContainsKey($code)) {
             if ($board.Count -ge $maxEvents) { Send-Text $res 429 'Too many events'; continue }
             $board[$code] = @{}
@@ -172,7 +172,7 @@ try {
           Save-Board
           Send-Text $res 200 '{"ok":true}' 'application/json; charset=utf-8'
         } else {
-          $code = Clean-Id ([string]$req.QueryString['eventCode']) 40; $date = [string]$req.QueryString['date']
+          $code = 'org'; $date = [string]$req.QueryString['date']
           $players = @()
           if ($board.ContainsKey($code)) {
             foreach ($k in $board[$code].Keys) {

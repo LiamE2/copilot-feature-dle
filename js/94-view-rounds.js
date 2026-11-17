@@ -104,19 +104,11 @@
     eng.run = null; eng.main = null; eng.setup = null; eng.mode = null;
   }
 
-  /* ---------- the round meter: one dot a round, and the points so far ---------- */
-  const tier = (it) => (it.kind === 'hunt' ? (it.hints <= 2 ? 1 : it.hints <= 4 ? 2 : 3) : Math.min(3, Math.max(1, it.tries || 1)));
-  const dots = (r) => Array.from({ length: r.total }, (_, i) => { const it = r.items[i]; return html`<li class="${it ? (it.won ? 'is-done t' + tier(it) : 'is-done miss') : i === r.i ? 'is-now' : ''}"></li>`; });
-  const meterLabel = (r) => `Round ${r.i + 1} of ${r.total}. ${plural(pointsOf(r), 'point')} so far.`;
-  const meter = (r) => (r.total > 1 ? html`<div class="rounds-meter-row"><div class="pl-meter" role="group" aria-label="${meterLabel(r)}" id="pl-meter"><ol class="pl-dots" aria-hidden="true">${dots(r)}</ol><p class="pl-score" aria-hidden="true"><strong>${pointsOf(r)}</strong> points</p></div></div>` : '');
-  function updateMeter() {
-    const r = eng.run, m = $('#pl-meter', eng.main); if (!r || !m) return;
-    m.setAttribute('aria-label', meterLabel(r));
-    m.querySelector('.pl-dots').innerHTML = flat(dots(r));
-    m.querySelector('.pl-score strong').textContent = pointsOf(r);
-  }
-  /* the heading's small line: the mode, which game mode this puzzle is (in Free Play), and the round */
-  const eyebrow = (r, kind) => [MODES[r.mode].name].concat(r.mode === 'free' ? [FD.puzzles.name(kind)] : [], r.total > 1 ? [`Round ${r.i + 1} of ${r.total}`] : []);
+  /* ---------- the round tracker: which round you are on and the points so far (a game of one round is a single puzzle, so it has none) ---------- */
+  const meter = (r) => (r.total > 1 ? ui.roundTracker({ n: r.i + 1, total: r.total, points: pointsOf(r) }) : '');
+  const updateMeter = () => { if (eng.run) ui.setRoundPoints(eng.main, pointsOf(eng.run)); };
+  /* the heading's small line: the mode, and which game mode this puzzle is (in Free Play). The round is in the tracker under the heading, not here. */
+  const eyebrow = (r, kind) => [MODES[r.mode].name].concat(r.mode === 'free' ? [FD.puzzles.name(kind)] : []);
 
   /* ---------- a round ---------- */
   function show() {
@@ -142,8 +134,9 @@
   }
   const endActions = () => {
     const r = eng.run, M = MODES[r.mode];
-    if (r.total === 1) return [{ label: 'Play again', action: 'rounds-again', icon: M.icon, cls: 'btn-primary' }, { label: 'Change settings', action: 'rounds-setup', icon: 'sliders' }, { label: 'Feature Book', href: '#/book', icon: 'book' }];
-    return [{ label: last(r) ? 'See my results' : 'Next round', action: 'rounds-next', icon: 'right', after: true, cls: 'btn-primary' }, { label: 'Feature Book', href: '#/book', icon: 'book' }];
+    /* the About button for the feature is added after these, the same ending a Scenario Match or Prompt Lab question has */
+    if (r.total === 1) return [{ label: 'Play again', action: 'rounds-again', icon: M.icon, cls: 'btn-primary' }, { label: 'Change settings', action: 'rounds-setup', icon: 'sliders' }];
+    return [{ label: last(r) ? 'See my results' : 'Next round', action: 'rounds-next', icon: 'right', after: true, cls: 'btn-primary' }];
   };
   const questionButtons = () => {
     const r = eng.run, M = MODES[r.mode];
@@ -151,7 +144,7 @@
     return html`<button class="btn btn-primary" type="button" data-action="rounds-next" id="pl-next">${last(r) ? 'See my results' : 'Next round'} ${FD.icon('right', { size: 18 })}</button>`;
   };
 
-  /* a Feature Hunt puzzle: its full answer and Learning Mode, with the way on at the top and the bottom */
+  /* a Feature Hunt puzzle: its answer, the hints and guesses behind one click, then the way on and an About button */
   function mountHunt(game) {
     const r = eng.run;
     destroyPuzzle();
@@ -159,7 +152,6 @@
     eng.ctl = FD.play.mount($('#play-root', eng.main), game, {
       mode: r.mode, title: eyebrow(r, 'hunt').join(' \u00B7 '), headExtra: meter(r),
       actions: () => endActions(),
-      next: () => (r.total > 1 ? { label: last(r) ? 'See my results' : 'Next round', action: 'rounds-next', icon: 'right' } : null),
       onGuess: () => persist(),
       onFinish: (g, data) => roundDone({ kind: 'hunt', id: g.f.id, fid: g.f.id, won: g.won, points: g.won && data.breakdown ? data.breakdown.total : 0, xp: data.xp || 0, hints: g.hintsUsed })
     });
@@ -221,7 +213,6 @@
     const missed = items.filter((it) => !it.won).length;
     const p = FD.store.profile(), rk = FD.scoring.rank(p.xp);
     const kinds = FD.puzzles.KINDS.filter((k) => items.some((it) => it.kind === k && it.won));
-    const outcome = (it) => (it.won ? html`<span class="chip chip-solid c-green">Solved +${it.points}</span>` : html`<span class="chip chip-solid c-orange">Missed</span>`);
     const rows = items.map((it) => ({ f: FD.lib.byId[it.fid || it.id], it })).filter((x) => x.f);
     eng.main.innerHTML = flat(html`<div class="container hub"><section class="speed-summary rounds-summary card" aria-labelledby="ss-h">
       <div class="ss-top">${FD.pip(out.solved ? 'cheer' : 'hello', { size: 130 })}<div><p class="eyebrow">${[M.name + ' complete', plural(n, 'round')].join(' \u00B7 ')}</p><h1 id="ss-h">${title}</h1>
@@ -234,7 +225,7 @@
         <p class="met-help">${FD.icon('info', { size: 18 })}Tap any puzzle below to see everything about its feature: Know it, Use it and Prompt it.</p>
         <ul class="met-grid">${rows.map(({ f, it }) => { const cat = FD.data.catMeta(f.category); return html`<li><button class="met-card c-${cat.color} ${it.won ? 'is-won' : 'is-missed'}" type="button" data-action="met-open" data-id="${f.id}">
           <span class="met-ic" aria-hidden="true">${FD.icon(cat.icon || 'sparkle', { size: 24 })}</span>
-          <span class="met-body"><span class="met-name">${f.name}</span><span class="met-meta">${ui.kindChip(it.kind)}${outcome(it)}</span></span>
+          <span class="met-body"><span class="met-name">${f.name}</span><span class="met-meta">${ui.kindChip(it.kind)}</span></span>
           <span class="met-go">Learn more${FD.icon('right', { size: 18 })}</span></button></li>`; })}</ul></section>
       <div class="btn-row"><button class="btn btn-primary" type="button" data-action="rounds-again">${FD.icon('refresh', { size: 20 })}Play again</button><button class="btn btn-ghost" type="button" data-action="rounds-setup">${FD.icon('sliders', { size: 20 })}Change settings</button><a class="btn btn-ghost" href="#/stats">${FD.icon('chart', { size: 20 })}Your Stats</a></div>
     </section></div>`);

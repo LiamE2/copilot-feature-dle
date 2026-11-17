@@ -31,7 +31,7 @@
     setInterval(() => {
       const t = FD.daily.countdownText(), end = FD.u.fmtClock(FD.u.msToMidnight());
       $$('[data-countdown]').forEach((el) => { el.textContent = el.dataset.countdown === 'end' ? end : t; });
-      $$('.live-clock').forEach((el) => { const s = +el.dataset.clock; if (s) el.textContent = FD.u.fmtClock(Date.now() - s - (+el.dataset.paused || 0)); });
+      $$('.bonus-live').forEach((el) => { const s = +el.dataset.clock; if (s) el.textContent = ui.bonusText(Date.now() - s - (+el.dataset.paused || 0)); });
       const now = FD.u.dateKey();
       if (now !== key) {
         key = now;
@@ -63,31 +63,6 @@
     }
   }
 
-  /* live event board: share a link like  https://your-host/?event=LUNCH26  and everyone who opens it joins the same board
-     (needs an endpoint such as the one built into tools\serve.ps1, see README) */
-  const cleanCode = (v) => String(v || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40);
-  /* a link may only point the board at this same site - never at a third-party endpoint */
-  const sameSiteEndpoint = (v) => {
-    if (!v) return '';
-    try { const u = new URL(String(v), location.href); return u.origin === location.origin ? u.pathname + u.search : ''; } catch (e) { return ''; }
-  };
-  function applyEvent() {
-    const ev = FD.store.state.meta.event;
-    if (!FD.config.leaderboard.endpoint && ev && cleanCode(ev.code)) FD.config.leaderboard = { endpoint: sameSiteEndpoint(ev.endpoint) || 'api/leaderboard', eventCode: cleanCode(ev.code) };
-  }
-  function joinEventFromUrl() {
-    const sp = new URLSearchParams(location.search), code = cleanCode(sp.get('event'));
-    if (code) { FD.store.state.meta.event = { code, endpoint: sameSiteEndpoint(sp.get('board')) || 'api/leaderboard' }; FD.store.save(); }
-    applyEvent();
-  }
-  FD.joinEvent = (code) => {
-    const c = cleanCode(code);
-    if (c) FD.store.state.meta.event = { code: c, endpoint: 'api/leaderboard' }; else delete FD.store.state.meta.event;
-    FD.config.leaderboard = c ? { endpoint: 'api/leaderboard', eventCode: c } : { endpoint: '', eventCode: '' };
-    FD.store.save();
-    return c;
-  };
-
   async function boot() {
     FD.store.load();
     FD.store.applySettings();
@@ -114,7 +89,6 @@
     /* anything left over from earlier days is settled before the first screen is drawn */
     FD.store.expireDailies();
     if (location.hash === '' || location.hash === '#') history.replaceState(null, '', '#/');
-    joinEventFromUrl();
     ui.render();
     if (signedIn) ui.toast(signedIn.ok ? `Signed in as ${signedIn.display}` : signedIn.message, { icon: signedIn.ok ? 'check' : 'x', ms: signedIn.ok ? 4000 : 8000 });
     /* popups on open (?nowelcome keeps tests and screenshots clean):

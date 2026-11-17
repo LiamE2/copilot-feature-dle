@@ -1,6 +1,7 @@
-/* Copilot Feature-dle · result screen + Copilot Learning Mode
-   Completion order, top to bottom: the answer block (acknowledgement + score) -> hints and guesses -> Copilot Learning Mode.
-   Copilot Learning Mode and the Feature Book's popup show the same thing, built here: where you stand with the feature in each layer (Know it, Use it, Prompt it),
+/* Copilot Feature-dle · the result screen, and the Learn layers the Feature Book's popup shows
+   Completion order, top to bottom: the answer block (acknowledgement, the answer in plain words and the score) -> the hints and guesses behind one click -> the way on, with an
+   About button for the feature (the same ending a Scenario Match or Prompt Lab question has).
+   The Feature Book's popup shows the three layers of a feature, built here: where you stand with the feature in each layer (Know it, Use it, Prompt it),
    then a section for each layer, then a link to Microsoft Learn. */
 (function () {
   'use strict';
@@ -68,6 +69,13 @@
     return html`<div class="layers">${trackers(f)}${knowSection(f, idp)}${useSection(f, idp, o)}${promptSection(f, idp)}${learnMoreCard(f)}</div>`;
   }
 
+  /* the answer, written out plainly (no letter tiles); the Daily Challenge gets a yellow tab above its answer block so it stands out */
+  const answerLine = (f) => html`<p class="result-answer" aria-live="polite"><span class="ra-label">The answer</span><strong class="ra-name">${f.name}</strong></p>`;
+  const dailyTab = (d) => (d.mode === 'daily' ? html`<p class="daily-tab">${FD.icon('calendar', { size: 18 })}<strong>Daily Challenge${d.number ? ' #' + d.number : ''}</strong>${d.dateKey ? html`<span>${FD.u.fmtDateLong(d.dateKey)}</span>` : ''}</p>` : '');
+  const aboutButton = (f) => html`<button class="btn btn-ghost" type="button" data-action="met-open" data-id="${f.id}">${FD.icon('book', { size: 18 })}About ${f.name}</button>`;
+  /* the end of a puzzle: the way on, then About the feature, the same as after a Scenario Match or Prompt Lab question */
+  const endHtml = (f, o) => html`<section class="result-end" aria-label="What next"><div class="result-actions">${actionButtons(o.actions)}${aboutButton(f)}</div></section>`;
+
   const actionButtons = (list) => (list || []).map((a) => {
     const ic = a.icon ? FD.icon(a.icon, { size: 20 }) : '';
     return a.href
@@ -81,7 +89,7 @@
     const lines = won ? WIN_LINES[Math.min(5, Math.max(1, d.hintsUsed))] : d.expired ? EXPIRED_LINES : LOSS_LINES;
     const rk = FD.scoring.rank(FD.store.profile().xp);
     const b = d.breakdown;
-    const eyebrow = d.mode === 'daily' ? `Daily Challenge${d.number ? ' #' + d.number : ''}` : (o.eyebrow || 'Free Play');
+    const eyebrow = d.mode === 'daily' ? FD.puzzles.META.hunt.name : (o.eyebrow || 'Free Play');
     const pk = d.pack;
     const notes = [
       d.firstTime ? html`<p class="note c-green">${FD.icon('book', { size: 18 })} New in your Feature Book!</p>` : '',
@@ -94,16 +102,16 @@
     ].filter(Boolean);
 
     host.innerHTML = flat(html`
-      <section class="result ${won ? 'is-win' : 'is-loss'}" aria-labelledby="res-h">
+      <section class="result ${won ? 'is-win' : 'is-loss'}${d.mode === 'daily' ? ' is-daily' : ''}" aria-labelledby="res-h">
+        ${dailyTab(d)}
         <div class="result-hero">
           <div class="result-pip">${FD.pip(won ? 'cheer' : 'oops', { size: 150 })}</div>
           <div class="result-main">
-            <p class="eyebrow">${eyebrow} \u00B7 the answer</p>
+            <p class="eyebrow">${eyebrow}</p>
             <h1 id="res-h" class="result-title">${lines[0]}</h1>
             <p class="result-sub">${won ? html`${lines[1]} <strong>${d.hintsUsed} ${d.hintsUsed === 1 ? 'hint' : 'hints'}</strong>${d.mode === 'daily' && d.timeMs != null ? html` in <strong>${FD.u.fmtSeconds(d.timeMs)}</strong>` : ''}.` : lines[1]}</p>
-            <div class="answer" aria-live="polite"><span class="sr-only">The answer was ${f.name}.</span>${ui.nameTiles(f.name, FD.hints.level(5), true)}</div>
+            ${answerLine(f)}
             <div class="chips">${ui.diffChip(f.difficulty)}${ui.catChip(f.category)}</div>
-            ${o.next ? html`<div class="btn-row result-next"><button class="btn btn-primary btn-lg" type="button" data-action="${o.next.action}" id="result-next">${o.next.label} ${FD.icon(o.next.icon || 'right', { size: 18 })}</button></div>` : ''}
           </div>
           <div class="result-score">
             <h2 class="mini-h">${won ? 'Your score' : 'What you earned'}</h2>
@@ -119,11 +127,7 @@
         </div>
       </section>`);
 
-    const learnHtml = html`<section class="learn" aria-labelledby="learn-h">
-        <div class="section-head"><div><p class="eyebrow">Copilot learning mode</p><h2 id="learn-h">Meet ${f.name}</h2></div></div>
-        ${learn(f, { max: 3, idp: 'lm-' })}
-        <div class="result-actions">${actionButtons(o.actions)}</div>
-      </section>`;
+    const learnHtml = endHtml(f, o);
     if (o.learnHost) o.learnHost.innerHTML = flat(learnHtml); else host.insertAdjacentHTML('beforeend', flat(learnHtml));
   }
 
@@ -139,14 +143,15 @@
       html`<p class="next-daily">${FD.icon('calendar', { size: 18 })} Next challenge in <strong data-countdown>${FD.daily.countdownText()}</strong></p>`
     ].filter(Boolean);
     host.innerHTML = flat(html`
-      <section class="result ${won ? 'is-win' : 'is-loss'}" aria-labelledby="res-h">
+      <section class="result ${won ? 'is-win' : 'is-loss'} is-daily" aria-labelledby="res-h">
+        ${dailyTab({ ...d, mode: 'daily' })}
         <div class="result-hero">
           <div class="result-pip">${FD.pip(won ? 'cheer' : 'oops', { size: 150 })}</div>
           <div class="result-main">
-            <p class="eyebrow">Daily Challenge${d.number ? ' #' + d.number : ''} \u00B7 ${M.name} \u00B7 the answer</p>
+            <p class="eyebrow">${M.name}</p>
             <h1 id="res-h" class="result-title">${lines[0]}</h1>
             <p class="result-sub">${won ? html`${lines[1]} <strong>${tries} ${tries === 1 ? 'pick' : 'picks'}</strong>${d.timeMs != null ? html` in <strong>${FD.u.fmtSeconds(d.timeMs)}</strong>` : ''}.` : lines[1]}</p>
-            <div class="answer" aria-live="polite"><span class="sr-only">The answer was ${f.name}.</span>${ui.nameTiles(f.name, FD.hints.level(5), true)}</div>
+            ${answerLine(f)}
             <div class="chips">${ui.kindChip(d.kind)}${ui.diffChip(f.difficulty)}${ui.catChip(f.category)}</div>
           </div>
           <div class="result-score">
@@ -162,11 +167,7 @@
           <div class="result-notes">${notes}</div>
         </div>
       </section>`);
-    const learnHtml = html`<section class="learn" aria-labelledby="learn-h">
-        <div class="section-head"><div><p class="eyebrow">Copilot learning mode</p><h2 id="learn-h">Meet ${f.name}</h2></div></div>
-        ${learn(f, { max: 3, idp: 'lm-' })}
-        <div class="result-actions">${actionButtons(o.actions)}</div>
-      </section>`;
+    const learnHtml = endHtml(f, o);
     if (o.learnHost) o.learnHost.innerHTML = flat(learnHtml); else host.insertAdjacentHTML('beforeend', flat(learnHtml));
   }
 

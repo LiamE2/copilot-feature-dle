@@ -1,4 +1,4 @@
-/* Copilot Feature-dle · Leaderboard (device-wide by default, optional live event board). Tap a player to see their profile. */
+/* Copilot Feature-dle · Leaderboard (everyone on this device by default, or a shared organisation board). Tap a player to see their profile. */
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
@@ -17,17 +17,17 @@
     { id: 'mastery', label: 'Mastery', icon: 'crown', heading: 'Most features mastered', empty: 'Nobody has mastered a feature yet. Complete every puzzle a feature has (Know it, Use it and Prompt it) to master it.',
       metric: (p) => html`<strong>${p.mastered}</strong><small>${p.mastered === 1 ? 'feature' : 'features'}</small>`, sub: (p) => `${p.collected} of ${p.collectedTotal} collected` }
   ];
-  /* what the search results show for each player */
-  const FIND = { metric: (p) => html`<strong>${p.xp || 0}</strong><small>XP</small>`, sub: (p) => FD.scoring.rank(p.xp || 0).rank.name };
+  /* what the search results show for each player: their score and rank (never their XP) */
+  const FIND = { metric: (p) => html`<strong>${p.totalScore || 0}</strong><small>pts</small>`, sub: (p) => FD.scoring.rank(p.xp || 0).rank.name };
 
   FD.views.leaderboard = {
     title: 'Leaderboard',
     async render(main) {
-      let tab = 'daily', data = FD.board.local(), live = false, note = '', loading = false, query = '';
+      let tab = 'daily', data = FD.board.local(), note = '', loading = false, query = '';
       const remote = FD.board.remoteEnabled();
 
       const row = (t, p, i, showRank) => html`<li><button class="lb-row ${p.you ? 'is-you' : ''}" type="button" data-action="lb-open" data-pid="${p.id}" aria-haspopup="dialog">
-        ${showRank ? html`<span class="lb-rank r${i + 1}" aria-label="Rank ${i + 1}">${i + 1}</span>` : ''}${FD.avatar(p.name, p.color, 40, FD.scoring.rank(p.xp || 0).rank.id)}<span class="lb-name"><strong>${p.name}</strong>${p.you ? html`<span class="chip chip-solid c-blue">You</span>` : ''}${p.sample ? html`<span class="chip" title="Sample player so the board is never empty. Turn off in Settings.">Sample</span>` : ''}<small>${t.sub(p)}</small></span><span class="lb-metric">${t.metric(p)}</span><span class="lb-go" aria-hidden="true">${FD.icon('right', { size: 18 })}</span><span class="sr-only">Open profile</span></button></li>`;
+        ${showRank ? html`<span class="lb-rank r${i + 1}" aria-label="Rank ${i + 1}">${i + 1}</span>` : ''}${FD.avatar(p.name, p.color, 40, FD.scoring.rank(p.xp || 0).rank.id)}<span class="lb-name"><strong>${p.name}</strong>${p.you ? html`<span class="chip chip-solid c-blue">You</span>` : ''}<small>${t.sub(p)}</small></span><span class="lb-metric">${t.metric(p)}</span><span class="lb-go" aria-hidden="true">${FD.icon('right', { size: 18 })}</span><span class="sr-only">Open profile</span></button></li>`;
 
       function panelHtml() {
         const q = query.trim().toLowerCase();
@@ -50,13 +50,13 @@
 
       function draw() {
         main.innerHTML = flat(html`<div class="container hub">
-          <header class="hub-head"><p class="eyebrow">${live ? 'Live event board' : 'On this device'}</p><h1>Leaderboard</h1>
-            <p class="lede">${live ? 'Everyone playing in this event, updated live. Tap a player to see their profile.' : 'You, plus a few friendly sample players. Tap anyone to see their profile. Running an event? You can connect a shared board.'}</p></header>
-          ${FD.account.note('You\u2019re on this board as a guest. Sign in to use your own name.')}
+          <header class="hub-head"><p class="eyebrow">Across the org</p><h1>Leaderboard</h1>
+            <p class="lede">See how you rank across your organisation and follow the race for the top spot. Tap anyone to see their profile.</p></header>
+          ${FD.board.hidden() ? html`<p class="banner c-blue">${FD.icon('eye', { size: 18 })} You\u2019re hidden from the leaderboard. You can change this in <a href="#/settings">Settings</a>.</p>` : FD.account.note('You\u2019re on this board as a guest. Sign in to use your own name.')}
           <div class="field lb-search"><label for="lb-q">Find a player</label><div class="search"><span aria-hidden="true">${FD.icon('search', { size: 18 })}</span><input id="lb-q" class="input" type="search" placeholder="Search by name\u2026" autocomplete="off" value="${query}"></div></div>
           <div class="tabs" role="tablist" aria-label="Leaderboards">${TABS.map((x) => html`<button class="tab" role="tab" id="tab-${x.id}" aria-controls="lb-panel" aria-selected="${String(x.id === tab && !query.trim())}" tabindex="${x.id === tab ? 0 : -1}" data-tab="${x.id}">${FD.icon(x.icon, { size: 18 })}${x.label}</button>`)}</div>
           <section class="card lb-card" id="lb-panel" role="tabpanel" aria-labelledby="tab-${tab}"></section>
-          <p class="muted small lb-foot">${FD.icon('shield', { size: 16 })} ${live ? 'Names are whatever each player typed. Scores are only as honest as the players \u2013 this is a friendly game!' : html`Your progress and this board are stored only on this device. ${data.players.some((p) => p.sample) ? 'Players marked \u201CSample\u201D are placeholders. Switch them off in Settings.' : ''}`}</p>
+
         </div>`);
         drawPanel();
         const tabs = $('.tabs', main);
@@ -72,8 +72,8 @@
       async function refresh() {
         if (!remote) return;
         loading = true; drawPanel();
-        try { data = await FD.board.fetchRemote(); live = true; note = ''; }
-        catch (e) { live = false; data = FD.board.local(); note = 'Couldn\u2019t reach the event leaderboard, so you\u2019re seeing this device only.'; }
+        try { data = await FD.board.fetchRemote(); note = ''; }
+        catch (e) { data = FD.board.local(); note = 'Couldn\u2019t reach the shared leaderboard, so you\u2019re seeing this device only.'; }
         loading = false; draw();
       }
       ui.actions['lb-refresh'] = refresh;

@@ -5,7 +5,7 @@
 (function () {
   'use strict';
   const FD = (window.FD = window.FD || {});
-  const { html, flat, $, plural } = FD.u;
+  const { html, flat, $, plural, announce } = FD.u;
   const ui = FD.ui;
 
   const spotId = (t) => 'spot-' + t.id;
@@ -244,6 +244,9 @@
       const KEY = 'pack:' + pk.id;
       /* a pack moves on to the next puzzle (Needs Another Look too: its puzzles come from all three game modes) */
       const nextLabel = 'Next puzzle';
+      /* the same round tracker the games of rounds show, in the same place, counting puzzles: "Puzzle 3 of 46" (a pack with a single puzzle has no use for one) */
+      const tracker = (pr) => (pr.total > 1 ? ui.roundTracker({ noun: 'Puzzle', n: pr.count + 1, total: pr.total }) : '');
+      const sayPuzzle = (pr) => { if (pr.total > 1) announce(`Puzzle ${pr.count + 1} of ${pr.total}.`); };
       const stop = () => { if (ctl) ctl.destroy(); ctl = null; if (qctl) qctl.destroy(); qctl = null; };
 
       function complete() {
@@ -299,7 +302,7 @@
         stop();
         main.innerHTML = '<div class="container play-wrap" id="play-root"></div>';
         ctl = FD.play.mount($('#play-root', main), game, {
-          mode: 'pack', title: `${pk.name} \u00B7 ${pr.count + 1} of ${pr.total}${pk.nMatch || pk.nPrompts ? ' \u00B7 Feature Hunt' : ''}`, persistKey: KEY,
+          mode: 'pack', title: `${pk.name}${pk.nMatch || pk.nPrompts ? ' \u00B7 Feature Hunt' : ''}`, headExtra: tracker(pr), persistKey: KEY,
           onFinish: (g, data) => {
             const finished = FD.store.packMarkDone(pk.id, f.id, pk.ids);
             const after = FD.store.packProgress(pk.id, pk.ids);
@@ -315,6 +318,7 @@
             return [{ label: 'Start again', action: 'pack-restart', id: pk.id, icon: 'refresh', cls: 'btn-primary' }, back];
           }
         });
+        sayPuzzle(pr);
         ui.scrollTop();
       }
       ui.actions['pack-next'] = () => next();
@@ -325,7 +329,7 @@
         stop();
         const order = saved && FD.quizUI.validOrder(saved.order) ? saved.order.slice() : FD.quizUI.freshOrder();
         const wrong = saved && FD.quizUI.validOrder(saved.order) && Array.isArray(saved.wrong) ? saved.wrong : [];
-        main.innerHTML = flat(html`<div class="container play-wrap pl-wrap">${FD.quizUI.head(kind, [`${pk.name} \u00B7 ${pr.count + 1} of ${pr.total}`, FD.puzzles.name(kind)])}<div id="pl-body"></div></div>`);
+        main.innerHTML = flat(html`<div class="container play-wrap pl-wrap">${FD.quizUI.head(kind, [pk.name, FD.puzzles.name(kind)])}${tracker(pr)}<div id="pl-body"></div></div>`);
         /* the question in play is saved after every pick, so leaving never loses it (the pack then offers Resume progress) */
         const keep = () => { if (qctl) FD.store.setActive(KEY, { kind, id: scn.id, order: qctl.state.order, wrong: qctl.state.wrong, savedAt: Date.now() }); };
         let finished = false;
@@ -356,6 +360,7 @@
           }
         });
         if (!qctl.state.done) keep(); /* a saved question that turns out to be a miss has just been recorded and cleared: it must not be saved again */
+        sayPuzzle(pr);
         ui.scrollTop();
       }
 
