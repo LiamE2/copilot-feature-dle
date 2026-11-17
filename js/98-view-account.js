@@ -11,7 +11,7 @@
   /* Microsoft's own button: their logo and wording, in their light colours (Microsoft's "Sign in with Microsoft" branding guidelines) */
   acct.button = (o = {}) => html`<button class="btn-ms ${o.cls || ''}" type="button" data-action="sign-in">${FD.msLogo(21)}<span>${o.label || 'Sign in with Microsoft'}</span></button>`;
   /* text only: Microsoft's full-colour logo is for light backgrounds, and the Stats header is blue */
-  acct.tag = () => (FD.store.account() ? html`<span class="ms-tag">\u00B7 Microsoft account</span>` : '');
+  acct.tag = () => (FD.store.account() ? html`<span class="ms-tag">Microsoft account</span>` : '');
 
   const REASONS = {
     offline: 'You\u2019re offline. Connect to the internet to sign in.',

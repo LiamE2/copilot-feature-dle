@@ -98,7 +98,7 @@
       main.innerHTML = flat(html`<div class="container hub">
         <header class="stats-head card c-blue">
           ${FD.avatar(p.name, p.color, 72, rk.rank.id)}
-          <div class="sh-main"><p class="eyebrow">Player stats${FD.account.tag()}</p><h1>${p.name}</h1>
+          <div class="sh-main">${FD.account.tag() ? html`<p class="eyebrow">${FD.account.tag()}</p>` : ''}<h1>${p.name}</h1>
             <p class="sh-rank"><strong>${rk.rank.name}</strong><span>${p.xp} XP${rk.next ? ` \u00B7 ${rk.toNext} XP to ${rk.next.name}` : ' \u00B7 top rank!'}</span></p>
             ${ui.bar(rk.pct, 'yellow', 'Progress to next rank')}</div>
         </header>

@@ -10,10 +10,11 @@
     { "title": "A bigger streak bonus", "text": "Every day of your Daily streak now adds 5% bonus XP, up to 100%." },
     { "title": "Tidier menus and wording", "text": "One set of descriptions for every way to play, a shorter More menu on phones, and the Play tab always takes you back to the game modes." },
     { "title": "A clearer About page", "text": "Fresh wording for the game modes, how they work, scoring and the Daily Challenge, with every difficulty lined up and a Data usage note." },
-    { "title": "A clearer Stats page and Leaderboard", "text": "XP to go is labelled, a Total score joins the key numbers, the road to Copilot Champion shows your current XP, ticks the ranks you have passed and previews the border of every rank still to come, every rank's border stands out on the blue banner, and profiles show the name beside the icon with a rank and four numbers." },
+    { "title": "A clearer Stats page and Leaderboard", "text": "XP to go is labelled, a Total score joins the key numbers, the road to Copilot Champion shows your current XP, ticks the ranks you have passed and previews the border of every rank still to come, every rank's border sits on a navy plate so it stands out on the blue banner, the header drops its Player stats label, and profiles show the name beside the icon with a rank and four numbers." },
     { "title": "More control in Settings", "text": "Hide yourself from the leaderboard, create a desktop or phone app with one button, and erase your account data in one step." },
     { "title": "Tidier puzzle endings", "text": "Scenario Match and Prompt Lab results no longer list pick numbers and points, Change settings sits beside Play again, and Quick Draw is now a Daily Challenge badge." },
-    { "title": "Rank bars and Prompt Lab polish", "text": "Copilot Coach and Copilot Champion XP bars slowly shift through the colours of their borders. Prompt Lab scenarios now open with You're using the feature, in colour, and Scenario Match no longer shows the difficulty above its heading." }
+    { "title": "Rank bars and Prompt Lab polish", "text": "Copilot Coach and Copilot Champion XP bars slowly shift through the colours of their borders. Prompt Lab scenarios now open with You're using the feature, in colour, and Scenario Match no longer shows the difficulty above its heading." },
+    { "title": "A tidier Daily Challenge", "text": "The Daily Challenge and its Home tile no longer show a difficulty label, the Home wording is simpler, and opening the Daily by accident and leaving within 3 seconds starts its Speed Bonus clock again next time." }
   ],
   "microsoft": [],
   "microsoftEmpty": "No new Microsoft updates for now",

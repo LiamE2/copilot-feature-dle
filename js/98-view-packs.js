@@ -354,7 +354,7 @@
                 ? (left ? html`<button class="btn btn-primary" type="button" data-action="pack-restart" data-id="${pk.id}" id="pl-next">${FD.icon('refresh', { size: 20 })}Play ${left}</button>${back}` : html`<a class="btn btn-primary" href="#/packs" data-q-focus>${FD.icon('package', { size: 20 })}Back to Packs</a>`)
                 : html`<button class="btn btn-primary" type="button" data-action="pack-restart" data-id="${pk.id}" id="pl-next">${FD.icon('refresh', { size: 20 })}Start again</button>${back}`)
               : html`<button class="btn btn-primary" type="button" data-action="pack-next" id="pl-next">${nextLabel} ${FD.icon('right', { size: 18 })}</button>${back}`;
-            const note = html`<p class="note c-purple pk-note">${FD.icon('package', { size: 18 })} ${after.complete ? html`<strong>${pk.name} complete!</strong> You\u2019ve played everything in it.` : html`${pk.name}: <strong>${after.count} of ${after.total}</strong> played`}</p>`;
+            const note = html`<p class="note c-purple pk-note">${FD.icon('package', { size: 18 })}<span>${after.complete ? html`<strong>${pk.name} complete!</strong> You\u2019ve played everything in it.` : html`${pk.name}: <strong>${after.count} of ${after.total}</strong> played`}</span></p>`;
             if (finished) setTimeout(packFinished, 0); /* after this answer's own celebration has been queued */
             return { buttons, note };
           }

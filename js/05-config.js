@@ -16,6 +16,9 @@
        loses 1 point every `secondsPerPoint` seconds, so it reaches 0 after max x secondsPerPoint seconds (2 minutes). The Daily Challenge clock runs in real time, so it
        keeps ticking if you leave the game. */
     speedBonus: { max: 40, secondsPerPoint: 3 },
+    /* Opening the Daily Challenge by accident: leave it (or close the page) within this many milliseconds, before answering anything, and its clock is forgotten, so the next visit
+       starts a fresh one (see quickPeek in js/91-view-home.js) */
+    dailyPeekMs: 3000,
     /* the Perfect Score badge: a Daily Feature Hunt solved on hint 1 in under this many milliseconds */
     perfectScoreMs: 15000,
     /* XP (drives ranks). Points are never multiplied, so scores stay fair for everyone. */

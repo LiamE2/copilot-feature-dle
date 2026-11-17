@@ -187,8 +187,8 @@
 .sh-main { flex: 1 1 260px; min-width: 0; }
 .sh-rank { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .3rem 0 .8rem; }
 .sh-rank span { font-size: .9rem; }
-/* the banner is the same blue as the Curious Newcomer ring and close to the Coach and Whisperer ones, so every rank's border gets a white halo to stand out against it */
-.stats-head .rank-ring { box-shadow: 0 0 0 5px #fff; }
+/* the banner is the same blue as the Curious Newcomer ring and close to the Coach ring, so every rank's border sits on a navy plate (a ring of the brand navy and a soft shadow, like a medal) to stand out against it */
+.stats-head .rank-ring { box-shadow: 0 0 0 5px var(--navy), 0 8px 18px rgba(8, 10, 60, .35); }
 .num-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; margin: 1.25rem 0; }
 .num { display: flex; flex-direction: column; gap: .2rem; text-align: center; padding: 1.1rem .6rem; }
 .num strong { display: flex; justify-content: center; align-items: center; gap: .3rem; font: 900 2.1rem/1.1 var(--font-head); }

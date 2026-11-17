@@ -94,10 +94,10 @@
     const notes = [
       d.firstTime ? html`<p class="note c-green">${FD.icon('book', { size: 18 })} New in your Feature Book!</p>` : '',
       d.review === 'cleared' ? html`<p class="note c-green">${FD.icon('check', { size: 18 })} Off your Needs Another Look list. Nicely done!</p>` : '',
-      d.review === 'added' ? html`<p class="note c-orange">${FD.icon('refresh', { size: 18 })} Added to Needs Another Look. <a href="#/pack/review">Play it from Packs</a> whenever you like.</p>` : '',
+      d.review === 'added' ? html`<p class="note c-orange">${FD.icon('refresh', { size: 18 })}<span>Added to Needs Another Look. <a href="#/pack/review">Play it from Packs</a> whenever you like.</span></p>` : '',
       d.review === 'stays' ? html`<p class="note c-orange">${FD.icon('refresh', { size: 18 })} Still on your Needs Another Look list. Get it right next time and it comes off.</p>` : '',
       d.dailyStreak > 0 ? html`<p class="note c-orange">${FD.icon('flame', { size: 18 })} ${d.dailyStreak}-day Daily Challenge streak${FD.daily.weekendSafeDay() ? ' \u00B7 weekends won\u2019t reset it' : ''}</p>` : '',
-      pk ? html`<p class="note c-purple">${FD.icon('package', { size: 18 })} ${pk.complete ? html`<strong>${pk.name} complete!</strong> You\u2019ve played everything in it.` : html`${pk.name}: <strong>${pk.done} of ${pk.total}</strong> played`}</p>` : '',
+      pk ? html`<p class="note c-purple">${FD.icon('package', { size: 18 })}<span>${pk.complete ? html`<strong>${pk.name} complete!</strong> You\u2019ve played everything in it.` : html`${pk.name}: <strong>${pk.done} of ${pk.total}</strong> played`}</span></p>` : '',
       d.mode === 'daily' ? html`<p class="next-daily">${FD.icon('calendar', { size: 18 })} Next challenge in <strong data-countdown>${FD.daily.countdownText()}</strong></p>` : ''
     ].filter(Boolean);
 
@@ -138,7 +138,7 @@
     const lines = won ? Q_WIN_LINES[tries] : d.expired ? EXPIRED_LINES : LOSS_LINES;
     const rk = FD.scoring.rank(FD.store.profile().xp);
     const notes = [
-      d.review === 'added' ? html`<p class="note c-orange">${FD.icon('refresh', { size: 18 })} Added to Needs Another Look. <a href="#/pack/review">Play it from Packs</a> whenever you like.</p>` : '',
+      d.review === 'added' ? html`<p class="note c-orange">${FD.icon('refresh', { size: 18 })}<span>Added to Needs Another Look. <a href="#/pack/review">Play it from Packs</a> whenever you like.</span></p>` : '',
       d.dailyStreak > 0 ? html`<p class="note c-orange">${FD.icon('flame', { size: 18 })} ${d.dailyStreak}-day Daily Challenge streak${FD.daily.weekendSafeDay() ? ' \u00B7 weekends won\u2019t reset it' : ''}</p>` : '',
       html`<p class="next-daily">${FD.icon('calendar', { size: 18 })} Next challenge in <strong data-countdown>${FD.daily.countdownText()}</strong></p>`
     ].filter(Boolean);

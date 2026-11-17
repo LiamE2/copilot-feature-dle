@@ -354,7 +354,7 @@
   FD.daily.setSchedule({ days: [{ date: TODAY, feature: planFeat.name }] });
   FD.store.resetAll(); FD.store.setOnboarded();
   await go('#/', 300);
-  ok(q('.daily-card .chips').textContent.includes(planFeat.difficulty) && !q('.daily-card .chips').textContent.includes(rotToday.difficulty), 'plan: the home page\u2019s Daily tile uses the planned feature (its level shows)', q('.daily-card .chips').textContent.trim());
+  ok(/Feature Hunt/.test(q('.daily-card .chips').textContent) && !/Easy|Medium|Hard|Expert/.test(q('.daily-card .chips').textContent), 'plan: the home page\u2019s Daily tile names the game mode and has no difficulty label', q('.daily-card .chips').textContent.trim());
   await go('#/daily', 500);
   ok(norm(q('#hint-card .hint-text').textContent).includes(norm(FD.hints.build(planFeat)[0])) && q('.play-title .eyebrow').textContent.includes('#' + num(TODAY)), 'plan: the Daily screen plays the planned feature (its first hint) under the usual Daily number');
   await FD.daily.load();
@@ -554,7 +554,7 @@
   ok(q('#play-chips').children.length === 1 && /^Speed bonus ends in \d+s$/.test(chipTxt()) && leftOf(chipTxt()) >= 112 && leftOf(chipTxt()) <= 120 && !/Hard|Easy|Medium|Expert|Category/.test(q('#play-chips').textContent), 'speed bonus: the Daily Challenge shows only "Speed bonus ends in 118s", counting down from 2 minutes (no difficulty or category up there)', chipTxt());
   const saved0 = FD.store.getActive('daily:' + TODAY);
   ok(!!saved0 && saved0.startedAt > 0 && !saved0.pausedAt, 'timers: a Daily game is saved the moment you start it, with its clock running');
-  await sleep(2200);
+  await sleep(2200); skewClock(1500);
   const left0 = leftOf(chipTxt());
   ok(left0 <= 118 && left0 >= 100, 'speed bonus: a couple of seconds later the chip has counted down, not up', chipTxt());
   await go('#/'); await sleep(300);
@@ -704,13 +704,13 @@
     const qPlan = () => FD.daily.setSchedule({ days: [{ date: '2026-11-17', type: 'match', scenario: mScn.id }, { date: '2026-11-18', type: 'prompt', scenario: pScn.id }, { date: '2026-11-19', type: 'prompt', scenario: p3Scn.id }] });
     qPlan();
     await go('#/', 300);
-    ok(/Scenario Match/.test(q('.daily-card .chips').textContent) && q('.daily-card .chips').textContent.includes(mF.difficulty) && /A real work scenario and four Copilot features\. Which one fits best\?/.test(q('.daily-card .daily-msg').textContent), 'daily mix: on a Scenario Match day the home tile shows the game mode and asks the right question', q('.daily-card .chips').textContent.trim());
+    ok(/Scenario Match/.test(q('.daily-card .chips').textContent) && !/Easy|Medium|Hard|Expert/.test(q('.daily-card .chips').textContent) && /A real work scenario and four Copilot features\. Which one fits best\?/.test(q('.daily-card .daily-msg').textContent), 'daily mix: on a Scenario Match day the home tile shows the game mode and asks the right question', q('.daily-card .chips').textContent.trim());
     await go('#/daily', 500);
     const pick = (oi) => { q('.pl-opt[data-oi="' + oi + '"]').click(); };
     const wrongOi = (scn) => scn.options.findIndex((o) => !o.best);
     ok(!!q('#daily-q') && !q('#guess-input') && q('#pl-h').textContent.trim() === FD.quizUI.QUESTIONS.match && qa('#daily-q .pl-opt').length === 4 && norm(q('.pl-sit').textContent) === norm(mScn.situation), 'daily mix: the Scenario Match Daily asks its question with four features to choose from (no guess box)', q('#pl-h') && q('#pl-h').textContent);
     ok(/^Daily Challenge #24 \u00B7 Tuesday 17 November \u00B7 Scenario Match$/.test(norm(q('.pl-head .eyebrow').textContent)), 'daily mix: the question keeps the Daily number and date, and names its game mode', q('.pl-head .eyebrow').textContent);
-    ok(!!q('.pl-head .play-chips .bonus-live') && /^Speed bonus ends in \d+s$/.test(q('.pl-head .play-chips .bonus-live').textContent.trim()) && q('.pl-head .play-chips .chip.timer-chip') && qa('.pl-head .play-chips .chip').length === 2, 'daily mix: a question Daily counts the Speed Bonus down in the top right too (beside its difficulty)', q('.pl-head .play-chips').textContent.replace(/\s+/g, ' ').trim());
+    ok(!!q('.pl-head .play-chips .bonus-live') && /^Speed bonus ends in \d+s$/.test(q('.pl-head .play-chips .bonus-live').textContent.trim()) && q('.pl-head .play-chips .chip.timer-chip') && qa('.pl-head .play-chips .chip').length === 1 && !/Easy|Medium|Hard|Expert/.test(q('.pl-head .play-chips').textContent), 'daily mix: a question Daily counts the Speed Bonus down in the top right too (with no difficulty label beside it)', q('.pl-head .play-chips').textContent.replace(/\s+/g, ' ').trim());
     const mSave0 = FD.store.getActive('daily:' + TODAY);
     ok(!!mSave0 && mSave0.kind === 'match' && mSave0.id === mScn.id && mSave0.startedAt > 0 && Array.isArray(mSave0.order) && mSave0.order.length === 4, 'daily mix: a question Daily is saved the moment it opens, with its own clock');
     pick(wrongOi(mScn)); await sleep(300);
@@ -782,6 +782,70 @@
     await go('#/daily', 700);
     const p3Res = FD.store.profile().daily.results['2026-11-19'];
     ok(!!p3Res && p3Res.kind === 'prompt' && p3Res.won === false && p3Res.hints === 3 && !p3Res.expired && p3Res.score === 0 && !FD.store.getActive('daily:2026-11-19') && qa('#daily-q .pl-item.is-wrong').length === 3 && !!q('#result-host .result.is-loss') && FD.store.profile().prompts.seen[p3Scn.id].miss === 1, 'daily lost: a saved Daily question with all three weaker picks already made comes back as a lost day (not an expired one), with every option revealed', JSON.stringify(p3Res));
+    await boot('#/', { today: TODAY });
+    FD.store.resetAll(); FD.store.setOnboarded();
+  }
+
+  /* =============================================================== opening the Daily by accident */
+  section('daily challenge: opening it by accident');
+  {
+    const key = 'daily:' + TODAY, hF = FD.daily.rotation(TODAY), bad = FD.lib.features.find((f) => f.id !== hF.id);
+    const mScn = FD.scenarios.scenarios.find((s) => FD.lib.byId[s.feature]);
+    const hPlan = () => FD.daily.setSchedule({ days: [{ date: TODAY, feature: hF.id }] });
+    const qPlan = () => FD.daily.setSchedule({ days: [{ date: TODAY, type: 'match', scenario: mScn.id }] });
+    const noLevel = (el) => !/Easy|Medium|Hard|Expert/.test(el.textContent);
+    ok(FD.config.dailyPeekMs === 3000, 'accidental open: the grace period is 3 seconds');
+    FD.store.resetAll(); FD.store.setOnboarded(); hPlan();
+    await go('#/', 300);
+    ok(/Feature Hunt/.test(q('.daily-card .chips').textContent) && /Not started/.test(q('.daily-card .chips').textContent) && noLevel(q('.daily-card .chips')), 'home: a Daily that has not been started shows its game mode and "Not started", with no difficulty label');
+    ok(norm(q('.daily-card .daily-msg').textContent) === 'Five hints, one Copilot feature. Which one is it? Solve it early for more points, and keep your daily streak growing for bonus XP.' && !/glowing|same puzzle for everyone/i.test(q('.daily-card').textContent), 'home: the Daily tile says "Solve it early for more points, and keep your daily streak growing for bonus XP." (no "glowing", no "The same puzzle for everyone today.")', norm(q('.daily-card .daily-msg').textContent));
+    await go('#/daily', 400);
+    ok(!!FD.store.getActive(key) && noLevel(q('#play-chips')) && noLevel(q('.play-head')), 'accidental open: opening the Daily saves it with its clock running, and no difficulty label shows on the play screen');
+    await go('#/', 300);
+    ok(!FD.store.getActive(key) && /Not started/.test(q('.daily-card .chips').textContent) && !q('.daily-card .bonus-live'), 'accidental open: leaving a Feature Hunt Daily within 3 seconds, with nothing answered, forgets it (the Speed Bonus clock starts again next time)');
+    await go('#/daily', 400);
+    const s1 = FD.store.getActive(key);
+    ok(!!s1 && s1.guesses.length === 0, 'accidental open: opening it again starts a fresh game');
+    skewClock(3500); await go('#/', 300);
+    ok(!!FD.store.getActive(key) && FD.store.getActive(key).startedAt === s1.startedAt && /In progress/.test(q('.daily-card .chips').textContent), 'accidental open: staying 3 seconds or more keeps the game and its clock');
+    await go('#/daily', 300); await go('#/', 300);
+    ok(!!FD.store.getActive(key) && FD.store.getActive(key).startedAt === s1.startedAt, 'accidental open: a game from an earlier visit is never reset by a quick bounce');
+    FD.store.resetAll(); FD.store.setOnboarded(); hPlan();
+    await go('#/daily', 400);
+    typeInto(bad.name); submit(); await sleep(300);
+    await go('#/', 300);
+    ok(!!FD.store.getActive(key) && FD.store.getActive(key).guesses.length === 1, 'accidental open: once a guess is made, leaving quickly keeps the game');
+    FD.store.resetAll(); FD.store.setOnboarded(); hPlan();
+    await go('#/daily', 400);
+    q('[data-act="nudge"]').click(); await sleep(250);
+    await go('#/', 300);
+    ok(!!FD.store.getActive(key), 'accidental open: a nudge counts as playing, so leaving quickly keeps the game');
+    FD.store.resetAll(); FD.store.setOnboarded(); hPlan();
+    await go('#/daily', 400);
+    W().dispatchEvent(new (W().Event)('pagehide')); await sleep(100);
+    ok(!FD.store.getActive(key), 'accidental open: closing or reloading the page within 3 seconds forgets it too');
+    await go('#/', 300);
+    /* a Scenario Match Daily */
+    FD.store.resetAll(); FD.store.setOnboarded(); qPlan();
+    await go('#/', 300);
+    ok(/Scenario Match/.test(q('.daily-card .chips').textContent) && noLevel(q('.daily-card .chips')), 'home: a Scenario Match Daily shows no difficulty label either');
+    await go('#/daily', 500);
+    ok(!!FD.store.getActive(key) && !!q('#daily-q') && noLevel(q('.pl-head .play-chips')), 'accidental open: a Scenario Match Daily is saved when it opens, with no difficulty label');
+    await go('#/', 300);
+    ok(!FD.store.getActive(key) && /Not started/.test(q('.daily-card .chips').textContent), 'accidental open: leaving a Scenario Match Daily within 3 seconds, with nothing picked, forgets it');
+    await go('#/daily', 500);
+    const s2 = FD.store.getActive(key);
+    skewClock(3500); await go('#/', 300);
+    ok(!!FD.store.getActive(key) && FD.store.getActive(key).startedAt === s2.startedAt, 'accidental open: staying 3 seconds or more keeps a Scenario Match Daily');
+    FD.store.resetAll(); FD.store.setOnboarded(); qPlan();
+    await go('#/daily', 500);
+    q('.pl-opt[data-oi="' + mScn.options.findIndex((o) => !o.best) + '"]').click(); await sleep(300);
+    await go('#/', 300);
+    ok(!!FD.store.getActive(key) && FD.store.getActive(key).wrong.length === 1, 'accidental open: a pick counts as playing, so leaving quickly keeps the Scenario Match Daily');
+    FD.store.resetAll(); FD.store.setOnboarded(); qPlan();
+    await go('#/daily', 500);
+    W().dispatchEvent(new (W().Event)('pagehide')); await sleep(100);
+    ok(!FD.store.getActive(key), 'accidental open: closing the page within 3 seconds forgets a Scenario Match Daily too');
     await boot('#/', { today: TODAY });
     FD.store.resetAll(); FD.store.setOnboarded();
   }
@@ -2562,15 +2626,15 @@
       if (mine) { mine.click(); await sleep(400); const dlg = D().querySelector('dialog[open].dlg-profile'), nm = dlg.querySelector('.pf-name').getBoundingClientRect(), xb = dlg.querySelector('[data-close]').getBoundingClientRect(); ok(nm.right <= xb.left + 1 && nm.height > 0, 'profile: a very long name wraps inside its column, clear of the close button', Math.round(nm.right) + ' vs ' + Math.round(xb.left)); dlg.querySelector('[data-close]').click(); await sleep(200); } else ok(false, 'profile: your own entry is on the board (needed to check a very long name)');
     }
 
-    /* the Stats header: no crown, and every rank's border has a white halo so it shows against the blue banner */
+    /* the Stats header: no crown, and every rank's border sits on a navy plate so it shows against the blue banner */
     FD.store.resetAll(); FD.store.setOnboarded();
     const haloBad = [];
     for (const r of FD.config.ranks) {
       FD.store.profile().xp = r.xp; await go('#/stats', 350);
       const ring = q('.stats-head .rank-ring'), sh = cs(ring).boxShadow, bg = cs(q('.stats-head')).backgroundColor;
-      if (!ring || !/rgb\(255, 255, 255\)/.test(sh) || !/ 5px/.test(sh) || ratio('rgb(255, 255, 255)', bg) < 3 || ring.dataset.rank !== r.id) haloBad.push(r.id + ': ' + sh);
+      if (!ring || !/rgb\(18, 19, 75\)/.test(sh) || !/ 5px/.test(sh) || ratio('rgb(18, 19, 75)', bg) < 3 || ring.dataset.rank !== r.id) haloBad.push(r.id + ': ' + sh);
     }
-    ok(haloBad.length === 0, 'stats: all eight ranks\u2019 borders have a white halo around them on the blue banner (white against the banner is over 3:1), so no border blends into it', haloBad.join(' | '));
+    ok(haloBad.length === 0, 'stats: all eight ranks\u2019 borders sit on a navy plate (a 5px navy ring and a soft shadow) on the blue banner (the navy against the banner is over 3:1), so no border blends into it', haloBad.join(' | '));
     ok(!q('.stats-head .ic-crown') && !q('.sh-rank svg') && q('.sh-rank strong').textContent === FD.config.ranks[FD.config.ranks.length - 1].name && cs(q('.stats-head')).backgroundColor === tok('--blue', 'backgroundColor'), 'stats: no crown beside the rank in the header, and the banner is still the same blue', q('.sh-rank').textContent);
     FD.store.resetAll(); FD.store.setOnboarded();
   }
@@ -2781,6 +2845,11 @@
   ok(FD.board.hidden() && !FD.board.local().players.some((p) => p.you) && FD.board.local().players.length >= 3, 'settings: hiding your profile takes you off the leaderboard (everyone else stays)');
   await go('#/leaderboard', 400);
   ok(!!q('.banner') && /hidden from the leaderboard/.test(q('.banner').textContent) && !!q('.banner a[href="#/settings"]') && qa('.lb-row.is-you').length === 0, 'leaderboard: a hidden player is told so, with a link to Settings, and is not in any list');
+  {
+    const bn = q('.banner'), bl = bn.querySelector('a'), rg = D().createRange(), lr = bl.getBoundingClientRect();
+    rg.selectNodeContents(bl.previousSibling); const before = rg.getBoundingClientRect(); rg.selectNodeContents(bl.nextSibling); const after = rg.getBoundingClientRect();
+    ok(bn.children.length === 2 && bn.children[1].tagName === 'SPAN' && bn.children[1].contains(bl) && Math.abs(lr.left - before.right) <= 2 && Math.abs(after.left - lr.right) <= 2 && !/c-orange/.test(bn.className), 'leaderboard: the hidden banner reads as one sentence, with no gaps on either side of the Settings link', Math.round(lr.left - before.right) + ' and ' + Math.round(after.left - lr.right));
+  }
   {
   const sent = [], fetchH = W().fetch, day = FD.u.dateKey();
   FD.config.leaderboard = { endpoint: 'api/leaderboard' };
@@ -3311,7 +3380,7 @@
     const head = q('.stats-head'), numGrid = q('.num-grid'), top = q('.stats-top'), modesSec = q('.mode-stats').closest('section'), badgeCard = q('#bad-h').closest('section');
     ok(follows(head, numGrid) && follows(numGrid, top) && follows(top, modesSec) && follows(modesSec, badgeCard) && head.matches('header.card.c-blue') && numGrid.getAttribute('aria-label') === 'Key numbers' && top.querySelectorAll(':scope > section').length === 2, 'stats: from the top, the player\u2019s header, the key numbers, the calendar and the road side by side, the game modes and the badges', Array.from(q('.container.hub').children).map((c) => c.tagName).join());
     ok(qa('#main h2').map((h) => norm(h.textContent)).join('|') === 'Daily Challenge|The road to Copilot Champion|Game modes|Achievement badges ' + earnedN + ' of ' + FD.badges.all(lib).length && qa('#main h1').length === 1 && q('#main h1').textContent === P.name, 'stats: the headings are Daily Challenge, The road to Copilot Champion, Game modes and Achievement badges', qa('#main h2').map((h) => norm(h.textContent)).join('|'));
-    ok(norm(head.querySelector('.eyebrow').textContent).startsWith('Player stats') && head.querySelector('.sh-rank strong').textContent === rk.rank.name && head.querySelector('.sh-rank').textContent.includes(P.xp + ' XP') && head.querySelector('.sh-rank').textContent.includes(rk.toNext + ' XP to ' + rk.next.name) && !!head.querySelector('.rank-ring[data-rank="' + rk.rank.id + '"]'), 'stats: the header shows your name, your rank, your XP and the XP to go to the next one (with XP written next to that number)', norm(head.textContent));
+    ok(!head.querySelector('.eyebrow') && !/Player stats/i.test(head.textContent) && head.querySelector('.sh-rank strong').textContent === rk.rank.name && head.querySelector('.sh-rank').textContent.includes(P.xp + ' XP') && head.querySelector('.sh-rank').textContent.includes(rk.toNext + ' XP to ' + rk.next.name) && !!head.querySelector('.rank-ring[data-rank="' + rk.rank.id + '"]'), 'stats: the header shows your name, your rank, your XP and the XP to go to the next one (with XP written next to that number)', norm(head.textContent));
 
     /* five key numbers */
     const nums = qa('.num-grid .num'), numLabel = (e) => e.querySelector(':scope > span').firstChild.textContent.trim();
@@ -3840,7 +3909,7 @@
   const cd = D().querySelector('dialog[open].dlg-changelog');
   ok(!!cd, 'What\u2019s new: opens by itself the first time a new version is loaded');
   ok(FD.changelog.data.game.every((g) => cd.textContent.includes(g.title)) && /Game updates/.test(cd.textContent) && /Microsoft/.test(cd.textContent), 'What\u2019s new: shows the game updates and the Microsoft updates from data/changelog.json');
-  ok(FD.config.version === '1.6.0' && FD.changelog.data.game.length === 11 && FD.changelog.data.game.map((g) => g.title).join('|') === 'A calmer Feature Hunt|A cleaner finish|One round tracker everywhere|A Speed Bonus that counts down|A bigger streak bonus|Tidier menus and wording|A clearer About page|A clearer Stats page and Leaderboard|More control in Settings|Tidier puzzle endings|Rank bars and Prompt Lab polish' && qa('dialog[open].dlg-changelog #cl-game + .cl-list > li').length === 11 && norm(cd.querySelector('.cl-ver .chip').textContent) === 'Version 1.6.0' && /calmer Feature Hunt/.test(cd.querySelector('.cl-intro').textContent) && FD.changelog.data.history[0].version === '1.5.1' && FD.changelog.data.history[1].version === '1.5.0' && FD.changelog.data.history[2].version === '1.4.0', 'What\u2019s new: version 1.6.0 lists all of its game updates on the one entry (a calmer Feature Hunt, a cleaner finish, one round tracker everywhere, a Speed Bonus that counts down, a bigger streak bonus, tidier menus, a clearer About page, a clearer Stats page and Leaderboard, more control in Settings, tidier puzzle endings, rank bars and Prompt Lab polish), and 1.5.1 has moved into the history', FD.changelog.data.game.map((g) => g.title).join('|'));
+  ok(FD.config.version === '1.6.0' && FD.changelog.data.game.length === 12 && FD.changelog.data.game.map((g) => g.title).join('|') === 'A calmer Feature Hunt|A cleaner finish|One round tracker everywhere|A Speed Bonus that counts down|A bigger streak bonus|Tidier menus and wording|A clearer About page|A clearer Stats page and Leaderboard|More control in Settings|Tidier puzzle endings|Rank bars and Prompt Lab polish|A tidier Daily Challenge' && qa('dialog[open].dlg-changelog #cl-game + .cl-list > li').length === 12 && norm(cd.querySelector('.cl-ver .chip').textContent) === 'Version 1.6.0' && /calmer Feature Hunt/.test(cd.querySelector('.cl-intro').textContent) && FD.changelog.data.history[0].version === '1.5.1' && FD.changelog.data.history[1].version === '1.5.0' && FD.changelog.data.history[2].version === '1.4.0', 'What\u2019s new: version 1.6.0 lists all of its game updates on the one entry (a calmer Feature Hunt, a cleaner finish, one round tracker everywhere, a Speed Bonus that counts down, a bigger streak bonus, tidier menus, a clearer About page, a clearer Stats page and Leaderboard, more control in Settings, tidier puzzle endings, rank bars and Prompt Lab polish, a tidier Daily Challenge), and 1.5.1 has moved into the history', FD.changelog.data.game.map((g) => g.title).join('|'));
   cd.querySelector('[data-dlg="ok"]').click(); await sleep(300);
   ok(FD.store.changelogSeen() === FD.changelog.token(), 'What\u2019s new: dismissing it remembers that this person has seen it');
   await boot('#/', { welcome: true }); await sleep(700);
@@ -3860,7 +3929,7 @@
   const wItems = qa('dialog .welcome-item strong').map((e) => e.textContent);
   ok(wItems.join(',') === 'Daily Challenge,Free Play,Feature Hunt,Scenario Match,Prompt Lab,Packs,Feature Book' && /Read the hints and guess which Copilot feature they describe\./.test(wd.textContent) && /three ways: Know it, Use it and Prompt it\./.test(wd.querySelector('.welcome-lede').textContent) && !/Team Battle|Speed Round/.test(wd.textContent), 'welcome: a quick breakdown of the game, in this order: the Daily Challenge, Free Play, the three game modes (Know it, Use it, Prompt it), Packs and the Feature Book (no Speed Round and no Team Battle)', wItems.join(','));
   const wRows = qa('dialog .welcome-item').map((e) => norm(e.textContent));
-  ok(/^Daily ChallengeA new puzzle every weekday, with the same challenge for everyone$/.test(wRows[0]) && /^Free PlayMix and match game modes and play your way\.$/.test(wRows[1]) && !/timer|clock/i.test(wRows[1]) && /^Feature HuntRead the hints and guess which Copilot feature they describe\.$/.test(wRows[2]) && /^Scenario MatchRead a work scenario and choose the Copilot feature that fits best$/.test(wRows[3]) && /^Prompt LabRead the scenario and choose the strongest prompt for the job\.$/.test(wRows[4]) && /^PacksCurated bundles that mix all three game modes together\.$/.test(wRows[5]) && /^Feature BookExplore every Copilot feature and learn what it is, when to use it and how\.$/.test(wRows[6]) && !/What is it\?|When do I use it\?|How do I prompt it\?/.test(wd.textContent), 'welcome: every line says what the Play tab says about it (the Daily Challenge: a new puzzle every weekday, with the same challenge for everyone; Free Play: mix and match game modes; Packs: curated bundles that mix all three game modes; the Feature Book: explore every Copilot feature), and the old "What is it?" style labels are gone', wRows.join(' | '));
+  ok(/^Daily ChallengeA new puzzle every weekday, with the same challenge for everyone\.$/.test(wRows[0]) && /^Free PlayMix and match game modes and play your way\.$/.test(wRows[1]) && !/timer|clock/i.test(wRows[1]) && /^Feature HuntRead the hints and guess which Copilot feature they describe\.$/.test(wRows[2]) && /^Scenario MatchRead a work scenario and choose the Copilot feature that fits best$/.test(wRows[3]) && /^Prompt LabRead the scenario and choose the strongest prompt for the job\.$/.test(wRows[4]) && /^PacksCurated bundles that mix all three game modes together\.$/.test(wRows[5]) && /^Feature BookExplore every Copilot feature and learn what it is, when to use it and how\.$/.test(wRows[6]) && !/What is it\?|When do I use it\?|How do I prompt it\?/.test(wd.textContent), 'welcome: every line says what the Play tab says about it (the Daily Challenge: a new puzzle every weekday, with the same challenge for everyone; Free Play: mix and match game modes; Packs: curated bundles that mix all three game modes; the Feature Book: explore every Copilot feature), and the old "What is it?" style labels are gone', wRows.join(' | '));
   ok(!/Not it\?|hot or cold clue|Typos are fine|friendly like that/.test(wd.textContent) && wd.querySelectorAll('.welcome-intro p').length === 1, 'welcome: the "Not it? You\u2019ll get a hot or cold clue\u2026 Typos are fine" paragraph is gone, leaving just the one intro paragraph beside Pip', wd.querySelector('.welcome-intro').textContent.replace(/\s+/g, ' ').trim());
   wd.querySelector('[data-dlg="go"]').click(); await sleep(400);
   ok(!D().querySelector('dialog[open]') && FD.store.onboarded() && FD.store.changelogSeen() === FD.changelog.token(), 'welcome: "Let\u2019s play" closes it, and the new player has nothing to catch up on in What\u2019s new');

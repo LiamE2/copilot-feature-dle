@@ -38,7 +38,7 @@
         }
         const t = TABS.find((x) => x.id === tab), list = data[tab];
         return html`<div class="section-head"><h2>${t.heading}</h2>${remote ? html`<button class="btn btn-ghost btn-sm" type="button" data-action="lb-refresh">${FD.icon('refresh', { size: 16 })}${loading ? 'Refreshing\u2026' : 'Refresh'}</button>` : ''}</div>
-          ${note ? html`<p class="banner c-orange">${FD.icon('info', { size: 18 })} ${note}</p>` : ''}
+          ${note ? html`<p class="banner c-orange">${FD.icon('info', { size: 18 })}<span>${note}</span></p>` : ''}
           ${list.length ? html`<ol class="board">${list.map((p, i) => row(t, p, i, true))}</ol>`
             : html`<div class="empty-state">${FD.pip('think', { size: 100 })}<p>${t.empty}</p><a class="btn btn-primary" href="#/daily">Play today\u2019s challenge</a></div>`}`;
       }
@@ -52,7 +52,7 @@
         main.innerHTML = flat(html`<div class="container hub">
           <header class="hub-head"><p class="eyebrow">Across the org</p><h1>Leaderboard</h1>
             <p class="lede">See how you rank across your organisation and follow the race for the top spot. Tap anyone to see their profile.</p></header>
-          ${FD.board.hidden() ? html`<p class="banner c-blue">${FD.icon('eye', { size: 18 })} You\u2019re hidden from the leaderboard. You can change this in <a href="#/settings">Settings</a>.</p>` : FD.account.note('You\u2019re on this board as a guest. Sign in to use your own name.')}
+          ${FD.board.hidden() ? html`<p class="banner c-blue">${FD.icon('eye', { size: 18 })}<span>You\u2019re hidden from the leaderboard. You can change this in <a href="#/settings">Settings</a>.</span></p>` : FD.account.note('You\u2019re on this board as a guest. Sign in to use your own name.')}
           <div class="field lb-search"><label for="lb-q">Find a player</label><div class="search"><span aria-hidden="true">${FD.icon('search', { size: 18 })}</span><input id="lb-q" class="input" type="search" placeholder="Search by name\u2026" autocomplete="off" value="${query}"></div></div>
           <div class="tabs" role="tablist" aria-label="Leaderboards">${TABS.map((x) => html`<button class="tab" role="tab" id="tab-${x.id}" aria-controls="lb-panel" aria-selected="${String(x.id === tab && !query.trim())}" tabindex="${x.id === tab ? 0 : -1}" data-tab="${x.id}">${FD.icon(x.icon, { size: 18 })}${x.label}</button>`)}</div>
           <section class="card lb-card" id="lb-panel" role="tabpanel" aria-labelledby="tab-${tab}"></section>

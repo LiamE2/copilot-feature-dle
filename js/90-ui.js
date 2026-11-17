@@ -450,7 +450,7 @@
 
   /* ---------- welcome: the first time someone opens the game (no name to type: the player is "Player" until sign-in arrives) ---------- */
   const WELCOME_ITEMS = [
-    ['calendar', 'Daily Challenge', 'A new puzzle every weekday, with the same challenge for everyone', 'yellow'],
+    ['calendar', 'Daily Challenge', 'A new puzzle every weekday, with the same challenge for everyone.', 'yellow'],
     ['shuffle', 'Free Play', ui.MODE_TEXT.free, 'orange'],
     ['search', 'Feature Hunt', ui.MODE_TEXT.hunt, 'blue'],
     ['puzzle', 'Scenario Match', ui.MODE_TEXT.match, 'purple'],

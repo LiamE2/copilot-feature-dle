@@ -56,13 +56,13 @@
         dailyCta = html`<a class="btn btn-primary btn-lg" href="#/free">${FD.icon('shuffle', { size: 22 })}Free Play</a>`;
       } else if (res) {
         const unit = (res.kind || 'hunt') === 'hunt' ? 'hint' : 'pick';
-        chips = html`${kindChip}${ui.diffChip(info.difficulty)}<span class="chip chip-solid ${res.won ? 'c-green' : 'c-orange'}">${res.won ? 'Solved' : 'Revealed'}</span>`;
+        chips = html`${kindChip}<span class="chip chip-solid ${res.won ? 'c-green' : 'c-orange'}">${res.won ? 'Solved' : 'Revealed'}</span>`;
         dailyState = res.won
           ? html`<p class="daily-msg">${FD.icon('check', { size: 20 })}<span>Solved in <strong>${res.hints} ${res.hints === 1 ? unit : unit + 's'}</strong> for <strong>${res.score} points</strong>. Lovely work!</span></p>`
           : html`<p class="daily-msg">${FD.icon('bulb', { size: 20 })}<span>Not this time \u2013 but you\u2019ve met today\u2019s ${(res.kind || 'hunt') === 'hunt' ? 'feature' : 'answer'} now. Have a read of the learning card.</span></p>`;
         dailyCta = html`<a class="btn btn-primary btn-lg" href="#/daily">See today\u2019s result</a>`;
       } else if (inProgress) {
-        chips = html`${kindChip}${ui.diffChip(info.difficulty)}<span class="chip chip-solid c-blue">In progress</span>`;
+        chips = html`${kindChip}<span class="chip chip-solid c-blue">In progress</span>`;
         if (act.fid) {
           const g = FD.Game.restore(act, { realtime: true });
           dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>You\u2019re on <strong>hint ${Math.min(act.guesses.length + 1, FD.config.maxAttempts)} of ${FD.config.maxAttempts}</strong>. The clock keeps running while you\u2019re away: <strong class="bonus-live" data-clock="${g ? g.startedAt : ''}" data-paused="${g ? g.pausedMs : 0}">${ui.bonusText(g ? g.activeMs : 0)}</strong>.</span></p>`;
@@ -72,8 +72,8 @@
         }
         dailyCta = html`<a class="btn btn-primary btn-lg" href="#/daily">Continue today\u2019s challenge</a>`;
       } else {
-        chips = html`${kindChip}${ui.diffChip(info.difficulty)}<span class="chip">Not started</span>`;
-        dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>${ASKS[kind]} The same puzzle for everyone today. Solve it early for more points, and keep your Daily streak glowing for bonus XP.</span></p>`;
+        chips = html`${kindChip}<span class="chip">Not started</span>`;
+        dailyState = html`<p class="daily-msg">${FD.icon('target', { size: 20 })}<span>${ASKS[kind]} Solve it early for more points, and keep your daily streak growing for bonus XP.</span></p>`;
         dailyCta = html`<a class="btn btn-primary btn-lg" href="#/daily">Play today\u2019s challenge</a>`;
       }
 
@@ -153,21 +153,36 @@
   };
 
   /* ---------- DAILY ---------- */
+  /* The Daily Challenge's clock starts the moment it opens and keeps running in real time, so opening it by accident would cost someone its Speed Bonus. A game that this visit started
+     (nothing was saved before) and that is left within FD.config.dailyPeekMs with nothing answered is therefore forgotten, and the next visit starts a fresh clock. It applies when the
+     player leaves the screen and when the page is closed or reloaded. answered() says whether anything was guessed, picked or finished. */
+  function quickPeek(key, fresh, answered) {
+    const openedAt = Date.now();
+    const apply = () => {
+      if (!fresh || answered() || Date.now() - openedAt >= FD.config.dailyPeekMs) return;
+      FD.store.clearActive(key); FD.store.saveNow();
+    };
+    window.addEventListener('pagehide', apply);
+    return () => { window.removeEventListener('pagehide', apply); apply(); };
+  }
+
   /* a Scenario Match or Prompt Lab Daily Challenge: one question, worth 50, 30 or 10 points by the pick it is found on, plus the Speed Bonus. It is saved the moment it opens,
      with its own real-time clock, so leaving never loses it and the day's end still ends it. */
   function dailyQuestion(main, today, info) {
     const { kind, scenario: scn, feature: f } = info, Q = FD.quiz(kind), key = 'daily:' + today, maxTries = Q.maxTries();
     const res = FD.store.dailyResult(today);
-    let st = null;
+    let st = null, fresh = false;
     if (!res) {
       const saved = FD.store.getActive(key);
-      st = saved && saved.kind === kind && saved.id === scn.id && FD.quizUI.validOrder(saved.order)
+      const reuse = saved && saved.kind === kind && saved.id === scn.id && FD.quizUI.validOrder(saved.order);
+      st = reuse
         ? { order: saved.order, wrong: Array.isArray(saved.wrong) ? saved.wrong : [], startedAt: +saved.startedAt || Date.now() }
         : { order: FD.quizUI.freshOrder(), wrong: [], startedAt: Date.now() };
+      fresh = !reuse;
       FD.store.setActive(key, { kind, id: scn.id, ...st });
     }
     main.innerHTML = flat(html`<div class="container play-wrap pl-wrap" id="daily-q">
-      ${FD.quizUI.head(kind, [dailyTitle(today), FD.puzzles.name(kind)], html`<div class="play-chips">${ui.diffChip(f.difficulty)}${res ? '' : ui.bonusChip(st.startedAt)}</div>`)}
+      ${FD.quizUI.head(kind, [dailyTitle(today), FD.puzzles.name(kind)], html`<div class="play-chips">${res ? '' : ui.bonusChip(st.startedAt)}</div>`)}
       <div id="pl-body"></div>
       <div class="result-host" id="result-host" tabindex="-1"></div>
       <div id="learn-host"></div></div>`);
@@ -208,7 +223,8 @@
       ui.celebrate(out);
     };
     if (!res) timer = setInterval(expire, 1000);
-    return () => { clearInterval(timer); expire(); ctl.destroy(); };
+    const peek = res ? null : quickPeek(key, fresh, () => finished || ctl.state.wrong.length > 0 || ctl.state.done);
+    return () => { clearInterval(timer); expire(); ctl.destroy(); if (peek) peek(); };
   }
 
   FD.views.daily = {
@@ -230,13 +246,13 @@
       if (info.kind !== 'hunt' && info.scenario) return dailyQuestion(main, today, info);
 
       const res = FD.store.dailyResult(today);
-      let game;
+      let game, fresh = false;
       if (res) {
         game = FD.Game.restore({ fid: res.id, mode: 'daily', key: today, guesses: res.guesses || [], status: res.won ? 'won' : 'lost', activeMs: res.timeMs || 0, expired: !!res.expired });
       } else {
         const saved = FD.store.getActive('daily:' + today);
         game = saved && saved.fid ? FD.Game.restore(saved, { realtime: true }) : null;
-        if (!game || game.f.id !== info.feature.id || game.over) game = new FD.Game(info.feature, { mode: 'daily', key: today });
+        if (!game || game.f.id !== info.feature.id || game.over) { game = new FD.Game(info.feature, { mode: 'daily', key: today }); fresh = true; }
       }
       main.innerHTML = '<div class="container play-wrap" id="play-root"></div>';
       const ctl = FD.play.mount($('#play-root', main), game, {
@@ -248,7 +264,8 @@
           { label: 'Leaderboard', href: '#/leaderboard', icon: 'trophy' }
         ]
       });
-      return () => ctl.destroy();
+      const peek = res ? null : quickPeek('daily:' + today, fresh, () => game.over || game.hintsShown > 1 || game.guesses.length > 0);
+      return () => { ctl.destroy(); if (peek) peek(); };
     }
   };
 })();
